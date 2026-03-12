@@ -1,6 +1,6 @@
 # Orb Sys
 
-**A governance platform implementing the Polycentric Autonomy-Audit System (PAAS).**
+**A governance platform implementing the Polycentric Autonomy-Audit System [(PAAS)](https://www.doi.org/10.13140/RG.2.2.17443.52000).**
 
 Orb Sys is a sociotechnical governance engine for organisations that need
 legitimate, meritocratic decision-making without hierarchical authority. It
