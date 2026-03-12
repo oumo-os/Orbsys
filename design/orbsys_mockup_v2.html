@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orb Sys</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#080f1a; --bg2:#0d1829; --bg3:#111f35; --bg4:#162540;
+  --border:#1e304d; --border2:#243a5a;
+  --gold:#c8952a; --gold2:#e8b450; --gold-dim:rgba(200,149,42,0.12);
+  --text:#d4dde8; --text2:#8fa3bb; --text3:#556a82;
+  --teal:#2a8a8a; --teal-bg:rgba(42,138,138,0.1);
+  --red:#8b2a2a; --red-bg:rgba(139,42,42,0.12);
+  --green:#2a6b4a; --green-bg:rgba(42,107,74,0.12);
+  --purple:#6040b0; --purple-bg:rgba(96,64,176,0.12);
+  --amber-bg:rgba(200,149,42,0.08);
+  --r:6px; --r2:10px;
+  --mono:'IBM Plex Mono',monospace;
+  --sans:'IBM Plex Sans',sans-serif;
+  --serif:'Crimson Pro',Georgia,serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;height:100vh;overflow:hidden;display:flex;}
+
+/* SIDEBAR */
+.sidebar{width:220px;min-width:220px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;}
+.sidebar::-webkit-scrollbar{width:3px;} .sidebar::-webkit-scrollbar-thumb{background:var(--border);}
+.logo{padding:24px 20px 20px;border-bottom:1px solid var(--border);}
+.logo-mark{font-family:var(--serif);font-size:22px;font-weight:600;color:var(--gold);letter-spacing:.02em;line-height:1;}
+.logo-sub{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:.15em;text-transform:uppercase;margin-top:4px;}
+.member-card{padding:16px 20px;border-bottom:1px solid var(--border);cursor:pointer;}
+.member-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--teal),#1a5a6e);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:15px;color:#fff;margin-bottom:8px;}
+.member-name{font-size:13px;font-weight:600;color:var(--text);line-height:1.2;}
+.member-handle{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:2px;}
+.nav-section{padding:12px 0 4px;}
+.nav-label{font-family:var(--mono);font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.15em;padding:0 20px 6px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;cursor:pointer;color:var(--text2);font-size:13px;transition:all .15s;border-left:2px solid transparent;}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,.03);}
+.nav-item.active{color:var(--gold);background:var(--gold-dim);border-left-color:var(--gold);}
+.nav-icon{width:16px;text-align:center;font-size:14px;opacity:.7;}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-family:var(--mono);font-size:9px;padding:1px 5px;border-radius:10px;}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{height:52px;min-height:52px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 28px;background:var(--bg2);gap:16px;}
+.topbar-path{font-family:var(--mono);font-size:11px;color:var(--text3);display:flex;align-items:center;gap:6px;}
+.topbar-path span{color:var(--text2);} .topbar-path .sep{color:var(--border2);}
+.topbar-actions{margin-left:auto;display:flex;gap:8px;align-items:center;}
+.btn{font-family:var(--mono);font-size:10px;letter-spacing:.05em;padding:5px 12px;border-radius:var(--r);border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s;}
+.btn:hover{border-color:var(--gold);color:var(--gold);}
+.btn.primary{background:var(--gold);border-color:var(--gold);color:var(--bg);font-weight:500;}
+.btn.primary:hover{background:var(--gold2);border-color:var(--gold2);}
+.content{flex:1;overflow-y:auto;padding:28px;}
+.content::-webkit-scrollbar{width:4px;} .content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.view{display:none;animation:fadeIn .2s ease;}
+.view.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+/* TYPOGRAPHY */
+.page-title{font-family:var(--serif);font-size:28px;font-weight:300;color:var(--text);line-height:1.2;margin-bottom:4px;}
+.page-sub{font-size:13px;color:var(--text3);margin-bottom:20px;}
+.sec{font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.back{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--text3);cursor:pointer;margin-bottom:18px;letter-spacing:.05em;transition:color .15s;}
+.back:hover{color:var(--gold);}
+
+/* LAYOUT */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px;}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:18px;transition:border-color .15s;}
+.card.click{cursor:pointer;} .card.click:hover{border-color:var(--gold);}
+.stat-row{display:flex;gap:4px;margin-bottom:18px;}
+.stat{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;}
+.stat .n{font-family:var(--mono);font-size:18px;font-weight:500;color:var(--text);line-height:1;}
+.stat .l{font-size:10px;color:var(--text3);margin-top:3px;}
+.divider{height:1px;background:var(--border);margin:16px 0;}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:3px;font-weight:500;}
+.b-active{background:var(--green-bg);color:#4dba7f;border:1px solid #2a6b4a;}
+.b-pending{background:var(--amber-bg);color:var(--gold2);border:1px solid #5a4010;}
+.b-review{background:var(--purple-bg);color:#9b7fe8;border:1px solid var(--purple);}
+.b-enacted{background:var(--teal-bg);color:#4daaaa;border:1px solid var(--teal);}
+.b-rejected{background:var(--red-bg);color:#e86060;border:1px solid var(--red);}
+.b-judicial{background:rgba(120,20,20,.2);color:#c04040;border:1px solid #6a1a1a;}
+.b-drift{background:var(--teal-bg);color:#4daaaa;border:1px solid var(--teal);}
+.b-vol{background:rgba(60,80,120,.15);color:#8090b8;border:1px solid #3a4a70;}
+.b-probation{background:rgba(180,120,40,.12);color:#d4a050;border:1px solid #7a5020;}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);padding:8px 12px;text-align:left;border-bottom:1px solid var(--border);font-weight:400;}
+.tbl td{padding:10px 12px;font-size:13px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr.click{cursor:pointer;} .tbl tr.click:hover td{background:rgba(255,255,255,.02);color:var(--text);}
+.tbl td.s{color:var(--text);font-weight:500;} .tbl td.m{font-family:var(--mono);font-size:11px;}
+.htk{height:4px;background:var(--bg4);border-radius:2px;width:80px;}
+.hfill{height:100%;border-radius:2px;}
+
+/* BAR CHART */
+.bar-row{margin-bottom:14px;}
+.bar-lbl{display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:5px;}
+.bar-lbl .v{font-family:var(--mono);font-size:11px;color:var(--text3);}
+.bar-trk{height:6px;background:var(--bg4);border-radius:3px;position:relative;}
+.bar-fill{height:100%;border-radius:3px;background:var(--teal);transition:width .6s ease;}
+.bar-mark{position:absolute;top:-3px;width:2px;height:12px;background:var(--gold);border-radius:1px;}
+.bar-lgd{display:flex;gap:16px;margin-bottom:12px;font-size:10px;color:var(--text3);align-items:center;}
+.lgd-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;}
+.lgd-line{width:10px;height:2px;background:var(--gold);display:inline-block;margin-right:4px;vertical-align:middle;}
+
+/* FEED */
+.feed-item{display:flex;gap:14px;padding:13px 0;border-bottom:1px solid var(--border);}
+.feed-item:last-child{border-bottom:none;}
+.fdot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.fwho{font-size:12px;color:var(--text2);margin-bottom:3px;}
+.fwho strong{color:var(--text);}
+.fwhat{font-size:13px;color:var(--text);line-height:1.4;}
+.fmeta{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:4px;}
+
+/* INBOX */
+.inbox-item{display:flex;gap:14px;align-items:flex-start;padding:13px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;}
+.inbox-item:hover{background:rgba(255,255,255,.02);}
+.inbox-item.unread{border-left:2px solid var(--gold);}
+.idot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.ibody{flex:1;}
+.ititle{font-size:13px;color:var(--text);margin-bottom:2px;}
+.imeta{font-family:var(--mono);font-size:10px;color:var(--text3);}
+
+/* INSIGHT BOX */
+.insight{background:var(--gold-dim);border:1px solid rgba(200,149,42,.3);border-radius:var(--r);padding:12px 16px;margin-bottom:18px;display:flex;gap:10px;align-items:flex-start;}
+.iicon{font-size:16px;flex-shrink:0;margin-top:1px;}
+.itext{font-size:12px;color:var(--text2);line-height:1.5;}
+.itext strong{color:var(--gold2);}
+
+/* DETAIL HERO */
+.hero{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:24px;margin-bottom:20px;display:flex;gap:24px;align-items:flex-start;}
+.hero-icon{width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
+.hero-title{font-family:var(--serif);font-size:22px;font-weight:400;color:var(--text);margin-bottom:4px;}
+.hero-desc{font-size:13px;color:var(--text2);line-height:1.5;}
+.tags{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.tag{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:3px;background:var(--bg4);color:var(--text3);border:1px solid var(--border2);}
+
+/* FLOW */
+.flow{display:flex;align-items:center;flex-wrap:wrap;gap:0;margin:12px 0;}
+.fstep{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:7px 14px;font-size:12px;color:var(--text2);font-family:var(--mono);white-space:nowrap;}
+.fstep.done{border-color:var(--teal);color:#4daaaa;background:var(--teal-bg);}
+.fstep.cur{border-color:var(--gold);color:var(--gold2);background:var(--gold-dim);}
+.farr{color:var(--text3);padding:0 6px;font-size:12px;}
+
+/* HISTORY ROW */
+.hrow{display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);gap:12px;}
+.hrow:last-child{border-bottom:none;}
+.hav{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-family:var(--serif);color:#fff;flex-shrink:0;}
+
+/* ═══════════════════════════════════════════════════════════════════
+   STF CELL VISUAL THEMES
+═══════════════════════════════════════════════════════════════════ */
+
+/* xSTF — Collaborative Boardroom: warm, open */
+.stf-xstf-wrap { --room-accent: #7a5c2a; --room-bg: rgba(122,92,42,0.06); --room-border: rgba(200,149,42,0.25); }
+.stf-xstf-wrap .room-header { background: linear-gradient(135deg, #1a1408 0%, #0f0c04 100%); border-bottom: 1px solid rgba(200,149,42,0.2); }
+.stf-xstf-wrap .room-type-label { color: var(--gold2); }
+.stf-xstf-wrap .room-env { background: rgba(200,149,42,0.04); border: 1px solid rgba(200,149,42,0.12); }
+
+/* aSTF — Blind Chamber: cold, clinical, isolated */
+.stf-astf-wrap { --room-accent: #2a6b8a; --room-bg: rgba(42,107,138,0.06); --room-border: rgba(42,138,200,0.2); }
+.stf-astf-wrap .room-header { background: linear-gradient(135deg, #040d12 0%, #020810 100%); border-bottom: 1px solid rgba(42,138,200,0.15); }
+.stf-astf-wrap .room-type-label { color: #5ab8e0; }
+.stf-astf-wrap .room-env { background: rgba(42,107,138,0.06); border: 1px solid rgba(42,138,200,0.12); }
+
+/* vSTF — Verification Office: precise, neutral, archival */
+.stf-vstf-wrap { --room-accent: #4a3e80; --room-bg: rgba(74,62,128,0.06); --room-border: rgba(120,100,200,0.2); }
+.stf-vstf-wrap .room-header { background: linear-gradient(135deg, #080612 0%, #050410 100%); border-bottom: 1px solid rgba(120,100,200,0.15); }
+.stf-vstf-wrap .room-type-label { color: #9b7fe8; }
+.stf-vstf-wrap .room-env { background: rgba(74,62,128,0.06); border: 1px solid rgba(120,100,200,0.12); }
+
+/* jSTF — Court: grave, red-tinged, formal */
+.stf-jstf-wrap { --room-accent: #7a1a1a; --room-bg: rgba(122,26,26,0.06); --room-border: rgba(180,40,40,0.2); }
+.stf-jstf-wrap .room-header { background: linear-gradient(135deg, #120404 0%, #0d0202 100%); border-bottom: 1px solid rgba(180,40,40,0.15); }
+.stf-jstf-wrap .room-type-label { color: #e05050; }
+.stf-jstf-wrap .room-env { background: rgba(122,26,26,0.06); border: 1px solid rgba(180,40,40,0.12); }
+
+/* Meta-aSTF — Apex Chamber: cool white/silver, austere */
+.stf-meta-wrap { --room-accent: #3a4a5e; --room-bg: rgba(58,74,94,0.06); --room-border: rgba(180,200,220,0.15); }
+.stf-meta-wrap .room-header { background: linear-gradient(135deg, #0a0e14 0%, #080b10 100%); border-bottom: 1px solid rgba(180,200,220,0.12); }
+.stf-meta-wrap .room-type-label { color: #b0c8e0; }
+.stf-meta-wrap .room-env { background: rgba(58,74,94,0.06); border: 1px solid rgba(180,200,220,0.1); }
+
+.room-header { border-radius: var(--r2) var(--r2) 0 0; padding: 20px 24px 16px; }
+.room-type-label { font-family: var(--mono); font-size: 9px; letter-spacing: .2em; text-transform: uppercase; font-weight: 500; margin-bottom: 6px; }
+.room-title { font-family: var(--serif); font-size: 20px; font-weight: 400; color: var(--text); margin-bottom: 4px; }
+.room-meta { font-family: var(--mono); font-size: 10px; color: var(--text3); }
+.room-body { border: 1px solid var(--border); border-top: none; border-radius: 0 0 var(--r2) var(--r2); padding: 20px 24px; background: var(--bg2); margin-bottom: 20px; }
+.room-env { border-radius: var(--r); padding: 10px 14px; margin-bottom: 16px; }
+.room-env-label { font-family: var(--mono); font-size: 9px; letter-spacing: .15em; text-transform: uppercase; margin-bottom: 4px; }
+.room-env-text { font-size: 12px; color: var(--text2); line-height: 1.5; }
+
+/* Blind reviewer isolation grid */
+.blind-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.blind-slot { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--r); padding: 14px; text-align: center; }
+.blind-slot.mine { border-color: rgba(42,138,200,0.4); background: rgba(42,107,138,0.08); }
+.blind-slot .bs-icon { font-size: 22px; margin-bottom: 8px; }
+.blind-slot .bs-label { font-family: var(--mono); font-size: 9px; color: var(--text3); letter-spacing: .1em; text-transform: uppercase; margin-bottom:4px;}
+.blind-slot .bs-status { font-size: 12px; color: var(--text2); }
+.blind-wall { background: rgba(42,107,138,0.06); border: 1px dashed rgba(42,138,200,0.2); border-radius: var(--r); padding: 10px 14px; text-align: center; font-family: var(--mono); font-size: 10px; color: #5ab8e0; margin-bottom: 16px; letter-spacing: .08em; }
+
+/* Evidence shelf (vSTF) */
+.evidence-shelf { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.evidence-item { display: flex; align-items: center; gap: 12px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 14px; }
+.ev-icon { font-size: 18px; flex-shrink: 0; }
+.ev-name { font-size: 13px; color: var(--text); font-weight: 500; }
+.ev-meta { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-top:2px; }
+.ev-status { margin-left: auto; }
+
+/* Court record (jSTF) */
+.court-record { background: rgba(122,26,26,0.06); border: 1px solid rgba(180,40,40,0.15); border-radius: var(--r); padding: 14px; margin-bottom: 14px; }
+.court-charge { font-size: 13px; color: #e05050; font-weight: 500; margin-bottom: 8px; font-family: var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; }
+.court-text { font-size: 13px; color: var(--text2); line-height: 1.6; }
+.accused-row { display: flex; align-items: center; gap: 12px; background: rgba(122,26,26,0.08); border: 1px solid rgba(180,40,40,0.2); border-radius: var(--r); padding: 12px 16px; margin-bottom: 14px; }
+
+/* Spec motion format */
+.spec-block { background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--r); padding: 16px; margin-bottom: 16px; font-family: var(--mono); font-size: 12px; color: var(--text2); line-height: 1.8; }
+.spec-key { color: var(--text3); }
+.spec-val { color: var(--gold2); }
+.spec-just { color: var(--text2); }
+.spec-head { font-family: var(--mono); font-size: 9px; letter-spacing:.15em; text-transform:uppercase; color:var(--text3); margin-bottom:8px; }
+.vote-bar { background: var(--bg3); border:1px solid var(--border); border-radius:var(--r); padding:12px 16px; margin-bottom:14px; }
+.vote-row { display: flex; align-items: center; gap: 12px; }
+.vote-yea { font-family: var(--mono); font-size: 13px; color: #4dba7f; font-weight:500; }
+.vote-nay { font-family: var(--mono); font-size: 13px; color: #e86060; font-weight:500; }
+.vote-track { flex:1; height:8px; background:var(--bg4); border-radius:4px; overflow:hidden; }
+.vote-yea-fill { height:100%; background:linear-gradient(90deg,#2a6b4a,#4dba7f); border-radius:4px; }
+
+/* Reviewer checklist */
+.check-row { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--border); }
+.check-row:last-child{border-bottom:none;}
+.check-dim { flex:1; font-size:13px; color:var(--text); }
+.check-mark { font-size:13px; width:80px; text-align:center; }
+.check-yours { font-family:var(--mono); font-size:10px; color:var(--text3); width:80px; text-align:center; }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="logo">
+    <div class="logo-mark">Orb Sys</div>
+    <div class="logo-sub">PAAS &middot; v0.7</div>
+  </div>
+  <div class="member-card" onclick="nav('personal')">
+    <div class="member-avatar">AO</div>
+    <div class="member-name">Amara Osei</div>
+    <div class="member-handle">@amara &middot; Meridian Collective</div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Personal</div>
+    <div class="nav-item" data-v="personal" onclick="nav('personal')"><span class="nav-icon">&#9678;</span> Personal</div>
+    <div class="nav-item" data-v="deliberation" onclick="nav('deliberation')"><span class="nav-icon">&#10809;</span> Deliberation <span class="nav-badge">3</span></div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Organisation</div>
+    <div class="nav-item" data-v="org" onclick="nav('org')"><span class="nav-icon">&#11041;</span> Meridian Collective</div>
+    <div class="nav-item" data-v="commons" onclick="nav('commons')"><span class="nav-icon">&#9632;</span> Commons</div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Spaces</div>
+    <div class="nav-item" data-v="circles" onclick="nav('circles')"><span class="nav-icon">&#9673;</span> Circles</div>
+    <div class="nav-item" data-v="cells" onclick="nav('cells')"><span class="nav-icon">&#11034;</span> Cells</div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Oversight</div>
+    <div class="nav-item" data-v="stf" onclick="nav('stf')"><span class="nav-icon">&#10827;</span> STF Dash <span class="nav-badge">2</span></div>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-path" id="topbar-path"><span>Meridian Collective</span></div>
+    <div class="topbar-actions">
+      <button class="btn">Search</button>
+      <button class="btn primary">+ Propose</button>
+    </div>
+  </div>
+  <div class="content">
+
+  <!-- ═══ PERSONAL ═══ -->
+  <div class="view active" id="view-personal">
+    <div class="page-title">Amara Osei</div>
+    <div class="page-sub">Research Fellow &middot; Member since Jan 2024 &middot; Active</div>
+    <div class="insight"><div class="iicon">&#9672;</div><div class="itext"><strong>Insight Engine:</strong> Your Governance Curiosity has grown 18% this cycle but Governance Competence hasn't followed. You're eligible for 2 open xSTF slots in that domain — participating would accelerate your pathway.</div></div>
+    <div class="g3">
+      <div class="card"><div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;">Soft Competence W_s</div><div style="font-family:var(--serif);font-size:24px;font-weight:600;color:var(--text);line-height:1;">2,847</div><div style="font-size:11px;color:var(--text3);margin-top:4px;">&#8593; 124 this cycle</div></div>
+      <div class="card"><div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;">Hard Competence W_h</div><div style="font-family:var(--serif);font-size:24px;font-weight:600;color:var(--text);line-height:1;">1,400</div><div style="font-size:11px;color:var(--text3);margin-top:4px;">PhD Economics &middot; 2 certs verified</div></div>
+      <div class="card"><div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;">Active Roles</div><div style="font-family:var(--serif);font-size:24px;font-weight:600;color:var(--text);line-height:1;">3</div><div style="font-size:11px;color:var(--text3);margin-top:4px;">2 Circles &middot; 1 STF active</div></div>
+    </div>
+    <div class="g2">
+      <div class="card">
+        <div class="sec">Dormain Metrics</div>
+        <div class="bar-lgd"><span><span class="lgd-dot" style="background:var(--teal)"></span>Competence</span><span><span class="lgd-line"></span>Curiosity</span></div>
+        <div class="bar-row"><div class="bar-lbl"><span>Economics</span><span class="v">2840 / &#9672; 72%</span></div><div class="bar-trk"><div class="bar-fill" style="width:72%"></div><div class="bar-mark" style="left:72%"></div></div></div>
+        <div class="bar-row"><div class="bar-lbl"><span>Research Methods</span><span class="v">2100 / &#9672; 58%</span></div><div class="bar-trk"><div class="bar-fill" style="width:58%"></div><div class="bar-mark" style="left:58%"></div></div></div>
+        <div class="bar-row"><div class="bar-lbl"><span>Governance</span><span class="v">640 / &#9672; 48%</span></div><div class="bar-trk"><div class="bar-fill" style="width:20%;background:var(--gold)"></div><div class="bar-mark" style="left:48%"></div></div></div>
+        <div class="bar-row"><div class="bar-lbl"><span>Systems Design</span><span class="v">520 / &#9672; 22%</span></div><div class="bar-trk"><div class="bar-fill" style="width:16%;background:var(--gold)"></div><div class="bar-mark" style="left:22%"></div></div></div>
+        <div style="font-size:10px;color:var(--text3);margin-top:10px;">Bar = Competence. Gold line = Curiosity. Governance gap is Insight Engine trigger.</div>
+      </div>
+      <div class="card">
+        <div class="sec">Circle Membership</div>
+        <div class="hrow" style="cursor:pointer" onclick="nav('circle-detail')">
+          <div class="hav" style="background:linear-gradient(135deg,#1b6b6b,#0d4040)">Ec</div>
+          <div style="flex:1"><div style="font-size:13px;color:var(--text);font-weight:500">Economics Circle</div><div style="font-size:11px;color:var(--text3)">Active &middot; Since Mar 2024</div></div>
+          <span class="badge b-active">Active</span>
+        </div>
+        <div class="hrow">
+          <div class="hav" style="background:linear-gradient(135deg,#4a3080,#2a1860)">Rs</div>
+          <div style="flex:1"><div style="font-size:13px;color:var(--text);font-weight:500">Research Standards</div><div style="font-size:11px;color:var(--text3)">Active &middot; Since Jun 2024</div></div>
+          <span class="badge b-active">Active</span>
+        </div>
+        <div class="hrow">
+          <div class="hav" style="background:linear-gradient(135deg,#5a3010,#3a1a00)">Go</div>
+          <div style="flex:1"><div style="font-size:13px;color:var(--text);font-weight:500">Governance Circle</div><div style="font-size:11px;color:var(--text3)">Left Oct 2023 &middot; Competence Drift</div></div>
+          <span class="badge b-drift">Drift</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ DELIBERATION ═══ -->
+  <div class="view" id="view-deliberation">
+    <div class="page-title">Deliberation</div>
+    <div class="page-sub">Your active governance workspace</div>
+    <div class="g3">
+      <div class="card"><div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);margin-bottom:6px">Active Motions</div><div style="font-family:var(--serif);font-size:24px;font-weight:600;color:var(--text)">4</div><div style="font-size:11px;color:var(--text3);margin-top:4px">2 require your vote</div></div>
+      <div class="card"><div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);margin-bottom:6px">STF Assignments</div><div style="font-family:var(--serif);font-size:24px;font-weight:600;color:var(--text)">2</div><div style="font-size:11px;color:var(--text3);margin-top:4px">1 deadline in 3 days</div></div>
+      <div class="card"><div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);margin-bottom:6px">Inbox</div><div style="font-family:var(--serif);font-size:24px;font-weight:600;color:var(--text)">3</div><div style="font-size:11px;color:var(--text3);margin-top:4px">Unread notifications</div></div>
+    </div>
+    <div class="g2">
+      <div>
+        <div class="sec">Timeline</div>
+        <div class="feed-item"><div class="fdot" style="background:var(--teal)"></div><div><div class="fwho"><strong>Economics Circle</strong> voted on a motion</div><div class="fwhat">Increase novice STF slot reservation to 40% across all Circles</div><div class="fmeta">Passed &middot; 4h ago &middot; Gate 1 aSTF pending</div></div></div>
+        <div class="feed-item"><div class="fdot" style="background:var(--gold)"></div><div><div class="fwho"><strong>Inferential Engine</strong> suggested you for a role</div><div class="fwhat">xSTF: Quarterly Budget Review &mdash; Economics match 94%</div><div class="fmeta">2 slots open &middot; 6h ago</div></div></div>
+        <div class="feed-item"><div class="fdot" style="background:#9b7fe8"></div><div><div class="fwho"><strong>Kwame Asante</strong> sponsored a Commons thread</div><div class="fwhat">Proposal: establish a Knowledge &amp; Archive Circle</div><div class="fmeta">Deliberation Cell opened &middot; 1d ago</div></div></div>
+        <div class="feed-item"><div class="fdot" style="background:var(--red)"></div><div><div class="fwho"><strong>Integrity Engine</strong> flagged a deviation</div><div class="fwhat">Resolution ORG-2024-007: parameter mismatch — applied value differs from specification</div><div class="fmeta">Gate 2 aSTF commissioned &middot; 3d ago</div></div></div>
+      </div>
+      <div>
+        <div class="sec">Inbox</div>
+        <div class="inbox-item unread" onclick="nav('stf-astf')"><div class="idot" style="background:var(--gold)"></div><div class="ibody"><div class="ititle">aSTF assignment: RE-2024-022 methodology vote</div><div class="imeta">Research Standards Circle &middot; Due in 3 days</div></div></div>
+        <div class="inbox-item unread"><div class="idot" style="background:#9b7fe8"></div><div class="ibody"><div class="ititle">Vote requested: Motion on novice slot reservation</div><div class="imeta">Economics Circle &middot; Closes in 5 days</div></div></div>
+        <div class="inbox-item unread"><div class="idot" style="background:var(--teal)"></div><div class="ibody"><div class="ititle">Curiosity match: Cell #18 forming — Governance frameworks</div><div class="imeta">Inferential Engine &middot; Governance match 87%</div></div></div>
+        <div class="inbox-item"><div class="idot" style="background:var(--text3)"></div><div class="ibody"><div class="ititle">Periodic vSTF reminder: W_h audit cycle opens in 14 days</div><div class="imeta">Org Integrity Circle &middot; Routine</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ORG ═══ -->
+  <div class="view" id="view-org">
+    <div class="page-title">Meridian Collective</div>
+    <div class="page-sub">Decentralised research governance &middot; Founded Nov 2023 &middot; 47 members</div>
+    <div class="stat-row">
+      <div class="stat"><div class="n">47</div><div class="l">Members</div></div>
+      <div class="stat"><div class="n">9</div><div class="l">Circles</div></div>
+      <div class="stat"><div class="n">6</div><div class="l">Active Motions</div></div>
+      <div class="stat"><div class="n">84</div><div class="l">Resolutions</div></div>
+      <div class="stat"><div class="n">12</div><div class="l">Active STFs</div></div>
+    </div>
+    <div class="g2">
+      <div class="card">
+        <div class="sec">Org Dormain Metrics</div>
+        <div class="bar-lgd"><span><span class="lgd-dot" style="background:var(--teal)"></span>Composition</span><span><span class="lgd-line"></span>Desired</span></div>
+        <div class="bar-row"><div class="bar-lbl"><span>Economics</span><span class="v">68% / target 65%</span></div><div class="bar-trk"><div class="bar-fill" style="width:68%"></div><div class="bar-mark" style="left:65%"></div></div></div>
+        <div class="bar-row"><div class="bar-lbl"><span>Research Methods</span><span class="v">54% / target 60%</span></div><div class="bar-trk"><div class="bar-fill" style="width:54%"></div><div class="bar-mark" style="left:60%"></div></div></div>
+        <div class="bar-row"><div class="bar-lbl"><span>Governance</span><span class="v">32% / target 45%</span></div><div class="bar-trk"><div class="bar-fill" style="width:32%;background:var(--gold)"></div><div class="bar-mark" style="left:45%"></div></div></div>
+        <div class="bar-row"><div class="bar-lbl"><span>Systems Design</span><span class="v">21% / target 30%</span></div><div class="bar-trk"><div class="bar-fill" style="width:21%;background:#e86060"></div><div class="bar-mark" style="left:30%"></div></div></div>
+      </div>
+      <div class="card">
+        <div class="sec">Active Resolutions</div>
+        <table class="tbl">
+          <tr><th>ID</th><th>Motion</th><th>Type</th><th>Status</th></tr>
+          <tr class="click" onclick="nav('resolution-sys')"><td class="m">ORG-024-011</td><td class="s">Novice slot floor &rarr; 40%</td><td><span style="font-family:var(--mono);font-size:9px;color:var(--gold2)">sys-bound</span></td><td><span class="badge b-pending">Gate 1</span></td></tr>
+          <tr><td class="m">ORG-024-009</td><td class="s">New Ext. Relations Circle</td><td><span style="font-family:var(--mono);font-size:9px;color:var(--text3)">sys-bound</span></td><td><span class="badge b-review">Deliberating</span></td></tr>
+          <tr><td class="m">ORG-024-007</td><td class="s">Activity gravity update</td><td><span style="font-family:var(--mono);font-size:9px;color:var(--gold2)">sys-bound</span></td><td><span class="badge b-rejected">Contested</span></td></tr>
+          <tr><td class="m">ORG-024-006</td><td class="s">External review commission</td><td><span style="font-family:var(--mono);font-size:9px;color:var(--text3)">non-system</span></td><td><span class="badge b-enacted">Enacted</span></td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="sec">Circles</div>
+    <table class="tbl">
+      <tr><th>Circle</th><th>Type</th><th>Members</th><th>Mandate</th><th>Activity</th><th>Decision Quality</th><th></th></tr>
+      <tr class="click" onclick="nav('circle-detail')"><td class="s">Economics Circle</td><td><span class="badge b-active">Domain</span></td><td>8</td><td><div class="htk"><div class="hfill" style="width:82%;background:#4dba7f"></div></div></td><td><div class="htk"><div class="hfill" style="width:90%;background:#4dba7f"></div></div></td><td><div class="htk"><div class="hfill" style="width:88%;background:#4dba7f"></div></div></td><td style="color:var(--text3)">&rsaquo;</td></tr>
+      <tr class="click" onclick="nav('circle-detail')"><td class="s">Governance Circle</td><td><span class="badge b-pending">Suggested</span></td><td>5</td><td><div class="htk"><div class="hfill" style="width:74%;background:#d4a050"></div></div></td><td><div class="htk"><div class="hfill" style="width:65%;background:#d4a050"></div></div></td><td><div class="htk"><div class="hfill" style="width:70%;background:#d4a050"></div></div></td><td style="color:var(--text3)">&rsaquo;</td></tr>
+      <tr><td class="s">System Custodian</td><td><span class="badge b-pending">Suggested</span></td><td>4</td><td><div class="htk"><div class="hfill" style="width:91%;background:#4dba7f"></div></div></td><td><div class="htk"><div class="hfill" style="width:88%;background:#4dba7f"></div></div></td><td><div class="htk"><div class="hfill" style="width:94%;background:#4dba7f"></div></div></td><td style="color:var(--text3)">&rsaquo;</td></tr>
+      <tr><td class="s">Research Standards</td><td><span class="badge b-active">Domain</span></td><td>6</td><td><div class="htk"><div class="hfill" style="width:44%;background:#e86060"></div></div></td><td><div class="htk"><div class="hfill" style="width:55%;background:#d4a050"></div></div></td><td><div class="htk"><div class="hfill" style="width:48%;background:#e86060"></div></div></td><td style="color:var(--text3)">&rsaquo;</td></tr>
+    </table>
+  </div>
+
+  <!-- ═══ COMMONS ═══ -->
+  <div class="view" id="view-commons">
+    <div class="page-title">Commons</div>
+    <div class="page-sub">Open discussion &middot; Meridian Collective &middot; Public</div>
+    <div class="insight"><div class="iicon">&#9672;</div><div class="itext"><strong>Inferential Engine:</strong> Showing 3 threads matching your Circle mandates (Economics, Research Methods) and 2 matching your Curiosities (Governance, Archive). <span style="color:var(--text3)">847 total threads accessible.</span></div></div>
+    <div style="display:flex;gap:8px;margin-bottom:16px;"><button class="btn primary">My Feed</button><button class="btn">Economics</button><button class="btn">Research</button><button class="btn">Governance</button><button class="btn">All</button></div>
+    <div style="display:flex;flex-direction:column;gap:0;">
+      <!-- Thread with active cell -->
+      <div class="card" style="border-radius:var(--r2) var(--r2) 0 0;border-bottom:none;cursor:pointer" onclick="nav('cells')">
+        <div style="display:flex;align-items:flex-start;gap:14px;">
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <span class="badge b-active">Economics</span>
+              <span style="background:var(--gold-dim);border:1px solid rgba(200,149,42,.3);color:var(--gold2);font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:3px;letter-spacing:.08em;">&#9672; Deliberation Cell open</span>
+            </div>
+            <div style="font-size:15px;font-weight:500;color:var(--text);margin-bottom:6px;">Should budget allocation methodology be reviewed before the Q1 cycle?</div>
+            <div style="font-size:12px;color:var(--text3);line-height:1.5;">Arguing that the current weighted allocation model hasn't accounted for the new partnership agreements signed in Sept. Three major categories would shift significantly if recalculated now...</div>
+            <div style="margin-top:10px;font-family:var(--mono);font-size:10px;color:var(--text3)">Ravi Nair &middot; 2d ago &middot; 24 replies &middot; Resolution cited: ORG-024-006</div>
+          </div>
+        </div>
+      </div>
+      <div style="background:var(--gold-dim);border:1px solid rgba(200,149,42,.25);border-top:none;border-radius:0 0 var(--r2) var(--r2);padding:8px 18px;display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <span style="font-size:12px;color:var(--gold2)">Kwame Asante sponsored this thread as a proposal</span>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--text3)">Cell #21 &middot; 6h ago &middot; Economics + Modelling Dormains</span>
+        <button class="btn" style="margin-left:auto;font-size:9px;padding:3px 10px" onclick="nav('cells')">View Cell</button>
+      </div>
+      <!-- Thread no cell yet -->
+      <div class="card click" style="margin-bottom:12px">
+        <div style="display:flex;align-items:flex-start;gap:14px;">
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <span class="badge b-review">Governance</span>
+              <span style="font-family:var(--mono);font-size:9px;color:var(--text3)">Your Curiosity match</span>
+            </div>
+            <div style="font-size:15px;font-weight:500;color:var(--text);margin-bottom:6px;">The rotation window for aSTFs feels too short for complex mandate reviews</div>
+            <div style="font-size:12px;color:var(--text3);line-height:1.5;">Three reviewers have flagged to me privately that 2 weeks isn't enough when the Deliberation Cell record runs to 400+ messages. Proposal: minimum 3 weeks for Cells above a certain message volume...</div>
+            <div style="margin-top:10px;display:flex;align-items:center;gap:12px;">
+              <span style="font-family:var(--mono);font-size:10px;color:var(--text3)">Selin &Ccedil;elik &middot; 1d ago &middot; 11 replies</span>
+              <button class="btn primary" style="font-size:9px;padding:3px 10px;margin-left:auto">&#9672; Sponsor as Proposal</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Frozen thread -->
+      <div class="card" style="opacity:.6;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <span class="badge b-rejected">&#128274; Frozen</span>
+          <span style="font-family:var(--mono);font-size:9px;color:var(--text3)">Judicial order &middot; jSTF active</span>
+        </div>
+        <div style="font-size:15px;font-weight:500;color:var(--text2);margin-bottom:4px;">Credential verification dispute — member D.J.</div>
+        <div style="font-size:12px;color:var(--text3)">Thread frozen pending judicial investigation. Read-only.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ CIRCLES ═══ -->
+  <div class="view" id="view-circles">
+    <div class="page-title">Circles</div>
+    <div class="page-sub">Mandate-defined deliberation bodies &middot; All are the same object, different configurations</div>
+    <div style="margin-bottom:16px;display:flex;gap:8px;"><button class="btn primary">All</button><button class="btn">Suggested</button><button class="btn">Domain</button><button class="btn">My Circles</button></div>
+    <div class="g2">
+      <div class="card click" onclick="nav('circle-detail')">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+          <div style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,#1b6b6b,#0d4040);display:flex;align-items:center;justify-content:center;font-family:var(--serif);color:#fff;font-size:16px">Ec</div>
+          <div><div style="font-size:15px;font-weight:600;color:var(--text)">Economics Circle</div><div style="font-size:11px;color:var(--text3)">Domain &middot; 8 members</div></div>
+          <span class="badge b-active" style="margin-left:auto">Active</span>
+        </div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.5">Stewards economic analysis, resource modelling, and budget frameworks.</div>
+        <div style="display:flex;gap:6px"><span class="tag">Economics</span><span class="tag">Finance</span><span class="tag">Modelling</span></div>
+      </div>
+      <div class="card click" onclick="nav('circle-detail')">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+          <div style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,#1a3c5e,#0a1e34);display:flex;align-items:center;justify-content:center;font-family:var(--serif);color:#fff;font-size:16px">Go</div>
+          <div><div style="font-size:15px;font-weight:600;color:var(--text)">Governance Circle</div><div style="font-size:11px;color:var(--text3)">Suggested &middot; 5 members</div></div>
+          <span class="badge b-pending" style="margin-left:auto">Suggested</span>
+        </div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.5">Constitutional parameters, Dormain definitions, Org-level settings.</div>
+        <div style="display:flex;gap:6px"><span class="tag">Governance</span><span class="tag">Policy</span></div>
+      </div>
+      <div class="card click" onclick="nav('circle-detail')">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+          <div style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,#1b6b3b,#0d3a20);display:flex;align-items:center;justify-content:center;font-family:var(--serif);color:#fff;font-size:14px">Sc</div>
+          <div><div style="font-size:15px;font-weight:600;color:var(--text)">System Custodian</div><div style="font-size:11px;color:var(--text3)">Suggested &middot; 4 members</div></div>
+          <span class="badge b-pending" style="margin-left:auto">Suggested</span>
+        </div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.5">System integrity custodianship. First invited on system proposals by Dormain match. No system write access.</div>
+        <div style="display:flex;gap:6px"><span class="tag">Systems</span><span class="tag">Parameters</span></div>
+      </div>
+      <div class="card click" onclick="nav('circle-detail')">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+          <div style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,#4a3080,#2a1860);display:flex;align-items:center;justify-content:center;font-family:var(--serif);color:#fff;font-size:16px">Rs</div>
+          <div><div style="font-size:15px;font-weight:600;color:var(--text)">Research Standards</div><div style="font-size:11px;color:var(--text3)">Domain &middot; 6 members</div></div>
+          <span class="badge b-rejected" style="margin-left:auto">Health &#8595;</span>
+        </div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.5">Methodology standards and peer review protocols.</div>
+        <div style="display:flex;gap:6px"><span class="tag">Research</span><span class="tag">Methods</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ CIRCLE DETAIL ═══ -->
+  <div class="view" id="view-circle-detail">
+    <div class="back" onclick="nav('circles')">&#8592; Circles</div>
+    <div class="hero">
+      <div class="hero-icon" style="background:linear-gradient(135deg,#1b6b6b,#0d4040)"><span style="font-family:var(--serif);color:#fff;font-size:20px">Ec</span></div>
+      <div style="flex:1">
+        <div class="hero-title">Economics Circle</div>
+        <div class="hero-desc">Stewards economic analysis, resource modelling, and budget frameworks. Dual mandate: decision-making and implementation on all Economics Dormain resolutions.</div>
+        <div class="tags"><span class="tag">Economics</span><span class="tag">Finance</span><span class="tag">Modelling</span><span class="badge b-active" style="margin-left:4px">Active</span></div>
+      </div>
+      <div style="text-align:right;flex-shrink:0"><div style="font-family:var(--mono);font-size:10px;color:var(--text3)">Circle Health</div><div style="font-family:var(--serif);font-size:28px;color:#4dba7f;font-weight:600">87<span style="font-size:14px;color:var(--text3)">/100</span></div><div style="font-size:10px;color:var(--text3)">last 3 aSTF cycles</div></div>
+    </div>
+    <div class="sec">Current Members</div>
+    <table class="tbl" style="margin-bottom:20px">
+      <tr><th>Member</th><th>W_s</th><th>W_h</th><th>State</th><th>Since</th></tr>
+      <tr><td class="s">Amara Osei</td><td class="m">2,847</td><td class="m">1,400</td><td><span class="badge b-active">Active</span></td><td class="m" style="color:var(--text3)">Mar 2024</td></tr>
+      <tr><td class="s">Kwame Asante</td><td class="m">3,210</td><td class="m">1,800</td><td><span class="badge b-active">Active</span></td><td class="m" style="color:var(--text3)">Nov 2023</td></tr>
+      <tr><td class="s">Selin &Ccedil;elik</td><td class="m">1,840</td><td class="m">1,200</td><td><span class="badge b-probation">Probation</span></td><td class="m" style="color:var(--text3)">Oct 2024</td></tr>
+    </table>
+    <div class="sec">Membership History</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-bottom:20px">
+      <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,#5a3010,#3a1a00)">TO</div><div style="flex:1"><div style="font-size:13px;color:var(--text);font-weight:500">Tariq Okonkwo</div></div><div style="font-family:var(--mono);font-size:10px;color:var(--text3);flex:1">Nov 2023 – Feb 2024</div><div style="font-size:11px;color:var(--text3);flex:2">W_s fell below threshold</div><span class="badge b-drift">Drift</span></div>
+      <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,#3a1860,#1a0840)">MB</div><div style="flex:1"><div style="font-size:13px;color:var(--text);font-weight:500">Maya Brennan</div></div><div style="font-family:var(--mono);font-size:10px;color:var(--text3);flex:1">Nov 2023 – Jul 2024</div><div style="font-size:11px;color:var(--text3);flex:2">Transfer to Research Standards</div><span class="badge b-enacted">Transfer</span></div>
+      <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,#6b1b1b,#3a0d0d)">DJ</div><div style="flex:1"><div style="font-size:13px;color:var(--text);font-weight:500">Daniel J&oslash;rgensen</div></div><div style="font-family:var(--mono);font-size:10px;color:var(--text3);flex:1">Dec 2023 – Aug 2024</div><div style="font-size:11px;color:var(--text3);flex:2">Judicial penalty &mdash; competence deduction</div><span class="badge b-judicial">Judicial</span></div>
+    </div>
+  </div>
+
+  <!-- ═══ CELLS ═══ -->
+  <div class="view" id="view-cells">
+    <div class="page-title">Cells</div>
+    <div class="page-sub">Your active contextual workspaces</div>
+    <div class="g3">
+      <div class="card click" onclick="nav('stf-xstf')">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span class="badge b-pending" style="background:var(--amber-bg);color:var(--gold2);border-color:#5a4010">xSTF Boardroom</span><span style="font-family:var(--mono);font-size:10px;color:var(--text3)">#Cell-21</span></div>
+        <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Q1 2025 Budget Model Analysis</div>
+        <div style="font-size:12px;color:var(--text3);line-height:1.4;margin-bottom:10px">Collaborative research cell. 4 members. Producing analysis report for Economics Circle.</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text3)">Economics &middot; 4 members &middot; Active</div>
+      </div>
+      <div class="card click" onclick="nav('stf-astf')">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span class="badge b-enacted" style="background:rgba(42,107,138,0.12);color:#5ab8e0;border-color:#1a5a7a">aSTF Blind Chamber</span><span style="font-family:var(--mono);font-size:10px;color:var(--text3)">#Cell-22</span></div>
+        <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">RE-2024-022 Motion Review</div>
+        <div style="font-size:12px;color:var(--text3);line-height:1.4;margin-bottom:10px">Blind parallel review. 3 reviewers isolated. Your report pending.</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text3)">Research Methods &middot; 3 reviewers &middot; &#9873; 3 days</div>
+      </div>
+      <div class="card click" onclick="nav('cells-delib')">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span class="badge b-review">Deliberation Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text3)">#Cell-19</span></div>
+        <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Knowledge &amp; Archive Circle — establish?</div>
+        <div style="font-size:12px;color:var(--text3);line-height:1.4;margin-bottom:10px">Open deliberation cell. Sponsored from Commons. Motion crystallising.</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text3)">Governance &middot; 12 members &middot; 3d active</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ CELLS DELIB ═══ -->
+  <div class="view" id="view-cells-delib">
+    <div class="back" onclick="nav('cells')">&#8592; Cells</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-bottom:20px">
+      <div style="background:linear-gradient(135deg,#0d1420,#080f1a);border-bottom:1px solid var(--border);padding:20px 24px 16px">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#9b7fe8;margin-bottom:6px">Deliberation Cell &middot; Open</div>
+        <div style="font-family:var(--serif);font-size:20px;color:var(--text);margin-bottom:4px">Knowledge &amp; Archive Circle — establish?</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text3)">Governance &middot; Sponsored from Commons thread #Thread-088 &middot; 3d active &middot; 12 participants</div>
+      </div>
+      <div style="padding:20px 24px">
+        <div class="insight" style="margin-bottom:16px"><div class="iicon">&#9672;</div><div class="itext"><strong>Insight Engine — Draft Proposal ready:</strong> Based on 3 days of deliberation, a proposal has been drafted from this Cell's record. <span style="color:var(--gold2)">Review and confirm to crystallise motion.</span></div></div>
+        <div class="g2">
+          <div>
+            <div class="sec">Founding Mandate</div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:16px"><em style="color:var(--text3)">From Commons thread snapshot:</em> Thread argues that institutional memory is being lost between resolution cycles. Archive function currently split across Org Integrity and informal member practices. A dedicated Circle with explicit mandate would centralise precedent custody.</div>
+            <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:12px;font-family:var(--mono);font-size:11px;color:var(--text3)">
+              <div style="color:var(--text2);font-weight:500;margin-bottom:6px">Commons Thread Ref</div>
+              <div>Thread #088 &middot; snapshot Nov 18 2024</div>
+              <div style="margin-top:4px">24 contributors cited in proposal attribution</div>
+            </div>
+          </div>
+          <div>
+            <div class="sec">Participating Circles</div>
+            <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,#1a3c5e,#0a1e34)">Go</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Governance Circle</div><div style="font-size:11px;color:var(--text3)">Governance Dormain match</div></div><span class="badge b-active">5 active</span></div>
+            <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,#4a3080,#2a1860)">Oi</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Org Integrity Circle</div><div style="font-size:11px;color:var(--text3)">Archive mandate overlap</div></div><span class="badge b-active">4 active</span></div>
+            <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,#1b6b6b,#0d4040)">Ms</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Membership Circle</div><div style="font-size:11px;color:var(--text3)">Onboarding archive overlap</div></div><span class="badge b-active">3 active</span></div>
+          </div>
+        </div>
+        <div class="sec" style="margin-top:4px">Preliminary Vote</div>
+        <div class="vote-bar">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:8px">Weighted competence vote — Governance Dormain</div>
+          <div class="vote-row"><span class="vote-yea">YEA 1,847</span><div class="vote-track"><div class="vote-yea-fill" style="width:78%"></div></div><span class="vote-nay">NAY 312</span></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px"><button class="btn primary">Confirm &amp; Crystallise Motion</button><button class="btn">Request Redraft</button><button class="btn" style="color:#e86060;border-color:var(--red)">Dissolve Cell</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ STF DASH ═══ -->
+  <div class="view" id="view-stf">
+    <div class="page-title">STF Dash</div>
+    <div class="page-sub">Your active Short-Term Facilitator assignments</div>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px">
+      <div style="background:var(--bg2);border:1px solid rgba(200,149,42,.25);border-radius:var(--r2);padding:16px 20px;cursor:pointer;display:flex;align-items:center;gap:16px" onclick="nav('stf-xstf')">
+        <div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#1a1408,#0f0c04);border:1px solid rgba(200,149,42,.3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">&#9732;</div>
+        <div style="flex:1"><div style="font-size:14px;color:var(--text);font-weight:500;margin-bottom:3px">Q1 Budget Model Comparative Analysis</div><div style="font-family:var(--mono);font-size:10px;color:var(--text3)">xSTF Boardroom &middot; Economics Circle &middot; Due Dec 10</div></div>
+        <span class="badge b-active">Active</span>
+      </div>
+      <div style="background:var(--bg2);border:1px solid rgba(42,138,200,.2);border-radius:var(--r2);padding:16px 20px;cursor:pointer;display:flex;align-items:center;gap:16px" onclick="nav('stf-astf')">
+        <div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#040d12,#020810);border:1px solid rgba(42,138,200,.25);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">&#9670;</div>
+        <div style="flex:1"><div style="font-size:14px;color:var(--text);font-weight:500;margin-bottom:3px">RE-2024-022: Peer Review Framework — aSTF</div><div style="font-family:var(--mono);font-size:10px;color:var(--text3)">aSTF Blind Chamber &middot; Research Standards &middot; Due Nov 28</div></div>
+        <span class="badge b-pending">Report due</span>
+      </div>
+    </div>
+    <div class="sec">Org-wide Active STFs</div>
+    <table class="tbl">
+      <tr><th>Room</th><th>Purpose</th><th>Circle</th><th>Deadline</th><th>Status</th></tr>
+      <tr class="click" onclick="nav('stf-vstf')"><td><span style="font-family:var(--mono);font-size:9px;color:#9b7fe8;background:var(--purple-bg);padding:2px 7px;border-radius:3px;border:1px solid var(--purple)">vSTF</span></td><td class="s">W_h verification: Selin &Ccedil;elik</td><td>Org Integrity</td><td class="m">Dec 01</td><td><span class="badge b-review">In review</span></td></tr>
+      <tr class="click" onclick="nav('stf-jstf')"><td><span style="font-family:var(--mono);font-size:9px;color:#e05050;background:var(--red-bg);padding:2px 7px;border-radius:3px;border:1px solid var(--red)">jSTF</span></td><td class="s">Investigation: Credential misrepresentation</td><td>Judicial Circle</td><td class="m">Dec 15</td><td><span class="badge b-judicial">&#128274; Closed</span></td></tr>
+      <tr class="click" onclick="nav('stf-meta')"><td><span style="font-family:var(--mono);font-size:9px;color:#b0c8e0;background:rgba(58,74,94,.15);padding:2px 7px;border-radius:3px;border:1px solid rgba(180,200,220,.2)">Meta</span></td><td class="s">Final ruling: D.J. investigation</td><td>Judicial Circle</td><td class="m">Dec 20</td><td><span class="badge b-pending">Deliberating</span></td></tr>
+    </table>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       STF CELL VIEWS — EACH WITH UNIQUE VISUAL IDENTITY
+  ═══════════════════════════════════════════════════════════════ -->
+
+  <!-- xSTF: The Boardroom — warm, collaborative, open -->
+  <div class="view" id="view-stf-xstf">
+    <div class="back" onclick="nav('stf')">&#8592; STF Dash</div>
+    <div class="stf-xstf-wrap">
+      <div class="room-header">
+        <div class="room-type-label">&#9732; xSTF &mdash; Collaborative Boardroom</div>
+        <div class="room-title">Q1 2025 Budget Model Comparative Analysis</div>
+        <div class="room-meta">Economics Circle &middot; Due Dec 10 2024 &middot; 4 members &middot; Working Cell</div>
+      </div>
+      <div class="room-body">
+        <div class="room-env"><div class="room-env-label" style="color:var(--gold2)">Room Environment</div><div class="room-env-text">Collaborative workspace. All members are visible to each other. Standard deliberation rules apply. Produce analysis report as basis for formal Economics Circle motion.</div></div>
+        <div class="g2">
+          <div>
+            <div class="sec">Team</div>
+            <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--teal),#0d4040)">AO</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Amara Osei <em style="color:var(--gold2)">(you)</em></div><div style="font-size:11px;color:var(--text3)">Economics lead</div></div><span class="badge b-active">Active</span></div>
+            <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,#4a3080,#2a1860)">KA</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Kwame Asante</div><div style="font-size:11px;color:var(--text3)">Modelling</div></div><span class="badge b-active">Active</span></div>
+            <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,#1b6b3b,#0d3a20)">RN</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Ravi Nair</div><div style="font-size:11px;color:var(--text3)">Finance</div></div><span class="badge b-active">Active</span></div>
+            <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,#5a3010,#3a1a00)">SC</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Selin &Ccedil;elik</div><div style="font-size:11px;color:var(--text3)">Economics</div></div><span class="badge b-probation">Probation</span></div>
+          </div>
+          <div>
+            <div class="sec">Report Progress</div>
+            <div style="margin-bottom:12px">
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:5px"><span>Model A: Weighted allocation</span><span style="font-family:var(--mono);color:#4dba7f">&#10003; Complete</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:5px"><span>Model B: Priority-based</span><span style="font-family:var(--mono);color:#4dba7f">&#10003; Complete</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:5px"><span>Model C: Zero-base</span><span style="font-family:var(--mono);color:var(--gold2)">&#9651; In progress</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:5px"><span>Comparative summary</span><span style="font-family:var(--mono);color:var(--text3)">&mdash; Pending</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2)"><span>Recommendation</span><span style="font-family:var(--mono);color:var(--text3)">&mdash; Pending</span></div>
+            </div>
+            <button class="btn primary" style="width:100%">Submit Report to Economics Circle</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- aSTF: The Blind Chamber — cold, isolated, clinical -->
+  <div class="view" id="view-stf-astf">
+    <div class="back" onclick="nav('stf')">&#8592; STF Dash</div>
+    <div class="stf-astf-wrap">
+      <div class="room-header">
+        <div class="room-type-label">&#9670; aSTF &mdash; Blind Review Chamber</div>
+        <div class="room-title">RE-2024-022: Peer Review Methodology Framework</div>
+        <div class="room-meta">Research Standards Circle &middot; Gate 1 &middot; Due Nov 28 2024 &middot; 3 reviewers &middot; Write-restricted</div>
+      </div>
+      <div class="room-body">
+        <div class="blind-wall">&#128274; &nbsp; ISOLATION ACTIVE &mdash; REVIEWERS CANNOT SEE EACH OTHER &mdash; IDENTITIES WITHHELD UNTIL ALL VERDICTS FILED &nbsp; &#128274;</div>
+        <div class="room-env"><div class="room-env-label" style="color:#5ab8e0">Room Environment</div><div class="room-env-text">You are Reviewer 3 of 3. You have full access to the motion text and the Deliberation Cell record. You cannot see Reviewers 1 or 2, their identities, or their assessments. File your report independently. Integrity Engine aggregates after all three are filed.</div></div>
+        <div class="sec">Reviewer Isolation Status</div>
+        <div class="blind-grid">
+          <div class="blind-slot"><div class="bs-icon">&#9671;</div><div class="bs-label">Reviewer 1</div><div class="bs-status"><span class="badge b-active">Filed</span></div><div style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:6px">Identity sealed</div></div>
+          <div class="blind-slot"><div class="bs-icon">&#9671;</div><div class="bs-label">Reviewer 2</div><div class="bs-status"><span class="badge b-active">Filed</span></div><div style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:6px">Identity sealed</div></div>
+          <div class="blind-slot mine"><div class="bs-icon">&#9670;</div><div class="bs-label">Reviewer 3 &mdash; You</div><div class="bs-status"><span class="badge b-pending">Pending</span></div><div style="font-family:var(--mono);font-size:9px;color:#5ab8e0;margin-top:6px">Your view only</div></div>
+        </div>
+        <div class="sec">Your Verdict Checklist</div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:16px">
+          <div class="check-row" style="padding:10px 14px">
+            <div class="check-dim">Procedural compliance</div>
+            <div class="check-mark" style="color:#4dba7f">&#10003; R1 Clear</div>
+            <div class="check-mark" style="color:#4dba7f">&#10003; R2 Clear</div>
+            <div><select style="background:var(--bg4);border:1px solid var(--border2);color:var(--text2);border-radius:3px;font-family:var(--mono);font-size:10px;padding:3px 6px"><option>— Your assessment</option><option>&#10003; Clear</option><option>&#9651; Concerns</option><option>&#10007; Violation</option></select></div>
+          </div>
+          <div class="check-row" style="padding:10px 14px">
+            <div class="check-dim">Evidence quality</div>
+            <div class="check-mark" style="color:#d4a050">&#9651; R1 Concerns</div>
+            <div class="check-mark" style="color:#4dba7f">&#10003; R2 Adequate</div>
+            <div><select style="background:var(--bg4);border:1px solid var(--border2);color:var(--text2);border-radius:3px;font-family:var(--mono);font-size:10px;padding:3px 6px"><option>— Your assessment</option><option>&#10003; Adequate</option><option>&#9651; Concerns</option><option>&#10007; Insufficient</option></select></div>
+          </div>
+          <div class="check-row" style="padding:10px 14px">
+            <div class="check-dim">Participation breadth</div>
+            <div class="check-mark" style="color:#4dba7f">&#10003; R1 Good</div>
+            <div class="check-mark" style="color:#4dba7f">&#10003; R2 Good</div>
+            <div><select style="background:var(--bg4);border:1px solid var(--border2);color:var(--text2);border-radius:3px;font-family:var(--mono);font-size:10px;padding:3px 6px"><option>— Your assessment</option><option>&#10003; Good</option><option>&#9651; Thin</option><option>&#10007; Inadequate</option></select></div>
+          </div>
+          <div class="check-row" style="padding:10px 14px">
+            <div class="check-dim">Mandate alignment</div>
+            <div class="check-mark" style="color:#4dba7f">&#10003; R1 Aligned</div>
+            <div class="check-mark" style="color:#e86060">&#10007; R2 Concern</div>
+            <div><select style="background:var(--bg4);border:1px solid var(--border2);color:var(--text2);border-radius:3px;font-family:var(--mono);font-size:10px;padding:3px 6px"><option>— Your assessment</option><option>&#10003; Aligned</option><option>&#9651; Partial</option><option>&#10007; Misaligned</option></select></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px"><button class="btn primary">File My Verdict</button><button class="btn">Save Draft</button></div>
+        <div style="margin-top:10px;font-size:11px;color:var(--text3)">Filing your verdict is irreversible. Identities revealed to all org members after all 3 verdicts are filed.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- vSTF: The Verification Office — precise, archival, purple -->
+  <div class="view" id="view-stf-vstf">
+    <div class="back" onclick="nav('stf')">&#8592; STF Dash</div>
+    <div class="stf-vstf-wrap">
+      <div class="room-header">
+        <div class="room-type-label">&#9670; vSTF &mdash; Credential Verification Office</div>
+        <div class="room-title">W_h Verification: Selin &Ccedil;elik &mdash; PhD Economics</div>
+        <div class="room-meta">Org Integrity Circle &middot; Blind parallel assessment &middot; Due Dec 01 2024</div>
+      </div>
+      <div class="room-body">
+        <div class="blind-wall" style="background:rgba(74,62,128,.06);border-color:rgba(120,100,200,.2);color:#9b7fe8">&#128274; &nbsp; BLIND PARALLEL &mdash; EACH ASSESSOR SEES SAME EVIDENCE, NO CROSS-ASSESSOR COMMUNICATION &nbsp; &#128274;</div>
+        <div class="room-env"><div class="room-env-label" style="color:#9b7fe8">Room Environment</div><div class="room-env-text">Forensic credential review. You have been assigned the submitted evidence package for Selin &Ccedil;elik's PhD Economics claim. Review each item independently. Provide your adjusted W_h assessment with supporting rationale. Your assessment is sealed until all assessors have filed.</div></div>
+        <div class="g2">
+          <div>
+            <div class="sec">Evidence Package</div>
+            <div class="evidence-shelf">
+              <div class="evidence-item"><div class="ev-icon">&#128196;</div><div style="flex:1"><div class="ev-name">PhD Certificate — Bonn University</div><div class="ev-meta">Submitted Nov 14 &middot; PDF &middot; 2.1MB</div></div><div class="ev-status"><span class="badge b-active">Verified</span></div></div>
+              <div class="evidence-item"><div class="ev-icon">&#128196;</div><div style="flex:1"><div class="ev-name">Dissertation Abstract — Macroeconomic modelling</div><div class="ev-meta">Submitted Nov 14 &middot; PDF &middot; 840KB</div></div><div class="ev-status"><span class="badge b-active">Verified</span></div></div>
+              <div class="evidence-item"><div class="ev-icon">&#128196;</div><div style="flex:1"><div class="ev-name">University registrar confirmation</div><div class="ev-meta">Submitted Nov 16 &middot; PDF &middot; 120KB</div></div><div class="ev-status"><span class="badge b-review">Under review</span></div></div>
+              <div class="evidence-item"><div class="ev-icon">&#128279;</div><div style="flex:1"><div class="ev-name">Published paper — SSRN preprint</div><div class="ev-meta">External link &middot; Accessed Nov 17</div></div><div class="ev-status"><span class="badge b-pending">Check pending</span></div></div>
+            </div>
+          </div>
+          <div>
+            <div class="sec">Your W_h Assessment</div>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:14px">
+              <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:8px">Current claimed W_h</div>
+              <div style="font-family:var(--serif);font-size:28px;color:var(--text);font-weight:600;margin-bottom:12px">1,200</div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:6px">Your adjusted assessment</div>
+              <input type="number" value="1200" style="width:100%;background:var(--bg4);border:1px solid var(--border2);color:var(--text);border-radius:3px;padding:8px 12px;font-family:var(--mono);font-size:14px;margin-bottom:10px">
+              <textarea placeholder="Rationale for your assessment..." style="width:100%;background:var(--bg4);border:1px solid var(--border2);color:var(--text2);border-radius:3px;padding:8px 12px;font-size:12px;height:70px;resize:none"></textarea>
+            </div>
+            <button class="btn primary" style="width:100%">File Assessment</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- jSTF: The Court — grave, red, formal -->
+  <div class="view" id="view-stf-jstf">
+    <div class="back" onclick="nav('stf')">&#8592; STF Dash</div>
+    <div class="stf-jstf-wrap">
+      <div class="room-header">
+        <div class="room-type-label">&#9632; jSTF &mdash; Judicial Investigation</div>
+        <div class="room-title">Investigation: Credential Misrepresentation Claim</div>
+        <div class="room-meta">Judicial Circle &middot; Write-restricted &middot; Due Dec 15 2024 &middot; &#128274; Closed to external parties</div>
+      </div>
+      <div class="room-body">
+        <div style="background:rgba(122,26,26,.1);border:1px solid rgba(180,40,40,.2);border-radius:var(--r);padding:10px 14px;margin-bottom:16px;font-family:var(--mono);font-size:10px;color:#e05050;letter-spacing:.08em;text-align:center">&#128274; &nbsp; JUDICIAL PROCEEDING &mdash; EXTERNAL WRITE ACCESS RESTRICTED &mdash; INTEGRITY ENGINE MONITORING &nbsp; &#128274;</div>
+        <div class="room-env"><div class="room-env-label" style="color:#e05050">Room Environment</div><div class="room-env-text">Judicial investigation workspace. Investigation team has collaborative access. This Cell record is sealed from all non-team org members. The Judicial Circle has read access for oversight. Meta-aSTF will receive this Cell's report as read-only input. No cross-layer communication.</div></div>
+        <div class="sec">Case Record</div>
+        <div class="accused-row">
+          <div class="hav" style="background:linear-gradient(135deg,#6b1b1b,#3a0d0d);width:36px;height:36px">DJ</div>
+          <div style="flex:1"><div style="font-size:13px;color:var(--text);font-weight:500">Daniel J&oslash;rgensen</div><div style="font-size:11px;color:var(--text3)">Former Economics Circle member &middot; Under Review status</div></div>
+          <span class="badge b-judicial">Under investigation</span>
+        </div>
+        <div class="court-record">
+          <div class="court-charge">Trigger: Integrity Engine anomaly flag</div>
+          <div class="court-text">Flag raised on Nov 12: statistical correlation detected between auditor assignment pattern and credential verification outcomes. Secondary flag: claimed W_h credentials in Systems Design domain appear inconsistent with demonstrated participation quality in related Cells. Judicial Circle commissioned this investigation on Nov 14.</div>
+        </div>
+        <div class="g2">
+          <div>
+            <div class="sec">Investigation Team</div>
+            <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,#4a3080,#2a1860)">FO</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Fatima Ouedraogo</div><div style="font-size:11px;color:var(--text3)">Lead investigator</div></div><span class="badge b-active">Active</span></div>
+            <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,#1b4a2a,#0d2a16)">BK</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Bongani Khumalo</div><div style="font-size:11px;color:var(--text3)">Evidence review</div></div><span class="badge b-active">Active</span></div>
+            <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,#1a3c5e,#0a1e34)">LM</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Lena M&uuml;ller</div><div style="font-size:11px;color:var(--text3)">Systems Dormain expert</div></div><span class="badge b-active">Active</span></div>
+          </div>
+          <div>
+            <div class="sec">Report Status</div>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px">
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px"><span style="color:var(--text2)">Findings</span><span style="color:#4dba7f">&#10003; Drafted</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px"><span style="color:var(--text2)">Evidence appendix</span><span style="color:#4dba7f">&#10003; Complete</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px"><span style="color:var(--text2)">Points of concern</span><span style="color:#d4a050">&#9651; In review</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--text2)">Recommended sanctions</span><span style="color:var(--text3)">&mdash; Pending</span></div>
+              <div class="divider"></div>
+              <button class="btn" style="width:100%;color:#e05050;border-color:var(--red)">Finalise &amp; Forward to Meta-aSTF</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Meta-aSTF: The Apex Chamber — cold white, austere -->
+  <div class="view" id="view-stf-meta">
+    <div class="back" onclick="nav('stf')">&#8592; STF Dash</div>
+    <div class="stf-meta-wrap">
+      <div class="room-header">
+        <div class="room-type-label">&#9670; Meta-aSTF &mdash; Apex Review Chamber</div>
+        <div class="room-title">Final Ruling: Investigation of Daniel J&oslash;rgensen</div>
+        <div class="room-meta">Judicial Circle mandate &middot; Due Dec 20 2024 &middot; Binding ruling &middot; Read-only jSTF input</div>
+      </div>
+      <div class="room-body">
+        <div style="background:rgba(58,74,94,.08);border:1px solid rgba(180,200,220,.12);border-radius:var(--r);padding:10px 14px;margin-bottom:16px;font-family:var(--mono);font-size:10px;color:#b0c8e0;letter-spacing:.08em;text-align:center">META-aSTF &mdash; APEX REVIEW &mdash; CANNOT RE-INVESTIGATE &mdash; REVIEWS DUE PROCESS &amp; PROPORTIONALITY ONLY</div>
+        <div class="room-env"><div class="room-env-label" style="color:#b0c8e0">Room Environment</div><div class="room-env-text">You are reviewing the jSTF's investigation of this case, not the case itself. Your mandate: was the investigation conducted with due process? Was evidence handled appropriately? Are recommended sanctions proportionate? Issue the final binding ruling. This ruling cannot be appealed within Orb Sys.</div></div>
+        <div class="g2">
+          <div>
+            <div class="sec">jSTF Report — Read Only</div>
+            <div style="background:rgba(58,74,94,.06);border:1px solid rgba(180,200,220,.1);border-radius:var(--r);padding:14px;margin-bottom:14px">
+              <div style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-bottom:8px;letter-spacing:.1em;text-transform:uppercase">Investigation summary</div>
+              <div style="font-size:13px;color:var(--text2);line-height:1.6">jSTF found credible evidence of credential misrepresentation in the Systems Design domain. W_h score appears inflated by approximately 400 points relative to demonstrated competence. The auditor correlation flag was determined to be partially substantiated. Three recommendations filed: competence deduction, temporary suspension, Circle flush.</div>
+            </div>
+            <div style="background:rgba(58,74,94,.06);border:1px solid rgba(180,200,220,.1);border-radius:var(--r);padding:12px;font-family:var(--mono);font-size:10px;color:var(--text3)"><div style="margin-bottom:4px">Due process check: &#10003; Passed</div><div style="margin-bottom:4px">Evidence documentation: &#10003; Adequate</div><div>Investigator independence: &#10003; Verified</div></div>
+          </div>
+          <div>
+            <div class="sec">Your Ruling</div>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:14px">
+              <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:10px">Proportionality assessment of recommended sanctions</div>
+              <div style="margin-bottom:10px">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><input type="checkbox" checked style="accent-color:var(--teal)"><span style="font-size:13px;color:var(--text2)">Competence deduction: 400 pts W_h</span></div>
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><input type="checkbox" checked style="accent-color:var(--teal)"><span style="font-size:13px;color:var(--text2)">Temporary suspension: 60 days</span></div>
+                <div style="display:flex;align-items:center;gap:8px"><input type="checkbox" style="accent-color:var(--teal)"><span style="font-size:13px;color:var(--text2)">Circle flush — Economics</span></div>
+              </div>
+              <textarea placeholder="Ruling rationale — binding record..." style="width:100%;background:var(--bg4);border:1px solid var(--border2);color:var(--text2);border-radius:3px;padding:8px 12px;font-size:12px;height:70px;resize:none"></textarea>
+            </div>
+            <button class="btn primary" style="width:100%;background:rgba(180,200,220,.15);border-color:rgba(180,200,220,.3);color:#b0c8e0">Issue Binding Ruling</button>
+            <div style="margin-top:8px;font-size:11px;color:var(--text3)">This ruling is final, immutably logged, and enacted by the Integrity Engine immediately.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ RESOLUTION DETAIL (sys-bound) ═══ -->
+  <div class="view" id="view-resolution-sys">
+    <div class="back" onclick="nav('org')">&#8592; Org</div>
+    <div class="hero">
+      <div class="hero-icon" style="background:var(--gold-dim);border:1px solid rgba(200,149,42,.3)"><span style="font-size:22px">&#9664;</span></div>
+      <div style="flex:1">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:6px">ORG-2024-011 &mdash; <span style="color:var(--gold2)">sys-bound</span></div>
+        <div class="hero-title">Novice STF Slot Reservation Floor</div>
+        <div class="hero-desc">System parameter change. Increase novice slot floor from 30% to 40% across all xSTF formations.</div>
+        <div class="tags"><span class="tag">Governance</span><span class="tag">sys-bound</span><span class="badge b-pending" style="margin-left:4px">Gate 1 aSTF</span></div>
+      </div>
+    </div>
+    <div class="sec">Resolution Status</div>
+    <div class="flow" style="margin-bottom:20px">
+      <div class="fstep done">Draft</div><div class="farr">&rsaquo;</div>
+      <div class="fstep done">Deliberating</div><div class="farr">&rsaquo;</div>
+      <div class="fstep done">Voted &#10003;</div><div class="farr">&rsaquo;</div>
+      <div class="fstep cur">Gate 1 aSTF</div><div class="farr">&rsaquo;</div>
+      <div class="fstep">Pending Impl.</div><div class="farr">&rsaquo;</div>
+      <div class="fstep">Gate 2 diff</div><div class="farr">&rsaquo;</div>
+      <div class="fstep">Enacted &#128274;</div>
+    </div>
+    <div class="g2">
+      <div>
+        <div class="sec">Motion Specification</div>
+        <div class="spec-block">
+          <div class="spec-head">MOTION TYPE: sys-bound</div>
+          <div style="margin-bottom:8px">
+            <span class="spec-key">parameter           </span><span style="color:var(--text3)"> : </span><span class="spec-val">new_value           </span><span style="color:var(--text3)"> : </span><span class="spec-just">justification</span>
+          </div>
+          <div style="margin-bottom:4px">
+            <span class="spec-key">novice_slot_floor   </span><span style="color:var(--text3)"> : </span><span class="spec-val">0.40                </span><span style="color:var(--text3)"> : </span><span class="spec-just">Cell #18 findings + Dev Circle analysis</span>
+          </div>
+        </div>
+        <div class="vote-bar">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:8px">Weighted vote — Governance Dormain</div>
+          <div class="vote-row"><span class="vote-yea">YEA 847</span><div class="vote-track"><div class="vote-yea-fill" style="width:73%"></div></div><span class="vote-nay">NAY 312</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="sec">Gate 1 aSTF</div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:10px">Gate 1 asks: was the deliberation sound and the decision legitimate? Not a mandate check — routing handled that.</div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:12px;font-family:var(--mono);font-size:10px;color:var(--text3);line-height:1.8">
+          <div>Reviewers assigned: 3</div>
+          <div>Filed: 0 of 3</div>
+          <div>Deadline: Nov 28 2024</div>
+          <div style="margin-top:8px;color:var(--gold2)">Gate 2: Integrity Engine diff</div>
+          <div>applied(novice_slot_floor) must === 0.40</div>
+          <div>No "justified deviation" for sys-bound changes</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+const views = {
+  personal:       ['Personal'],
+  deliberation:   ['Deliberation'],
+  org:            ['Meridian Collective'],
+  commons:        ['Meridian Collective', 'Commons'],
+  circles:        ['Meridian Collective', 'Circles'],
+  cells:          ['Meridian Collective', 'Cells'],
+  stf:            ['STF Dash'],
+  'circle-detail':['Meridian Collective', 'Circles', 'Economics Circle'],
+  'cells-delib':  ['Meridian Collective', 'Cells', 'Cell #19 — Knowledge & Archive'],
+  'stf-xstf':     ['STF Dash', 'xSTF — Boardroom'],
+  'stf-astf':     ['STF Dash', 'aSTF — Blind Chamber'],
+  'stf-vstf':     ['STF Dash', 'vSTF — Verification Office'],
+  'stf-jstf':     ['STF Dash', 'jSTF — Investigation'],
+  'stf-meta':     ['STF Dash', 'Meta-aSTF — Apex Chamber'],
+  'resolution-sys':['Meridian Collective', 'Resolutions', 'ORG-2024-011'],
+};
+const navMap = {
+  personal:'personal', deliberation:'deliberation',
+  org:'org', commons:'org', circles:'circles', 'circle-detail':'circles',
+  cells:'cells', 'cells-delib':'cells',
+  stf:'stf', 'stf-xstf':'stf', 'stf-astf':'stf', 'stf-vstf':'stf',
+  'stf-jstf':'stf', 'stf-meta':'stf', 'resolution-sys':'org',
+};
+function nav(key) {
+  if (!views[key]) return;
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const el = document.getElementById('view-' + key);
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.nav-item[data-v="' + navMap[key] + '"]').forEach(n => n.classList.add('active'));
+  const path = views[key];
+  document.getElementById('topbar-path').innerHTML = path.map((p,i) =>
+    i < path.length-1 ? `<span>${p}</span><span class="sep">&rsaquo;</span>` : `<span style="color:var(--text)">${p}</span>`
+  ).join('');
+  document.querySelector('.content').scrollTop = 0;
+}
+nav('personal');
+</script>
+</body>
+</html>
