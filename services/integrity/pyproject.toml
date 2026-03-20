@@ -1,0 +1,14 @@
+[project]
+name = "orbsys-integrity"
+version = "0.1.0"
+description = "Orb Sys integrity Engine"
+requires-python = ">=3.12"
+dependencies = [
+    "sqlalchemy[asyncio]>=2.0.0",
+    "asyncpg>=0.29.0",
+    "nats-py>=2.7.0",
+    "httpx>=0.27.0",
+]
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
