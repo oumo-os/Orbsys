@@ -1,0 +1,184 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* ── Orb Sys palette ───────────────────────────────────────────────────── */
+  --void:          #0a0a0b;
+  --surface:       #111113;
+  --surface-raised: #17171a;
+  --border:        #22222a;
+  --border-subtle: #1a1a20;
+  --text:          #e8e8f0;
+  --text-muted:    #6b6b7e;
+  --text-dim:      #3a3a48;
+
+  /* Accent — cold gold */
+  --gold:          #c8a84b;
+  --gold-dim:      #7a6530;
+  --gold-glow:     rgba(200, 168, 75, 0.12);
+
+  /* Status */
+  --green:         #4ea860;
+  --green-dim:     #1a2e1e;
+  --red:           #c85a5a;
+  --red-dim:       #2e1a1a;
+  --blue:          #5a82c8;
+  --blue-dim:      #1a2040;
+  --amber:         #c89040;
+  --amber-dim:     #2e2010;
+
+  /* STF type colours */
+  --stf-xstf:      #4e9eb8;
+  --stf-astf:      #c8a84b;
+  --stf-vstf:      #8a6ec8;
+  --stf-jstf:      #c85a5a;
+  --stf-meta:      #c87850;
+
+  /* Typography */
+  --font-display:  "Syne", sans-serif;
+  --font-body:     "Inter", sans-serif;
+  --font-mono:     "DM Mono", monospace;
+}
+
+@layer base {
+  * { box-sizing: border-box; }
+
+  body {
+    background-color: var(--void);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
+  code, pre, .mono {
+    font-family: var(--font-mono);
+  }
+}
+
+@layer components {
+  /* ── Cards ─────────────────────────────────────────────────────────────── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .card-raised {
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  /* ── Pills / badges ────────────────────────────────────────────────────── */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .pill-gold   { background: var(--gold-glow); color: var(--gold); border: 1px solid var(--gold-dim); }
+  .pill-green  { background: var(--green-dim); color: var(--green); }
+  .pill-red    { background: var(--red-dim); color: var(--red); }
+  .pill-blue   { background: var(--blue-dim); color: var(--blue); }
+  .pill-amber  { background: var(--amber-dim); color: var(--amber); }
+  .pill-muted  { background: var(--surface-raised); color: var(--text-muted); }
+
+  /* ── Competence bar ────────────────────────────────────────────────────── */
+  .ws-bar {
+    height: 2px;
+    background: var(--border);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+  .ws-bar-fill {
+    height: 100%;
+    background: var(--gold);
+    border-radius: 1px;
+    transition: width 1s ease;
+  }
+
+  /* ── Section headings ──────────────────────────────────────────────────── */
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  /* ── Buttons ───────────────────────────────────────────────────────────── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border: 1px solid transparent;
+  }
+
+  .btn-primary {
+    background: var(--gold);
+    color: var(--void);
+    font-weight: 600;
+  }
+  .btn-primary:hover { filter: brightness(1.1); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-muted);
+    border-color: var(--border);
+  }
+  .btn-ghost:hover {
+    background: var(--surface-raised);
+    color: var(--text);
+    border-color: var(--border);
+  }
+
+  .btn-danger {
+    background: var(--red-dim);
+    color: var(--red);
+    border-color: var(--red);
+  }
+
+  /* ── Motion state indicator ────────────────────────────────────────────── */
+  .motion-track {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+  .motion-step {
+    width: 28px;
+    height: 4px;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+  .motion-step.completed { background: var(--green); }
+  .motion-step.active    { background: var(--gold); }
+  .motion-step.blocked   { background: var(--red); }
+  .motion-step:first-child { border-radius: 2px 0 0 2px; }
+  .motion-step:last-child  { border-radius: 0 2px 2px 0; }
+
+  /* ── Scrollbars ────────────────────────────────────────────────────────── */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+}
