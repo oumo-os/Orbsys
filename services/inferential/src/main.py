@@ -471,6 +471,16 @@ async def dispatch(data: dict, sf: async_sessionmaker, nc: Any) -> None:
                 title = payload.get("title", "")
                 body_text = payload.get("body", "")
                 await tag_commons_thread(db, nc, org_id, thread_id, title, body_text)
+                # Also compute feed scores so the feed is relevance-ranked from the start
+                await compute_and_store_feed_scores(db, nc, org_id, thread_id)
+
+            elif etype == "dormain_tag_applied":
+                # Tag corrected — recompute scores
+                thread_id_str = data.get("subject_id")
+                if thread_id_str:
+                    await compute_and_store_feed_scores(
+                        db, nc, org_id, uuid.UUID(thread_id_str)
+                    )
 
             elif etype == "cell_created":
                 cell_id_str = data.get("subject_id")

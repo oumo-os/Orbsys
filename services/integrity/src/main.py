@@ -554,6 +554,44 @@ async def handle_notification_write(data, db):
     log.debug(f"[integrity] notification written: {n.get('notification_type')} → {n.get('member_id')}")
 
 
+
+
+async def handle_feed_scores_write(data, db):
+    """
+    Inferential Engine computed relevance scores for a thread.
+    Upsert into feed_scores using ON CONFLICT DO UPDATE.
+    """
+    thread_id_str = data.get("thread_id")
+    org_id_str = data.get("org_id")
+    scores = data.get("scores", [])
+    if not thread_id_str or not scores:
+        return
+
+    thread_id = uuid.UUID(thread_id_str)
+    org_id = uuid.UUID(org_id_str)
+    computed_at = datetime.now(timezone.utc)
+
+    # Batch upsert
+    for s in scores:
+        member_id = uuid.UUID(s["member_id"])
+        await db.execute(text("""
+            INSERT INTO feed_scores
+              (id, org_id, member_id, thread_id, relevance_score, score_basis, computed_at)
+            VALUES
+              (:id, :oid, :mid, :tid, :score, :basis, :ts)
+            ON CONFLICT (member_id, thread_id) DO UPDATE
+              SET relevance_score = EXCLUDED.relevance_score,
+                  score_basis     = EXCLUDED.score_basis,
+                  computed_at     = EXCLUDED.computed_at
+        """), {
+            "id": uuid.uuid4(), "oid": org_id, "mid": member_id,
+            "tid": thread_id, "score": s["relevance_score"],
+            "basis": s.get("score_basis", "combined"), "ts": computed_at,
+        })
+
+    log.debug(f"[integrity] feed scores upserted: {len(scores)} for thread {thread_id}")
+
+
 async def dispatch(data, sf, nc, reply_subject=None):
     etype = data.get("event_type", "")
     async with sf() as db:
@@ -571,6 +609,8 @@ async def dispatch(data, sf, nc, reply_subject=None):
                     await handle_gate1_result(data, db)
                 elif etype == "stf_formation_requested":
                     await handle_stf_formation(data, db)
+                elif etype == "feed_scores_write_requested":
+                    await handle_feed_scores_write(data, db)
                 elif etype == "notification_write_requested":
                     await handle_notification_write(data, db)
                 elif etype in LEDGER_ONLY:

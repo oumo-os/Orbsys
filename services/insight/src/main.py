@@ -334,6 +334,52 @@ async def handle_contribution_added(data: dict, db: AsyncSession) -> None:
     log.debug(f"[insight] minutes updated for cell {cell_id}")
 
 
+
+
+async def handle_sponsor_draft(data: dict, db: AsyncSession, nc: Any) -> None:
+    """
+    Circle member clicked Sponsor — generate Cell founding mandate draft.
+    Reads thread posts AT THIS MOMENT. Replies via NATS reply subject.
+    """
+    thread_id_str = data.get("thread_id")
+    org_id_str    = data.get("org_id")
+    reply_to      = data.get("reply_to")
+    title         = data.get("title", "")
+
+    if not thread_id_str:
+        return
+
+    # Load posts (strip member IDs for LLM)
+    posts_result = await db.execute(text("""
+        SELECT body, created_at FROM commons_posts
+        WHERE thread_id = :tid
+        ORDER BY created_at ASC
+        LIMIT 25
+    """), {"tid": uuid.UUID(thread_id_str)})
+    posts = [{"body": r[0]} for r in posts_result.fetchall()]
+
+    analysis = await analyse_contributions_llm(posts, "non_system")
+    if analysis is None:
+        analysis = analyse_contributions_local(posts)
+
+    mandate = analysis.get("mandate_suggestion", "")
+    if not mandate and title:
+        mandate = f"Deliberation cell for: {title}"
+
+    draft = {
+        "draft_id": data.get("draft_id", str(uuid.uuid4())),
+        "founding_mandate": mandate,
+        "key_themes": analysis.get("key_positions", [])[:3],
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+    if reply_to and nc and nc.is_connected:
+        try:
+            await nc.publish(reply_to, json.dumps(draft, default=str).encode())
+        except Exception as e:
+            log.error(f"[insight] failed to send sponsor draft reply: {e}")
+
+
 # ── Notifications ─────────────────────────────────────────────────────────────
 
 async def emit_notification(
@@ -598,7 +644,10 @@ async def dispatch(data: dict, sf: async_sessionmaker, nc: Any) -> None:
 
     async with sf() as db:
         try:
-            if etype == "cell_crystallise_requested":
+            if etype == "sponsor_draft_requested":
+                await handle_sponsor_draft(data, db, nc)
+
+            elif etype == "cell_crystallise_requested":
                 await handle_crystallise(data, db, nc)
 
             elif etype == "cell_contribution_added":
@@ -648,6 +697,7 @@ async def main() -> None:
     js = nc.jetstream()
 
     HANDLED_EVENTS = {
+        "sponsor_draft_requested",
         "cell_crystallise_requested", "cell_contribution_added",
         "stf_assignment_created", "motion_filed",
         "motion_revision_requested", "stf_deadline_approaching",
