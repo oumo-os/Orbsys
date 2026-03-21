@@ -15,7 +15,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
 
 from .base import BaseService
@@ -55,6 +55,49 @@ class MotionsService(BaseService):
 
     # ── Reads ─────────────────────────────────────────────────────────────────
 
+    async def list_motions(
+        self,
+        org_id: uuid.UUID,
+        page: int,
+        page_size: int,
+        state: str | None = None,
+        cell_id: uuid.UUID | None = None,
+    ) -> "Paginated[MotionResponse]":
+        from ..schemas.common import Paginated as PaginatedT
+        from ..models.types import MotionState
+
+        q = select(Motion).where(Motion.org_id == org_id)
+        if state:
+            try:
+                q = q.where(Motion.state == MotionState(state))
+            except ValueError:
+                pass
+        if cell_id:
+            q = q.where(Motion.cell_id == cell_id)
+
+        total = (await self.db.execute(
+            select(func.count()).select_from(q.subquery())
+        )).scalar_one()
+
+        rows = await self.db.execute(
+            q.order_by(Motion.created_at.desc())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        )
+        motions = rows.scalars().all()
+
+        items = []
+        for m in motions:
+            items.append(await self._motion_to_response(m))
+
+        return PaginatedT(
+            items=items,
+            total=total,
+            page=page,
+            page_size=page_size,
+            has_next=(page * page_size) < total,
+        )
+
     async def get_motion(
         self, motion_id: uuid.UUID, org_id: uuid.UUID
     ) -> MotionResponse:
@@ -89,7 +132,7 @@ class MotionsService(BaseService):
         if motion is None or motion.org_id != org_id:
             raise NotFound("Motion", str(motion_id))
 
-        result = self._validate_one(body.parameter, body.new_value, body.justification)
+        result = await self._validate_one_async(body.parameter, body.new_value, body.justification, motion.org_id)
 
         return ValidateSpecificationResponse(
             motion_id=motion_id,
@@ -97,14 +140,31 @@ class MotionsService(BaseService):
             all_valid=result.status == PreValidationStatus.VALID,
         )
 
+    async def _validate_one_async(
+        self,
+        parameter: str,
+        new_value: object,
+        justification: str,
+        org_id: uuid.UUID,
+    ) -> SpecificationValidationResult:
+        """Async version that looks up current value from OrgParameter table."""
+        from ..models.org import OrgParameter
+        param_row = (await self.db.execute(
+            select(OrgParameter).where(
+                OrgParameter.org_id == org_id,
+                OrgParameter.key == parameter,
+            )
+        )).scalar_one_or_none()
+        current_value = param_row.value if param_row else None
+        return self._validate_one(parameter, new_value, justification, current_value)
+
     def _validate_one(
         self,
         parameter: str,
         new_value: object,
         justification: str,
+        current_value: object = None,
     ) -> SpecificationValidationResult:
-        # Load current org parameter value — stub (real: query OrgParameter table)
-        current_value = None
 
         if parameter not in SYSTEM_PARAMETERS:
             return SpecificationValidationResult(

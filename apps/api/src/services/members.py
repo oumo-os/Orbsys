@@ -97,60 +97,80 @@ class MembersService(BaseService):
     ) -> Paginated[FeedItemResponse]:
         """
         Relevance-ranked Commons thread feed.
-        Inferential Engine pre-computes and stores relevance scores in a
-        feed_scores table (not yet modelled — TODO: add feed_scores table).
-        Fallback: chronological order when no scores are available.
+        Joins feed_scores (written by Inferential Engine) when available.
+        Falls back to chronological order when no scores exist for this member.
         """
-        from ..models.governance import CommonsThread, CommonsThreadDormainTag
-        from ..schemas.commons import CommonsThreadSummaryResponse
-        from ..schemas.common import DormainRef, MemberRef
+        from sqlalchemy import func, outerjoin, literal
+        from ..models.governance import CommonsThread, CommonsPost
 
-        # Load threads for this org, paginated — chronological fallback
-        count_q = select(CommonsThread).where(
-            CommonsThread.org_id == org_id,
-            CommonsThread.state.in_(["open", "sponsored"]),
+        # Outer-join threads with feed_scores for this member
+        # threads without a score get score=0 and basis="chrono"
+        scored_q = (
+            select(
+                CommonsThread,
+                FeedScore.relevance_score,
+                FeedScore.score_basis,
+            )
+            .outerjoin(
+                FeedScore,
+                and_(
+                    FeedScore.thread_id == CommonsThread.id,
+                    FeedScore.member_id == member_id,
+                ),
+            )
+            .where(
+                CommonsThread.org_id == org_id,
+                CommonsThread.state.in_(["open", "sponsored"]),
+            )
+            .order_by(
+                FeedScore.relevance_score.desc().nullslast(),
+                CommonsThread.created_at.desc(),
+            )
         )
-        result = await self.db.execute(
-            count_q
-            .order_by(CommonsThread.created_at.desc())
+
+        total = (await self.db.execute(
+            select(func.count()).select_from(scored_q.subquery())
+        )).scalar_one()
+
+        rows = (await self.db.execute(
+            scored_q
             .offset((page - 1) * page_size)
             .limit(page_size)
             .options(selectinload(CommonsThread.tags))
-        )
-        threads = result.scalars().all()
+        )).all()
 
-        # Total count
-        from sqlalchemy import func
-        total_result = await self.db.execute(
-            select(func.count()).select_from(
-                select(CommonsThread).where(
-                    CommonsThread.org_id == org_id,
-                    CommonsThread.state.in_(["open", "sponsored"]),
-                ).subquery()
+        threads = [r[0] for r in rows]
+        score_map = {r[0].id: (float(r[1]) if r[1] else 0.0, r[2] or "chrono") for r in rows}
+
+        author_ids = list({t.author_id for t in threads if t.author_id})
+        authors: dict = {}
+        if author_ids:
+            ar = await self.db.execute(select(Member).where(Member.id.in_(author_ids)))
+            authors = {m.id: m for m in ar.scalars().all()}
+
+        post_counts: dict = {}
+        if threads:
+            pc_result = await self.db.execute(
+                select(CommonsPost.thread_id, func.count(CommonsPost.id))
+                .where(CommonsPost.thread_id.in_([t.id for t in threads]))
+                .group_by(CommonsPost.thread_id)
             )
-        )
-        total = total_result.scalar_one()
+            post_counts = dict(pc_result.all())
 
-        # Load authors
-        author_ids = list({t.author_id for t in threads})
-        authors_result = await self.db.execute(
-            select(Member).where(Member.id.in_(author_ids))
-        )
-        authors = {m.id: m for m in authors_result.scalars().all()}
+        dormain_name_map: dict = {}
+        all_dormain_ids = {tag.dormain_id for t in threads for tag in (t.tags or [])}
+        if all_dormain_ids:
+            dr = await self.db.execute(
+                select(Dormain).where(Dormain.id.in_(all_dormain_ids))
+            )
+            dormain_name_map = {d.id: d.name for d in dr.scalars().all()}
 
-        # Load post counts
-        from sqlalchemy import func as sqlfunc
-        from ..models.governance import CommonsPost
-        post_counts_result = await self.db.execute(
-            select(CommonsPost.thread_id, sqlfunc.count(CommonsPost.id))
-            .where(CommonsPost.thread_id.in_([t.id for t in threads]))
-            .group_by(CommonsPost.thread_id)
-        )
-        post_counts = dict(post_counts_result.all())
+        from ..schemas.common import DormainRef, MemberRef
 
         items = []
         for thread in threads:
-            author = authors.get(thread.author_id)
+            author = authors.get(thread.author_id) if thread.author_id else None
+            relevance, basis = score_map.get(thread.id, (0.0, "chrono"))
             items.append(
                 FeedItemResponse(
                     thread_id=thread.id,
@@ -162,15 +182,18 @@ class MembersService(BaseService):
                         display_name=author.display_name,
                     ) if author else None,
                     dormain_tags=[
-                        DormainRef(id=tag.dormain_id, name="")  # name loaded lazily
+                        DormainRef(
+                            id=tag.dormain_id,
+                            name=dormain_name_map.get(tag.dormain_id, ""),
+                        )
                         for tag in (thread.tags or [])
                     ],
                     state=thread.state,
                     post_count=post_counts.get(thread.id, 0),
                     created_at=thread.created_at,
                     sponsored_at=thread.sponsored_at,
-                    feed_relevance=0.0,         # TODO: load from feed_scores table
-                    relevance_source="chrono",  # fallback
+                    feed_relevance=relevance,
+                    relevance_source=basis,
                 )
             )
 

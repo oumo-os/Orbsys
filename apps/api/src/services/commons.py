@@ -308,41 +308,70 @@ class CommonsService(BaseService):
         )
         post_count = post_count_result.scalar_one()
 
-        # Emit event — Insight Engine generates draft asynchronously
-        # In full implementation: use a request/reply pattern via NATS
-        # Here: return a placeholder draft_id the client uses for confirm
-        draft_id = str(uuid.uuid4())
+        import json as _json
 
-        await get_event_bus().emit(
-            org_id,
-            GovernanceEvent(
-                event_type=EventType.COMMONS_THREAD_SPONSORED,
-                subject_id=thread.id,
-                subject_type="commons_thread",
-                payload={
-                    "draft_id": draft_id,
-                    "post_count": post_count,
-                    "snapshot_at": datetime.now(timezone.utc).isoformat(),
-                },
-                triggered_by_member=member_id,
-            ),
-        )
+        draft_id = str(uuid.uuid4())
+        now = datetime.now(timezone.utc)
+
+        # Try NATS request/reply to Insight Engine (10s timeout)
+        bus = get_event_bus()
+        engine_draft = None
+        if bus._connected and bus._nc is not None:
+            try:
+                reply_msg = await bus._nc.request(
+                    subject=f"ORG.{org_id}.events",
+                    payload=_json.dumps({
+                        "event_type": "sponsor_draft_requested",
+                        "org_id": str(org_id),
+                        "thread_id": str(thread_id),
+                        "draft_id": draft_id,
+                        "title": thread.title,
+                        "post_count": post_count,
+                    }, default=str).encode(),
+                    timeout=10.0,
+                )
+                engine_draft = _json.loads(reply_msg.data.decode())
+            except Exception:
+                pass
 
         author = await self.get_by_id(Member, member_id)
 
-        # Placeholder — real implementation awaits Insight Engine reply
+        if engine_draft:
+            return SponsorDraftResponse(
+                draft_id=engine_draft.get("draft_id", draft_id),
+                founding_mandate=engine_draft.get("founding_mandate", ""),
+                key_themes=engine_draft.get("key_themes", []),
+                contributing_members=[
+                    MemberRef(id=author.id, handle=author.handle,
+                              display_name=author.display_name)
+                ],
+                generated_at=now,
+            )
+
+        # Fallback: load posts ourselves for a basic mandate
+        posts_result = await self.db.execute(
+            select(CommonsPost)
+            .where(CommonsPost.thread_id == thread_id)
+            .order_by(CommonsPost.created_at.asc())
+            .limit(15)
+        )
+        posts = posts_result.scalars().all()
+        combined = " ".join(p.body[:200] for p in posts)
+        mandate_preview = (
+            combined[:400].rsplit(".", 1)[0] + "."
+            if combined
+            else f"Deliberation cell for: {thread.title}"
+        )
+
         return SponsorDraftResponse(
             draft_id=draft_id,
-            founding_mandate=(
-                f"Deliberation cell for: {thread.title}\n\n"
-                f"[Mandate draft pending from Insight Engine — "
-                f"edit before confirming]"
-            ),
+            founding_mandate=mandate_preview,
             key_themes=[],
             contributing_members=[
-                MemberRef(id=author.id, handle=author.handle, display_name=author.display_name)
+                MemberRef(id=author.id, handle=author.handle,
+                          display_name=author.display_name)
             ],
-            generated_at=datetime.now(timezone.utc),
+            generated_at=now,
         )
 
     async def confirm_sponsorship(

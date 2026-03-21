@@ -17,6 +17,19 @@ from ..schemas import (
 router = APIRouter(prefix="/cells", tags=["cells"])
 
 
+@router.get("", response_model=Paginated[CellResponse])
+async def list_cells(
+    member: ActiveMember, db: DB,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(25, ge=1, le=100),
+    state: str | None = Query(None, description="Filter by cell state"),
+):
+    return await CellsService(db).list_cells(
+        _uuid.UUID(member.org_id), _uuid.UUID(member.member_id),
+        page, page_size, state,
+    )
+
+
 @router.get("/{cell_id}", response_model=CellResponse)
 async def get_cell(cell_id: UUID, member: ActiveMember, db: DB):
     return await CellsService(db).get_cell(

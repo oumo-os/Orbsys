@@ -234,7 +234,7 @@ class CellsService(BaseService):
         motion = await self._get_active_motion(cell_id)
         if motion is None:
             return CellVoteSummariesResponse(
-                motion_id=uuid.uuid4(),  # placeholder
+                motion_id=None,
                 tallies_by_dormain=[],
                 overall_result=None,
             )

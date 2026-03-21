@@ -162,7 +162,7 @@ class VoteSummaryResponse(BaseModel):
 
 
 class CellVoteSummariesResponse(BaseModel):
-    motion_id: uuid.UUID
+    motion_id: uuid.UUID | None  # None when no active motion
     tallies_by_dormain: list[VoteSummaryResponse]
     overall_result: str | None  # passed | failed | pending
 

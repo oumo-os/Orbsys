@@ -141,6 +141,32 @@ class CirclesService(BaseService):
         )
         rows = result.all()
 
+        # Load primary dormains for this circle
+        primary_dormains_result = await self.db.execute(
+            select(CircleDormain.dormain_id)
+            .where(
+                CircleDormain.circle_id == circle_id,
+                CircleDormain.mandate_type == "primary",
+                CircleDormain.removed_at.is_(None),
+            )
+            .limit(1)
+        )
+        primary_dormain_id = primary_dormains_result.scalar_one_or_none()
+
+        # Batch-load W_s for all members on the primary dormain
+        ws_map: dict = {}
+        if primary_dormain_id:
+            from ..models.competence import CompetenceScore
+            ws_result = await self.db.execute(
+                select(CompetenceScore.member_id, CompetenceScore.w_s)
+                .where(
+                    CompetenceScore.dormain_id == primary_dormain_id,
+                    CompetenceScore.member_id.in_([row[1].id for row in rows]),
+                    CompetenceScore.mcmp_status == "active",
+                )
+            )
+            ws_map = {row[0]: float(row[1]) for row in ws_result.all()}
+
         return [
             CircleMemberResponse(
                 member=MemberRef(
@@ -150,7 +176,7 @@ class CirclesService(BaseService):
                 ),
                 joined_at=cm.joined_at,
                 current_state=cm.current_state,
-                primary_dormain_ws=None,  # TODO: join competence_scores on primary dormain
+                primary_dormain_ws=ws_map.get(member.id),
             )
             for cm, member in rows
         ]
