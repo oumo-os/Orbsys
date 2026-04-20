@@ -85,6 +85,27 @@ export default function CircleDetailPage() {
 
   useEffect(() => { load(); }, [load]);
 
+  async function inviteMember() {
+    if (!inviteHandle.trim()) return;
+    setInviting(true); setInviteMsg(null);
+    try {
+      // Resolve handle → member_id first
+      const memberRes = await api.get(`/members/${inviteHandle.trim()}`).catch(() => null);
+      const memberId = memberRes?.data?.id;
+      if (!memberId) { setInviteMsg("Member not found."); return; }
+      await circlesApi.invite(id, { member_id: memberId });
+      setInviteMsg(`Invitation sent to @${inviteHandle.trim()}.`);
+      setInviteHandle("");
+      // Refresh members list
+      const updated = await circlesApi.members(id);
+      setMembers(updated.data ?? []);
+    } catch {
+      setInviteMsg("Could not send invitation. Are you a member of this circle?");
+    } finally {
+      setInviting(false);
+    }
+  }
+
   if (loading) return (
     <div className="space-y-4">
       {[1, 2].map(i => (
@@ -218,7 +239,33 @@ export default function CircleDetailPage() {
 
       {/* Members tab */}
       {tab === "members" && (
-        <div className="space-y-2">
+        <div className="space-y-3">
+          {/* Invite form */}
+          <div className="card p-4 flex gap-2 items-center">
+            <input
+              value={inviteHandle}
+              onChange={e => setInviteHandle(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && inviteMember()}
+              placeholder="@handle to invite"
+              className="flex-1 bg-transparent border border-[var(--border)] rounded px-3 py-1.5
+                         text-sm font-mono text-[var(--text)] placeholder:text-[var(--text-dim)]
+                         focus:outline-none focus:border-[var(--gold)]"
+            />
+            <button
+              onClick={inviteMember}
+              disabled={inviting || !inviteHandle.trim()}
+              className="px-4 py-1.5 rounded border border-[var(--gold)]/40 bg-[var(--gold-glow)]
+                         text-[var(--gold)] font-mono text-xs disabled:opacity-40
+                         hover:bg-[var(--gold)]/10 transition-colors"
+            >
+              {inviting ? "…" : "Invite"}
+            </button>
+          </div>
+          {inviteMsg && (
+            <p className={`text-xs font-mono px-1 ${
+              inviteMsg.startsWith("Invitation") ? "text-[var(--green)]" : "text-[var(--red)]"
+            }`}>{inviteMsg}</p>
+          )}
           {members.length === 0 ? (
             <div className="card p-8 text-center">
               <Users size={24} className="mx-auto mb-2 text-[var(--text-dim)]" />

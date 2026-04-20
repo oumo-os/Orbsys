@@ -236,19 +236,36 @@ class CirclesService(BaseService):
         auto_confirm = org is not None and org.bootstrapped_at is None
 
         invitation_id = uuid.uuid4()
-        status = "pending_vote"
 
-        if auto_confirm:
-            # Create membership directly during bootstrap
-            membership = CircleMember(
-                circle_id=circle_id,
-                member_id=body.member_id,
-                joined_at=now,
-                current_state=MemberState.PROBATIONARY,
-            )
-            self.db.add(membership)
-            await self.db.flush()
-            status = "accepted"
+        # v1.0: invitations are confirmed immediately — the inviting Circle member's
+        # judgment is sufficient. The full Circle-vote confirmation mechanism is v1.1.
+        # (During bootstrap auto_confirm was already true; post-bootstrap we keep the
+        # same behaviour so the system is usable before the vote mechanism lands.)
+        membership = CircleMember(
+            circle_id=circle_id,
+            member_id=body.member_id,
+            joined_at=now,
+            current_state=MemberState.PROBATIONARY,
+        )
+        self.db.add(membership)
+        await self.db.flush()
+
+        await get_event_bus().emit(
+            org_id,
+            GovernanceEvent(
+                event_type=EventType.MEMBER_STATE_CHANGED,
+                subject_id=body.member_id,
+                subject_type="member",
+                payload={
+                    "from_state": None,
+                    "to_state": "probationary",
+                    "trigger": "circle_invitation_accepted",
+                    "circle_id": str(circle_id),
+                    "circle_name": circle.name,
+                },
+                triggered_by_member=inviting_member_id,
+            ),
+        )
 
         return InvitationResponse(
             invitation_id=invitation_id,
@@ -258,7 +275,7 @@ class CirclesService(BaseService):
                 handle=target_member.handle,
                 display_name=target_member.display_name,
             ),
-            status=status,
+            status="accepted",
             created_at=now,
         )
 

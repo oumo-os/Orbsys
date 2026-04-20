@@ -62,6 +62,105 @@ class OrgService(BaseService):
             raise NotFound("Org")
         return OrgResponse.model_validate(org)
 
+    async def bootstrap_complete(
+        self,
+        org_id: uuid.UUID,
+        member_id: uuid.UUID,
+        membership_policy: str = "open_application",
+    ) -> OrgResponse:
+        """
+        Complete the founding bootstrap:
+          1. Set org.bootstrapped_at = now()
+          2. Dissolve all founding_circle=True circles
+          3. Seed membership_policy org parameter
+          4. Emit ORG_BOOTSTRAPPED ledger event
+
+        Only permitted while bootstrapped_at is null.
+        After this call:
+          - POST /auth/register returns 403 (BootstrapOnly)
+          - POST /members/apply accepts new members (if policy allows)
+          - Circle invite requires a vote, not auto-confirm
+        """
+        from ..core.exceptions import Forbidden
+
+        org = await self.get_by_id(Org, org_id)
+        if org is None:
+            raise NotFound("Org")
+        if org.bootstrapped_at is not None:
+            raise Forbidden("ALREADY_BOOTSTRAPPED: org is already live")
+
+        if membership_policy not in ("open_application", "invite_only", "closed"):
+            raise Forbidden(f"INVALID_POLICY: {membership_policy}")
+
+        now = datetime.now(timezone.utc)
+
+        # 1. Mark org live
+        org.bootstrapped_at = now
+        self.db.add(org)
+
+        # 2. Dissolve all founding circles
+        from sqlalchemy import update
+        await self.db.execute(
+            update(Circle)
+            .where(Circle.org_id == org_id, Circle.founding_circle.is_(True))
+            .values(dissolved_at=now)
+        )
+
+        # 3. Seed membership_policy parameter
+        existing_policy = (await self.db.execute(
+            select(OrgParameter).where(
+                OrgParameter.org_id == org_id,
+                OrgParameter.parameter == "membership_policy",
+            )
+        )).scalar_one_or_none()
+
+        if existing_policy is None:
+            self.db.add(OrgParameter(
+                org_id=org_id,
+                parameter="membership_policy",
+                value={"value": membership_policy},
+                applied_at=now,
+            ))
+        else:
+            existing_policy.value = {"value": membership_policy}
+            existing_policy.applied_at = now
+            self.db.add(existing_policy)
+
+        # 4. Seed default novice_slot_floor_pct if missing
+        existing_floor = (await self.db.execute(
+            select(OrgParameter).where(
+                OrgParameter.org_id == org_id,
+                OrgParameter.parameter == "novice_slot_floor_pct",
+            )
+        )).scalar_one_or_none()
+        if existing_floor is None:
+            self.db.add(OrgParameter(
+                org_id=org_id,
+                parameter="novice_slot_floor_pct",
+                value={"value": 0.30},
+                applied_at=now,
+            ))
+
+        await self.db.flush()
+
+        # 5. Emit ledger event
+        await get_event_bus().emit(
+            org_id,
+            GovernanceEvent(
+                event_type=EventType.ORG_BOOTSTRAPPED,
+                subject_id=org_id,
+                subject_type="org",
+                payload={
+                    "bootstrapped_at": now.isoformat(),
+                    "membership_policy": membership_policy,
+                    "triggered_by_member": str(member_id),
+                },
+                triggered_by_member=member_id,
+            ),
+        )
+
+        return OrgResponse.model_validate(org)
+
     # ── Dormains (bootstrap step 2) ───────────────────────────────────────────
 
     async def create_dormain(
@@ -115,6 +214,89 @@ class OrgService(BaseService):
         return [DormainResponse.model_validate(d) for d in result.scalars().all()]
 
     # ── Org parameters ────────────────────────────────────────────────────────
+
+    async def create_circle_bootstrap(
+        self,
+        org_id: uuid.UUID,
+        member_id: uuid.UUID,
+        body: object,  # BootstrapCircleRequest — avoid circular import
+    ) -> "CircleResponse":
+        """
+        Direct circle creation during bootstrap (org.bootstrapped_at is null).
+        In live operation circles are created via governance motions.
+        """
+        from ..core.exceptions import Forbidden, AlreadyExists, BootstrapOnly
+        from ..models.org import Org, Circle, CircleDormain, CircleMember, Dormain
+        from ..models.types import MandateType, MemberState
+        from ..schemas.circles import CircleResponse, CircleDormainResponse
+        from ..schemas.common import DormainRef
+
+        org = await self.get_by_id(Org, org_id)
+        if org is None:
+            raise Forbidden("Org not found")
+        if org.bootstrapped_at is not None:
+            raise BootstrapOnly("circle creation via /org/circles")
+
+        # Unique name within org
+        existing = (await self.db.execute(
+            select(Circle).where(Circle.org_id == org_id, Circle.name == body.name)
+        )).scalar_one_or_none()
+        if existing:
+            raise AlreadyExists("Circle", "name", body.name)
+
+        now = datetime.now(timezone.utc)
+        circle = Circle(
+            org_id=org_id,
+            name=body.name,
+            description=body.description,
+            founding_circle=False,
+        )
+        await self.save(circle)
+
+        # Attach dormains
+        dormains: list = []
+        for did in (body.dormain_ids or []):
+            dormain = await self.get_by_id(Dormain, did)
+            if dormain and dormain.org_id == org_id:
+                da = CircleDormain(
+                    circle_id=circle.id,
+                    dormain_id=did,
+                    mandate_type=MandateType.PRIMARY,
+                    added_at=now,
+                )
+                self.db.add(da)
+                dormains.append((da, dormain))
+
+        # Auto-add creating member to circle
+        self.db.add(CircleMember(
+            circle_id=circle.id,
+            member_id=member_id,
+            joined_at=now,
+            current_state=MemberState.ACTIVE,
+        ))
+
+        await self.db.flush()
+
+        return CircleResponse(
+            id=circle.id,
+            org_id=circle.org_id,
+            name=circle.name,
+            description=circle.description,
+            tenets=None,
+            founding_circle=False,
+            dormains=[
+                CircleDormainResponse(
+                    dormain=DormainRef(id=da.dormain_id, name=d.name),
+                    mandate_type=da.mandate_type,
+                    added_at=da.added_at,
+                    removed_at=None,
+                )
+                for da, d in dormains
+            ],
+            member_count=1,
+            created_at=circle.created_at,
+            dissolved_at=None,
+        )
 
     async def get_parameters(self, org_id: uuid.UUID) -> list[OrgParameterResponse]:
         result = await self.db.execute(

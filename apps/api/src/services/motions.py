@@ -48,6 +48,10 @@ SYSTEM_PARAMETERS: dict[str, dict] = {
     "quorum_pct":                 {"type": float, "min": 0.1,  "max": 1.0},
     "pass_threshold_pct":         {"type": float, "min": 0.5,  "max": 1.0},
     "commons_visibility":         {"type": str,   "values": ["members_only", "public", "circle_only"]},
+    "membership_policy":          {"type": str,   "values": ["open_application", "invite_only", "closed"]},
+    "novice_slot_floor_pct":      {"type": float, "min": 0.0, "max": 1.0},
+    "stf_rotation_weeks_min":     {"type": int,   "min": 1, "max": 52},
+    "stf_rotation_weeks_max":     {"type": int,   "min": 1, "max": 52},
 }
 
 
@@ -152,7 +156,7 @@ class MotionsService(BaseService):
         param_row = (await self.db.execute(
             select(OrgParameter).where(
                 OrgParameter.org_id == org_id,
-                OrgParameter.key == parameter,
+                OrgParameter.parameter == parameter,
             )
         )).scalar_one_or_none()
         current_value = param_row.value if param_row else None

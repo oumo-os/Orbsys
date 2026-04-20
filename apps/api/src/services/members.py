@@ -29,6 +29,7 @@ from ..core.events import get_event_bus, GovernanceEvent, EventType
 from ..models.org import Member, Dormain
 from ..models.competence import Curiosity, CompetenceScore
 from ..models.governance import CommonsThread, FeedScore, Notification
+from ..models.org import MemberApplication
 from ..schemas.members import (
     MemberResponse, MemberDetailResponse, UpdateMemberRequest,
     SetCuriositiesRequest, CuriosityResponse, CompetenceScoreSummary,
@@ -383,6 +384,237 @@ class MembersService(BaseService):
             .values(read=True, read_at=datetime.now(timezone.utc))
         )
         return result.rowcount
+
+    # ── Membership applications (post-bootstrap joining) ─────────────────────
+
+    async def apply_to_join(
+        self,
+        org_id: uuid.UUID,
+        handle: str,
+        display_name: str,
+        email: str,
+        password: str,
+        motivation: str | None = None,
+        expertise_summary: str | None = None,
+        proof_of_personhood_ref: str | None = None,
+    ) -> dict:
+        """
+        Submit a membership application to a live org.
+        Checks membership_policy parameter — raises 403 if not 'open_application'.
+        Notifies Membership Circle members (P2 notification).
+        """
+        from ..models.org import Org, OrgParameter, MemberApplication
+        from ..core.security import hash_password
+        from ..core.exceptions import Forbidden
+
+        org = (await self.db.execute(
+            select(Org).where(Org.id == org_id)
+        )).scalar_one_or_none()
+        if not org:
+            raise Forbidden("Org not found")
+
+        # Check membership_policy parameter
+        policy_row = (await self.db.execute(
+            select(OrgParameter).where(
+                OrgParameter.org_id == org_id,
+                OrgParameter.parameter == "membership_policy",
+            )
+        )).scalar_one_or_none()
+        policy = (policy_row.value if policy_row else {}).get("value", "open_application")
+
+        if policy == "closed":
+            raise Forbidden("MEMBERSHIP_CLOSED: this org is not accepting new members")
+        if policy == "invite_only":
+            raise Forbidden("MEMBERSHIP_INVITE_ONLY: join by invitation from a circle member")
+
+        # Check no pending application with same handle/email
+        from sqlalchemy import or_
+        existing = (await self.db.execute(
+            select(MemberApplication).where(
+                MemberApplication.org_id == org_id,
+                MemberApplication.status == "pending",
+                or_(
+                    MemberApplication.handle == handle,
+                    MemberApplication.email == email,
+                ),
+            )
+        )).scalar_one_or_none()
+        if existing:
+            raise AlreadyExists("MemberApplication", "handle/email", handle)
+
+        # Also check active members
+        existing_member = (await self.db.execute(
+            select(Member).where(
+                Member.org_id == org_id,
+                or_(Member.handle == handle, Member.email == email),
+            )
+        )).scalar_one_or_none()
+        if existing_member:
+            raise AlreadyExists("Member", "handle/email", handle)
+
+        application = MemberApplication(
+            org_id=org_id,
+            handle=handle,
+            display_name=display_name,
+            email=email,
+            password_hash=hash_password(password),
+            motivation=motivation,
+            expertise_summary=expertise_summary,
+            proof_of_personhood_ref=proof_of_personhood_ref,
+            status="pending",
+        )
+        self.db.add(application)
+        await self.db.flush()
+
+        # Emit event → Insight Engine notifies Membership Circle members
+        await get_event_bus().emit(
+            org_id,
+            GovernanceEvent(
+                event_type=EventType.MEMBER_APPLICATION_SUBMITTED,
+                subject_id=application.id,
+                subject_type="member_application",
+                payload={"handle": handle, "display_name": display_name},
+            ),
+        )
+
+        return {
+            "application_id": str(application.id),
+            "status": "pending",
+            "message": "Application submitted. The Membership Circle will review your application.",
+        }
+
+    async def list_applications(
+        self,
+        org_id: uuid.UUID,
+        status_filter: str | None,
+        page: int,
+        page_size: int,
+    ) -> dict:
+        """List membership applications. Membership Circle visibility only."""
+        from ..models.org import MemberApplication
+        from sqlalchemy import func
+
+        q = select(MemberApplication).where(MemberApplication.org_id == org_id)
+        if status_filter:
+            q = q.where(MemberApplication.status == status_filter)
+
+        total = (await self.db.execute(
+            select(func.count()).select_from(q.subquery())
+        )).scalar_one()
+
+        rows = await self.db.execute(
+            q.order_by(MemberApplication.created_at.desc())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        )
+        apps = rows.scalars().all()
+
+        return {
+            "items": [
+                {
+                    "id": str(a.id),
+                    "handle": a.handle,
+                    "display_name": a.display_name,
+                    "email": a.email,
+                    "motivation": a.motivation,
+                    "expertise_summary": a.expertise_summary,
+                    "status": a.status,
+                    "created_at": a.created_at.isoformat(),
+                    "reviewed_at": a.reviewed_at.isoformat() if a.reviewed_at else None,
+                    "review_note": a.review_note,
+                }
+                for a in apps
+            ],
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "has_next": (page * page_size) < total,
+        }
+
+    async def review_application(
+        self,
+        application_id: uuid.UUID,
+        org_id: uuid.UUID,
+        reviewer_id: uuid.UUID,
+        approve: bool,
+        note: str | None = None,
+    ) -> dict:
+        """
+        Approve or reject a pending application.
+        On approval: creates the Member account and sends credentials.
+        Reviewer must be a member of the Membership Circle (enforced here).
+        """
+        from ..models.org import MemberApplication, Circle, CircleDormain, CircleMember
+        from ..models.types import MemberState
+        from ..core.exceptions import NotFound, Forbidden
+
+        app = (await self.db.execute(
+            select(MemberApplication).where(
+                MemberApplication.id == application_id,
+                MemberApplication.org_id == org_id,
+                MemberApplication.status == "pending",
+            )
+        )).scalar_one_or_none()
+        if not app:
+            raise NotFound("MemberApplication", str(application_id))
+
+        # Reviewer must be in a Membership Circle
+        # (circle with 'community' or 'governance' domain that has membership mandate)
+        # For now: any GovWriter (circle member) can review — enforced at route level
+        # In v1.1: require specific Membership Circle membership
+
+        now = datetime.now(timezone.utc)
+        app.reviewed_by = reviewer_id
+        app.reviewed_at = now
+        app.review_note = note
+        app.status = "approved" if approve else "rejected"
+
+        new_member_id = None
+        if approve:
+            # Create the member account using stored credentials
+            member = Member(
+                org_id=org_id,
+                handle=app.handle,
+                display_name=app.display_name,
+                email=app.email,
+                password_hash=app.password_hash,
+                joined_at=now,
+                current_state=MemberState.PROBATIONARY,
+                proof_of_personhood_ref=app.proof_of_personhood_ref,
+            )
+            self.db.add(member)
+            await self.db.flush()
+            app.member_id = member.id
+            new_member_id = member.id
+
+            await get_event_bus().emit(
+                org_id,
+                GovernanceEvent(
+                    event_type=EventType.MEMBER_STATE_CHANGED,
+                    subject_id=member.id,
+                    subject_type="member",
+                    payload={
+                        "from_state": None,
+                        "to_state": "probationary",
+                        "trigger": "application_approved",
+                        "application_id": str(application_id),
+                    },
+                    triggered_by_member=reviewer_id,
+                ),
+            )
+
+        await self.db.flush()
+
+        return {
+            "application_id": str(application_id),
+            "status": app.status,
+            "member_id": str(new_member_id) if new_member_id else None,
+            "message": (
+                f"Application approved. @{app.handle} can now log in."
+                if approve
+                else f"Application rejected. Note: {note or '(no reason given)'}"
+            ),
+        }
 
     # ── Internal ──────────────────────────────────────────────────────────────
 

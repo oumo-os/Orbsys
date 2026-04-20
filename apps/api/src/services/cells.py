@@ -61,6 +61,81 @@ class CellsService(BaseService):
 
     # ── Cell reads ────────────────────────────────────────────────────────────
 
+    async def list_cells(
+        self,
+        org_id: uuid.UUID,
+        member_id: uuid.UUID,
+        page: int,
+        page_size: int,
+        state: str | None = None,
+    ) -> Paginated:
+        """
+        Returns cells visible to this member:
+          - Open deliberation cells (any member can see)
+          - Closed cells where member's circle is invited
+          - Cells initiated by this member
+        """
+        # Start with all org cells
+        q = select(Cell).where(Cell.org_id == org_id)
+
+        if state:
+            q = q.where(Cell.state == state)
+
+        # Access filter: open | invited circle member | initiator
+        from sqlalchemy import or_
+        member_circle_ids_sq = (
+            select(CircleMember.circle_id)
+            .where(CircleMember.member_id == member_id,
+                   CircleMember.exited_at.is_(None))
+            .scalar_subquery()
+        )
+        invited_cell_ids_sq = (
+            select(CellInvitedCircle.cell_id)
+            .where(CellInvitedCircle.circle_id.in_(member_circle_ids_sq))
+            .scalar_subquery()
+        )
+        q = q.where(or_(
+            Cell.access == "open",
+            Cell.id.in_(invited_cell_ids_sq),
+            Cell.initiating_member_id == member_id,
+        ))
+
+        total = (await self.db.execute(
+            select(func.count()).select_from(q.subquery())
+        )).scalar_one()
+
+        rows = await self.db.execute(
+            q.options(selectinload(Cell.invited_circles))
+            .order_by(Cell.created_at.desc())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        )
+        cells = rows.scalars().all()
+
+        items = []
+        for cell in cells:
+            initiator = await self.get_by_id(Member, cell.initiating_member_id)
+            items.append({
+                "id": str(cell.id),
+                "org_id": str(cell.org_id),
+                "cell_type": cell.cell_type,
+                "state": cell.state,
+                "access": cell.access,
+                "founding_mandate": cell.founding_mandate,
+                "initiating_member": {
+                    "id": str(initiator.id),
+                    "handle": initiator.handle,
+                    "display_name": initiator.display_name,
+                } if initiator else None,
+                "revision_directive": cell.revision_directive,
+                "created_at": cell.created_at.isoformat(),
+                "dissolved_at": cell.dissolved_at.isoformat() if cell.dissolved_at else None,
+                "commons_thread_id": str(cell.commons_thread_id) if cell.commons_thread_id else None,
+            })
+
+        return Paginated(items=items, total=total, page=page, page_size=page_size,
+                         has_next=(page * page_size) < total)
+
     async def get_cell(
         self, cell_id: uuid.UUID, org_id: uuid.UUID, member_id: uuid.UUID
     ) -> CellResponse:

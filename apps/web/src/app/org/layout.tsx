@@ -33,8 +33,9 @@ export default function OrgLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { member, isAuthenticated, isHydrated, hydrate, clearAuth } = useAuthStore();
 
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [showNotifs, setShowNotifs]   = useState(false);
+  const [unreadCount, setUnreadCount]       = useState(0);
+  const [pendingApps, setPendingApps]       = useState(0);
+  const [showNotifs, setShowNotifs]         = useState(false);
   const [notifs, setNotifs]           = useState<{
     id: string; priority: string; notification_type: string;
     body: string; action_url?: string; read: boolean; created_at: string;
@@ -60,7 +61,19 @@ export default function OrgLayout({ children }: { children: React.ReactNode }) {
     };
     fetchUnread();
     const iv = setInterval(fetchUnread, 30000);
-    return () => clearInterval(iv);
+
+    // Poll pending applications (Membership Circle members will see the badge)
+    const fetchApps = () => {
+      import("@/lib/api").then(({ api }) =>
+        api.get("/members/applications", { params: { status: "pending", page: 1, page_size: 1 } })
+          .then(r => setPendingApps(r.data?.total ?? 0))
+          .catch(() => {})
+      );
+    };
+    fetchApps();
+    const iv2 = setInterval(fetchApps, 60000);
+
+    return () => { clearInterval(iv); clearInterval(iv2); };
   }, [isAuthenticated]);
 
   async function markAllRead() {
