@@ -394,12 +394,13 @@ class AgentFactory:
         coalition = f"sybil-{random.randint(1000, 9999)}"
         dormain   = target_dormain or random.choice(_DORMAIN_NAMES)
         profiles  = []
+        async def _make_sybil(s: str) -> AgentProfile:
+            return _procedural_profile(s, "sybil", dormain, coalition)
+
         tasks = [
             _llm_profile(self._next_seed("sybil"), "sybil", dormain, coalition)
             if LLM_ENABLED else
-            asyncio.coroutine(
-                lambda s=self._next_seed("sybil"): _procedural_profile(s, "sybil", dormain, coalition)
-            )()
+            _make_sybil(self._next_seed("sybil"))
             for _ in range(n)
         ]
         results = await asyncio.gather(*tasks)

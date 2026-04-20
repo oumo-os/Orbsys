@@ -213,20 +213,26 @@ class Agent:
         return self.profile.handle
 
     async def setup(self, dormain_map: dict[str, str]) -> bool:
-        """Register or login, declare curiosities."""
+        """
+        Login (if already a member) or apply to join and wait for approval.
+        The test org Membership Circle auto-approves — apply_and_wait polls.
+        """
         self._dormain_map = dormain_map
 
-        # Try login first (agent may already exist from a previous run)
-        ok = await self.client.login()
+        # Try login first (agent may exist from a previous run)
+        if await self.client.login():
+            await self._declare_curiosities()
+            return True
+
+        # Submit application — post-bootstrap path
+        ok = await self.client.apply_and_wait(
+            display_name=self.profile.display_name,
+            email=self.profile.email,
+            motivation=self.profile.background[:500] if self.profile.background else "",
+            expertise_summary=self.profile.expertise_summary or "",
+        )
         if not ok:
-            ok = await self.client.register(
-                self.profile.display_name, self.profile.email
-            )
-            if not ok:
-                return False
-            ok = await self.client.login()
-            if not ok:
-                return False
+            return False
 
         await self._declare_curiosities()
         return True

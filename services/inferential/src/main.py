@@ -493,6 +493,101 @@ async def dispatch(data: dict, sf: async_sessionmaker, nc: Any) -> None:
                 if circle_ids:
                     await check_circle_homogeneity(db, nc, org_id, cell_id, circle_ids)
 
+            elif etype == "wh_claim_submitted":
+                # Commission a vSTF to verify the credential claim
+                cred_id_str = data.get("subject_id")
+                payload = data.get("payload", {})
+                dormain_id_str = payload.get("dormain_id")
+                member_id_str = data.get("triggered_by_member")
+                if not all([cred_id_str, dormain_id_str, member_id_str]):
+                    return
+                # Create vSTF instance
+                stf_id = uuid.uuid4()
+                now_iso = __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat()
+                await db.execute(text("""
+                    INSERT INTO stf_instances
+                      (id, org_id, stf_type, mandate, state,
+                       subject_member_id, commissioned_at, deadline_at)
+                    VALUES (:id, :oid, 'vstf',
+                            'Verify W_h credential claim for dormain ' || :did,
+                            'active', :mid, now(), now() + interval '7 days')
+                """), {"id": stf_id, "oid": org_id,
+                       "did": dormain_id_str, "mid": uuid.UUID(member_id_str)})
+                # Link to the credential
+                await db.execute(text(
+                    "UPDATE wh_credentials SET vstf_id=:sid WHERE id=:cid"
+                ), {"sid": stf_id, "cid": uuid.UUID(cred_id_str)})
+                await db.commit()
+                # Score candidates — same-dormain competence
+                scored = await score_candidates(
+                    db, org_id, stf_id, "vstf",
+                    f"Verify credential in dormain {dormain_id_str}",
+                    None, uuid.UUID(member_id_str), None,
+                )
+                if scored:
+                    target = min(STF_MAX_SIZE, max(STF_MIN_SIZE, len(scored)))
+                    await form_stf_assignments(db, nc, org_id, stf_id, "vstf", scored, target)
+                log.info(f"[inferential] vSTF {stf_id} commissioned for W_h claim {cred_id_str}")
+
+            elif etype == "motion_gate1_result":
+                # Notify implementing circles that a resolution is pending implementation
+                payload = data.get("payload", {})
+                if payload.get("verdict") != "approve":
+                    return
+                resolution_id = payload.get("resolution_id")
+                if not resolution_id:
+                    return
+                # Load implementing circles from the resolution
+                row = (await db.execute(text(
+                    "SELECT implementing_circle_ids FROM resolutions WHERE id=:rid"
+                ), {"rid": uuid.UUID(resolution_id)})).fetchone()
+                if not row or not row[0]:
+                    return
+                # Emit notification event for each implementing circle's members
+                await nc.publish(f"ORG.{org_id}.events", __import__("json").dumps({
+                    "event_type": "notification_write_requested",
+                    "org_id": str(org_id),
+                    "payload": {
+                        "target": "implementing_circles",
+                        "circle_ids": row[0],
+                        "notification_type": "resolution_pending_implementation",
+                        "title": "Resolution pending implementation",
+                        "body": f"Resolution {payload.get('resolution_ref','?')} passed Gate 1 and awaits implementation by your circle.",
+                        "priority": "P2",
+                        "ref_id": resolution_id,
+                        "ref_type": "resolution",
+                    },
+                }, default=str).encode())
+
+            elif etype == "member_application_submitted":
+                # Notify Membership Circle members about the pending application
+                payload = data.get("payload", {})
+                handle = payload.get("handle", "?")
+                # Find Membership Circle members
+                rows = (await db.execute(text("""
+                    SELECT cm.member_id FROM circle_members cm
+                    JOIN circles c ON c.id = cm.circle_id
+                    WHERE c.org_id = :oid
+                      AND lower(c.name) LIKE '%membership%'
+                      AND cm.exited_at IS NULL
+                """), {"oid": org_id})).fetchall()
+                if rows:
+                    member_ids = [str(r[0]) for r in rows]
+                    await nc.publish(f"ORG.{org_id}.events", __import__("json").dumps({
+                        "event_type": "notification_write_requested",
+                        "org_id": str(org_id),
+                        "payload": {
+                            "target": "member_list",
+                            "member_ids": member_ids,
+                            "notification_type": "member_application_submitted",
+                            "title": "New membership application",
+                            "body": f"@{handle} has applied to join. Review in Members → Applications.",
+                            "priority": "P2",
+                            "ref_id": data.get("subject_id"),
+                            "ref_type": "member_application",
+                        },
+                    }, default=str).encode())
+
         except Exception as e:
             log.error(f"[inferential] error handling {etype}: {e}", exc_info=True)
 

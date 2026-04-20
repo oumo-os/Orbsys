@@ -97,6 +97,13 @@ services:
     build:
       context: ../services/integrity
       dockerfile: Dockerfile
+    depends_on:
+      api:
+        condition: service_healthy
+      nats:
+        condition: service_started
+      postgres:
+        condition: service_healthy
     environment:
       <<: *common-env
       DATABASE_URL: "postgresql+asyncpg://orbsys_integrity:change_me@postgres:5432/orbsys"
@@ -109,6 +116,13 @@ services:
     build:
       context: ../services/inferential
       dockerfile: Dockerfile
+    depends_on:
+      api:
+        condition: service_healthy
+      nats:
+        condition: service_started
+      postgres:
+        condition: service_healthy
     environment:
       <<: *common-env
       DATABASE_URL: "postgresql+asyncpg://orbsys_inferential:change_me@postgres:5432/orbsys"
@@ -121,6 +135,13 @@ services:
     build:
       context: ../services/insight
       dockerfile: Dockerfile
+    depends_on:
+      api:
+        condition: service_healthy
+      nats:
+        condition: service_started
+      postgres:
+        condition: service_healthy
     environment:
       <<: *common-env
       DATABASE_URL: "postgresql+asyncpg://orbsys_insight:change_me@postgres:5432/orbsys"

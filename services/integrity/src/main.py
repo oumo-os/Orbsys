@@ -421,14 +421,27 @@ async def _reply(nc, reply_subject, data):
 
 # ── Ledger-only events ────────────────────────────────────────────────────────
 LEDGER_ONLY = {
+    # Org lifecycle
     "org_created", "org_bootstrapped", "dormain_created",
+    # Member lifecycle
     "member_registered", "member_state_changed", "member_exited",
-    "curiosity_updated", "commons_thread_created", "commons_thread_sponsored",
-    "commons_post_created", "dormain_tag_corrected", "cell_created",
-    "cell_contribution_added", "cell_vote_cast", "cell_dissolved",
-    "motion_filed", "motion_revision_requested", "stf_commissioned",
-    "stf_assignment_created", "stf_unsealing_triggered",
+    "member_application_submitted", "curiosity_updated",
+    # Commons
+    "commons_thread_created", "commons_thread_sponsored",
+    "commons_post_created", "dormain_tag_corrected",
+    # Cells
+    "cell_created", "cell_contribution_added", "cell_vote_cast", "cell_dissolved",
+    # Motions
+    "motion_filed", "motion_vote_closed", "motion_revision_requested",
+    # Resolutions (state transitions — no system writes needed here, enacted handled separately)
+    "resolution_created", "resolution_contested",
+    # STF
+    "stf_commissioned", "stf_assignment_created", "stf_unsealing_triggered",
+    "stf_deadline_approaching",
+    # Competence
     "wh_claim_submitted", "anomaly_flagged",
+    # These are written as side-effects of inline handlers above
+    "resolution_enacted", "stf_completed",
 }
 
 
@@ -592,6 +605,8 @@ async def handle_feed_scores_write(data, db):
     log.debug(f"[integrity] feed scores upserted: {len(scores)} for thread {thread_id}")
 
 
+
+
 async def dispatch(data, sf, nc, reply_subject=None):
     etype = data.get("event_type", "")
     async with sf() as db:
@@ -612,7 +627,38 @@ async def dispatch(data, sf, nc, reply_subject=None):
                 elif etype == "feed_scores_write_requested":
                     await handle_feed_scores_write(data, db)
                 elif etype == "notification_write_requested":
-                    await handle_notification_write(data, db)
+                    payload = data.get("payload", {})
+                    target = payload.get("target")
+                    if target in ("member_list", "implementing_circles"):
+                        # Fan-out: one notification per member
+                        member_ids = payload.get("member_ids", [])
+                        if target == "implementing_circles":
+                            # Resolve circle members
+                            circle_ids = payload.get("circle_ids", [])
+                            if circle_ids:
+                                rows = (await db.execute(text("""
+                                    SELECT DISTINCT member_id FROM circle_members
+                                    WHERE circle_id = ANY(:cids) AND exited_at IS NULL
+                                """), {"cids": [uuid.UUID(c) for c in circle_ids]})).fetchall()
+                                member_ids = [str(r[0]) for r in rows]
+                        for mid in member_ids:
+                            notif_data = {
+                                "notification": {
+                                    "id": str(uuid.uuid4()),
+                                    "org_id": data.get("org_id"),
+                                    "member_id": mid,
+                                    "priority": payload.get("priority", "p2"),
+                                    "notification_type": payload.get("notification_type", "general"),
+                                    "subject_id": payload.get("ref_id"),
+                                    "subject_type": payload.get("ref_type"),
+                                    "body": payload.get("body", ""),
+                                    "action_url": None,
+                                    "expires_at": None,
+                                }
+                            }
+                            await handle_notification_write(notif_data, db)
+                    else:
+                        await handle_notification_write(data, db)
                 elif etype in LEDGER_ONLY:
                     org_str = data.get("org_id")
                     if org_str:

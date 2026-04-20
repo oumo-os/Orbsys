@@ -82,8 +82,56 @@ class OrbSysClient:
             log.debug(f"[{self.handle}] login error: {e}")
             return False
 
-    async def register(self, display_name: str, email: str) -> bool:
-        """Self-register into the test org (bootstrap window always open)."""
+    async def apply_and_wait(
+        self, display_name: str, email: str,
+        motivation: str = "", expertise_summary: str = ""
+    ) -> bool:
+        """
+        Submit a membership application to the live org.
+        The test org's Membership Circle auto-approves — this polls
+        until the application is approved and then logs in.
+        """
+        try:
+            r = await self._http.post(
+                f"{API_URL}/members/apply",
+                params={"org_slug": self.org_slug},
+                json={
+                    "handle": self.handle,
+                    "display_name": display_name,
+                    "email": email,
+                    "password": self.password,
+                    "motivation": motivation or f"Simulation agent joining to test PAAS governance.",
+                    "expertise_summary": expertise_summary or f"Varied expertise across governance domains.",
+                },
+            )
+            if r.status_code not in (200, 202):
+                # 409 means already applied or already a member
+                if r.status_code == 409:
+                    return await self.login()
+                log.debug(f"[{self.handle}] apply {r.status_code}: {r.text[:80]}")
+                return False
+            # Application submitted — wait for auto-approval
+            return await self._poll_for_approval(email)
+        except Exception as e:
+            log.debug(f"[{self.handle}] apply error: {e}")
+            return False
+
+    async def _poll_for_approval(self, email: str, max_wait: int = 60) -> bool:
+        """
+        Poll login until the Membership Circle approves the application.
+        The test org uses an auto-approver that runs in the background.
+        """
+        import asyncio
+        for _ in range(max_wait // 3):
+            await asyncio.sleep(3)
+            if await self.login():
+                return True
+        log.warning(f"[{self.handle}] application not approved within {max_wait}s")
+        return False
+
+    # Kept for bootstrap-only contexts (founding member creation)
+    async def register_bootstrap(self, display_name: str, email: str) -> bool:
+        """Bootstrap-only self-registration. Only works while org.bootstrapped_at is null."""
         try:
             r = await self._http.post(
                 f"{API_URL}/auth/register",
@@ -96,14 +144,13 @@ class OrbSysClient:
                 },
             )
             if r.status_code not in (200, 201):
-                log.debug(f"[{self.handle}] register {r.status_code}: {r.text[:80]}")
                 return False
             data = r.json()
             self.member_id = data["id"]
             self.org_id    = data["org_id"]
             return True
         except Exception as e:
-            log.debug(f"[{self.handle}] register error: {e}")
+            log.debug(f"[{self.handle}] register_bootstrap error: {e}")
             return False
 
     async def _reauth(self) -> bool:

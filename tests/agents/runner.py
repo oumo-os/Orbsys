@@ -3,11 +3,13 @@ Scenario runner — orchestrates agent spawning, concurrent activity loops,
 and batch growth over time.
 
 Usage:
-    python runner.py --scenario normal --agents 50 --duration 300
-    python runner.py --scenario sybil  --agents 200 --duration 600 --report
-    python runner.py --scenario stress --agents 500 --concurrent 100
-    python runner.py --scenario mixed  --agents 100 --spawn-rate 10 --duration 600
-    python runner.py --scenario all    --agents 80  --report metrics.json
+    python runner.py --scenario normal   --agents 50  --duration 300
+    python runner.py --scenario sybil    --agents 200 --duration 600 --report results.json
+    python runner.py --scenario capture  --agents 100 --duration 600
+    python runner.py --scenario collusion --agents 80 --duration 400
+    python runner.py --scenario stress   --agents 500 --concurrent 100 --duration 300
+    python runner.py --scenario mixed    --agents 200 --spawn-rate 15 --duration 600
+    python runner.py --scenario all      --agents 80  --duration 240 --report all.json
 """
 from __future__ import annotations
 
@@ -18,20 +20,19 @@ import logging
 import os
 import random
 import time
-from typing import Sequence
+from typing import Any
 
 from agent import Agent
 from config import (
-    API_URL, TEST_ORG_SLUG, AGENT_CONCURRENCY, CYCLE_INTERVAL,
-    SPAWN_BATCH_SIZE, SPAWN_INTERVAL, MAX_AGENTS,
+    API_URL, TEST_ORG_SLUG, AGENT_CONCURRENCY,
+    CYCLE_INTERVAL, SPAWN_BATCH_SIZE, MAX_AGENTS,
 )
 from factory import AgentFactory, AgentProfile
 from metrics import MetricsCollector, ScenarioMetrics
+from setup import auto_approve_applications, FOUNDER_HANDLE, FOUNDER_PASSWORD
 
 log = logging.getLogger(__name__)
 
-FOUNDER_HANDLE   = "sim-founder"
-FOUNDER_PASSWORD = "sim-founder-2025"
 
 
 # ── Dormain map loader ────────────────────────────────────────────────────────
@@ -48,19 +49,19 @@ def load_dormain_map() -> dict[str, str]:
 
 class AgentPool:
     """
-    Manages a growing pool of agents. Handles:
-    - Concurrent activity (semaphore-limited)
-    - Progressive spawning over time
-    - Dormancy (most agents inactive per cycle)
+    Manages a growing pool of agents.
+      - Concurrent activity (semaphore-limited)
+      - Progressive spawning on demand
+      - Dormancy baked into each agent's cycle
     """
 
     def __init__(self, concurrency: int, dormain_map: dict[str, str]):
         self._concurrency = concurrency
         self._dormain_map = dormain_map
         self._agents: list[Agent] = []
-        self._setup_sem = asyncio.Semaphore(20)   # limit parallel registrations
+        self._setup_sem  = asyncio.Semaphore(20)
         self._active_sem = asyncio.Semaphore(concurrency)
-        self._factory = AgentFactory()
+        self._factory    = AgentFactory()
 
     @property
     def agents(self) -> list[Agent]:
@@ -71,33 +72,27 @@ class AgentPool:
         return len(self._agents)
 
     async def add_profiles(self, profiles: list[AgentProfile]) -> int:
-        """Register and setup agents from profiles. Returns count added."""
-        added = 0
-        tasks = []
-        for p in profiles:
-            tasks.append(self._setup_one(p))
+        tasks   = [self._setup_one(p) for p in profiles]
         results = await asyncio.gather(*tasks, return_exceptions=True)
-        for r in results:
-            if r is True:
-                added += 1
-        return added
+        return sum(1 for r in results if r is True)
 
     async def _setup_one(self, profile: AgentProfile) -> bool:
         async with self._setup_sem:
             agent = Agent(profile)
-            ok = await agent.setup(self._dormain_map)
+            ok    = await agent.setup(self._dormain_map)
             if ok:
                 self._agents.append(agent)
-                log.info(f"  Agent @{profile.handle} ready "
+                log.info(f"  @{profile.handle} ready "
                          f"(intent={profile.intent}, activity={profile.activity_level:.2f})")
+            else:
+                log.debug(f"  @{profile.handle} setup failed")
             return ok
 
     async def run_cycle(self) -> None:
-        """Run one cycle for all agents concurrently (semaphore-limited)."""
-        tasks = [self._run_one_cycle(a) for a in self._agents]
+        tasks = [self._run_one(a) for a in self._agents]
         await asyncio.gather(*tasks, return_exceptions=True)
 
-    async def _run_one_cycle(self, agent: Agent) -> None:
+    async def _run_one(self, agent: Agent) -> None:
         async with self._active_sem:
             try:
                 await agent.run_cycle()
@@ -110,13 +105,10 @@ class AgentPool:
         scenario: str = "normal",
         target_dormain: str | None = None,
     ) -> int:
-        """Spawn a new batch. scenario determines the population mix."""
         if self.count >= MAX_AGENTS:
-            log.warning(f"MAX_AGENTS ({MAX_AGENTS}) reached — not spawning")
+            log.warning(f"MAX_AGENTS ({MAX_AGENTS}) reached")
             return 0
-
         n = min(n, MAX_AGENTS - self.count)
-        log.info(f"Spawning batch of {n} (scenario={scenario}, total will be {self.count+n})")
 
         if scenario == "sybil":
             profiles = await self._factory.spawn_sybil_cluster(n, target_dormain)
@@ -124,173 +116,113 @@ class AgentPool:
             profiles = await self._factory.spawn_capture_cluster(n, target_dormain)
         elif scenario == "collusion":
             profiles = await self._factory.spawn_collusion_ring(n)
-        elif scenario == "stress":
-            # Pure genuine load — no adversarial agents
+        elif scenario in ("stress", "normal"):
             profiles = await self._factory.spawn_genuine(n)
-        elif scenario == "mixed":
+        else:  # mixed
             profiles = await self._factory.spawn_batch(n)
-        else:  # normal
-            profiles = await self._factory.spawn_genuine(n)
 
         return await self.add_profiles(profiles)
 
 
-# ── Scenario definitions ──────────────────────────────────────────────────────
+# ── Scenario dispatch ─────────────────────────────────────────────────────────
 
-async def run_normal(pool: AgentPool, duration: int, metrics: ScenarioMetrics) -> None:
-    """
-    Healthy governance: genuine agents, gradual population growth.
-    Tests that meritocracy emerges, aSTF works, ledger stays intact.
-    """
-    log.info(f"[normal] Starting — duration={duration}s")
-    start = time.time()
+async def _run_scenario(
+    name: str,
+    pool: AgentPool,
+    duration: int,
+    metrics: ScenarioMetrics,
+    spawn_rate: int,
+) -> None:
+    from scenarios.normal      import run     as run_normal
+    from scenarios.adversarial import run_sybil, run_capture, run_collusion
+    from scenarios.stress      import run_stress, run_mixed
 
-    # Initial batch
-    initial = min(metrics.total_agents // 3, SPAWN_BATCH_SIZE)
-    await pool.spawn_batch(initial, "normal")
-
-    while (elapsed := time.time() - start) < duration:
-        await pool.run_cycle()
-        await asyncio.sleep(CYCLE_INTERVAL)
-
-        # Progressively grow population
-        if elapsed > duration * 0.2 and pool.count < metrics.total_agents:
-            batch = min(SPAWN_BATCH_SIZE, metrics.total_agents - pool.count)
-            added = await pool.spawn_batch(batch, "normal")
-            if added:
-                log.info(f"[normal] Pool grown to {pool.count} agents")
-
-    metrics.active_agents = sum(1 for a in pool.agents if any(v > 0 for v in a.actions.values()))
-
-
-async def run_sybil(pool: AgentPool, duration: int, metrics: ScenarioMetrics) -> None:
-    """
-    Sybil flood: large cluster of coordinated low-competence agents try to
-    push one governance agenda. Tests Integrity Engine anomaly detection.
-    """
-    log.info(f"[sybil] Starting — duration={duration}s")
-    start = time.time()
-
-    n_genuine  = max(5, metrics.total_agents // 5)
-    n_sybil    = metrics.total_agents - n_genuine
-    target_d   = "Governance"
-
-    log.info(f"[sybil] Seeding {n_genuine} genuine + {n_sybil} sybil agents targeting '{target_d}'")
-
-    await pool.spawn_batch(n_genuine, "normal")
-    await asyncio.sleep(5)  # let genuine agents establish first
-    await pool.spawn_batch(n_sybil, "sybil", target_d)
-
-    while time.time() - start < duration:
-        await pool.run_cycle()
-        await asyncio.sleep(CYCLE_INTERVAL)
-
-    metrics.adversarial_agents = n_sybil
-    metrics.genuine_agents     = n_genuine
+    dispatch = {
+        "normal":    lambda: run_normal(pool, duration, metrics),
+        "sybil":     lambda: run_sybil(pool, duration, metrics),
+        "capture":   lambda: run_capture(pool, duration, metrics),
+        "collusion": lambda: run_collusion(pool, duration, metrics),
+        "stress":    lambda: run_stress(pool, duration, metrics),
+        "mixed":     lambda: run_mixed(pool, duration, metrics, spawn_rate),
+    }
+    fn = dispatch.get(name)
+    if fn:
+        await fn()
+    else:
+        log.error(f"Unknown scenario: {name}")
 
 
-async def run_capture(pool: AgentPool, duration: int, metrics: ScenarioMetrics) -> None:
-    """
-    Circle capture attempt: coordinated agents build W_s in one domain
-    and try to stack a circle. Tests homogeneity detection and aSTF independence.
-    """
-    log.info(f"[capture] Starting — duration={duration}s")
-    start = time.time()
+# ── Metrics enrichment ────────────────────────────────────────────────────────
 
-    n_genuine = max(5, metrics.total_agents // 3)
-    n_capture = metrics.total_agents - n_genuine
-    target_d  = random.choice(["Governance", "Security", "Treasury"])
-
-    log.info(f"[capture] {n_capture} capture agents targeting '{target_d}' circle")
-
-    await pool.spawn_batch(n_genuine, "normal")
-    await asyncio.sleep(10)
-    await pool.spawn_batch(n_capture, "capture", target_d)
-
-    while time.time() - start < duration:
-        await pool.run_cycle()
-        await asyncio.sleep(CYCLE_INTERVAL)
-
-    metrics.adversarial_agents = n_capture
-    metrics.genuine_agents     = n_genuine
-
-
-async def run_collusion(pool: AgentPool, duration: int, metrics: ScenarioMetrics) -> None:
-    """
-    Endorsement ring: mutual high-scoring collusion. Tests rate limits,
-    endorser meta-reputation tracking, and pattern detection.
-    """
-    log.info(f"[collusion] Starting — duration={duration}s")
-    start = time.time()
-
-    n_genuine   = max(10, int(metrics.total_agents * 0.6))
-    n_collude   = metrics.total_agents - n_genuine
-
-    await pool.spawn_batch(n_genuine, "normal")
-    await asyncio.sleep(5)
-    await pool.spawn_batch(n_collude, "collusion")
-
-    while time.time() - start < duration:
-        await pool.run_cycle()
-        await asyncio.sleep(CYCLE_INTERVAL)
-
-    metrics.adversarial_agents = n_collude
-    metrics.genuine_agents     = n_genuine
-
-
-async def run_mixed(
-    pool: AgentPool, duration: int, metrics: ScenarioMetrics,
-    spawn_rate: int = 10,
+async def _enrich_metrics(
+    collector: MetricsCollector,
+    pool: AgentPool,
+    metrics: ScenarioMetrics,
 ) -> None:
     """
-    Mixed realistic population with continuous background spawning.
-    New agents appear throughout the run — some genuine, some adversarial.
-    Closest to real-world conditions.
+    Gather PAAS paper validation signals and security detection results.
+    Reads from the live API via the probe client.
     """
-    log.info(f"[mixed] Starting — duration={duration}s, spawn_rate={spawn_rate}/interval")
-    start = time.time()
+    # Aggregate agent actions
+    collector.aggregate_agent_actions(pool.agents, metrics)
 
-    while (elapsed := time.time() - start) < duration:
-        await pool.run_cycle()
+    # Collect from API
+    await collector.collect(metrics)
 
-        if elapsed % SPAWN_INTERVAL < CYCLE_INTERVAL and pool.count < metrics.total_agents:
-            batch = min(spawn_rate, metrics.total_agents - pool.count)
-            await pool.spawn_batch(batch, "mixed")
+    # PAAS C1: meritocracy — check top vs bottom W_s spread
+    try:
+        top_dormain_data = await collector.probe.get(
+            "/competence/leaderboard/dummy",  # will 404 but shows the pattern
+        )
+    except Exception:
+        pass
 
-        await asyncio.sleep(CYCLE_INTERVAL)
+    # PAAS C3: participation breadth
+    dormain_data = await collector.probe.get("/competence/dormains")
+    dormains = collector.probe.items(dormain_data)
+    if dormains:
+        active_dormains = 0
+        for d in dormains:
+            lb = await collector.probe.get(
+                f"/competence/leaderboard/{d['id']}",
+                params={"page": 1, "page_size": 1}
+            )
+            if isinstance(lb, dict) and lb.get("total", 0) > 0:
+                active_dormains += 1
+        metrics.__dict__["dormain_coverage"] = (
+            active_dormains / len(dormains) if dormains else 0.0
+        )
 
+    # C4: aSTF rate breakdown
+    gate1_data = await collector.probe.get(
+        "/ledger", params={"event_type": "motion_gate1_result",
+                            "page": 1, "page_size": 200}
+    )
+    if isinstance(gate1_data, dict):
+        events = gate1_data.get("items", [])
+        verdicts = [e.get("payload", {}).get("verdict", "") for e in events]
+        total = len(verdicts)
+        if total:
+            metrics.__dict__["astf_approve_rate"]   = verdicts.count("approve") / total
+            metrics.__dict__["astf_revision_rate"]  = verdicts.count("revision_request") / total
+            metrics.__dict__["astf_reject_rate"]    = verdicts.count("reject") / total
 
-async def run_stress(pool: AgentPool, duration: int, metrics: ScenarioMetrics) -> None:
-    """
-    High-volume concurrent load — hundreds of active agents simultaneously.
-    Tests API throughput, event bus backpressure, and engine scaling.
-    """
-    log.info(f"[stress] Starting — {metrics.total_agents} agents, duration={duration}s")
-    start = time.time()
-
-    # Spawn all genuine agents upfront in large batches
-    for i in range(0, metrics.total_agents, 50):
-        batch = min(50, metrics.total_agents - i)
-        await pool.spawn_batch(batch, "stress")
-        log.info(f"[stress] Spawned {pool.count} / {metrics.total_agents}")
-
-    log.info(f"[stress] All agents spawned — running {duration}s under load")
-    while time.time() - start < duration:
-        await pool.run_cycle()
-        await asyncio.sleep(max(1, CYCLE_INTERVAL / 4))  # faster cycles for stress
-
-
-SCENARIOS = {
-    "normal":    run_normal,
-    "sybil":     run_sybil,
-    "capture":   run_capture,
-    "collusion": run_collusion,
-    "mixed":     run_mixed,
-    "stress":    run_stress,
-}
+    # C2: homogeneity warnings → circle_composition_warnings
+    homogeneity_data = await collector.probe.get(
+        "/ledger", params={"event_type": "anomaly_flagged", "page": 1, "page_size": 100}
+    )
+    if isinstance(homogeneity_data, dict):
+        flags = homogeneity_data.get("items", [])
+        metrics.__dict__["circle_composition_warnings"] = sum(
+            1 for f in flags
+            if "HOMOGENEITY" in f.get("payload", {}).get("anomaly_type", "").upper()
+        )
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
+
+ALL_SCENARIOS = ["normal", "sybil", "capture", "collusion", "mixed", "stress"]
+
 
 async def main(
     scenario: str,
@@ -308,38 +240,66 @@ async def main(
 
     dormain_map = load_dormain_map()
     if not dormain_map:
-        print("ERROR: Run setup.py first to provision the test org.")
+        print("ERROR: Run setup.py first to provision the test org and save dormain_map.json")
         return
 
-    scenarios_to_run = list(SCENARIOS.keys()) if run_all else [scenario]
+    scenarios_to_run = ALL_SCENARIOS if run_all else [scenario]
     all_metrics: list[ScenarioMetrics] = []
 
     for s in scenarios_to_run:
-        print(f"\n{'='*60}")
-        print(f"  Running scenario: {s.upper()}")
-        print(f"  Agents: {num_agents}  Duration: {duration}s  Concurrency: {concurrency}")
-        print(f"{'='*60}\n")
+        print(f"\n{'='*62}")
+        print(f"  Scenario: {s.upper()}")
+        print(f"  Agents: {num_agents}  Duration: {duration}s  "
+              f"Concurrency: {concurrency}")
+        print(f"{'='*62}")
 
-        metrics = ScenarioMetrics(scenario_name=s)
+        metrics         = ScenarioMetrics(scenario_name=s)
         metrics.total_agents = num_agents
 
         pool = AgentPool(concurrency=concurrency, dormain_map=dormain_map)
 
-        fn = SCENARIOS[s]
-        kwargs = {}
-        if s == "mixed":
-            kwargs["spawn_rate"] = spawn_rate
+        # Build founder auth headers for the auto-approver
+        import httpx as _httpx
+        _login_r = None
+        _founder_headers: dict = {}
+        try:
+            async with _httpx.AsyncClient(timeout=10) as _c:
+                _login_r = await _c.post(
+                    f"{API_URL}/auth/login",
+                    json={"org_slug": TEST_ORG_SLUG,
+                          "handle": FOUNDER_HANDLE,
+                          "password": FOUNDER_PASSWORD},
+                )
+            if _login_r and _login_r.status_code == 200:
+                _tok = _login_r.json()["tokens"]["access_token"]
+                _founder_headers = {"Authorization": f"Bearer {_tok}"}
+        except Exception:
+            pass
+
+        # Run scenario + auto-approver concurrently
+        async def _scenario_with_approver():
+            approver = asyncio.create_task(
+                auto_approve_applications(API_URL, _founder_headers, interval=5.0)
+                if _founder_headers else asyncio.sleep(0)
+            )
+            try:
+                await _run_scenario(s, pool, duration, metrics, spawn_rate)
+            except asyncio.CancelledError:
+                log.info(f"Scenario '{s}' cancelled")
+            except Exception as e:
+                log.error(f"Scenario '{s}' error: {e}", exc_info=True)
+            finally:
+                approver.cancel()
 
         try:
-            await fn(pool, duration, metrics, **kwargs)
-        except asyncio.CancelledError:
-            log.info(f"Scenario '{s}' cancelled")
+            await _scenario_with_approver()
+        except Exception as e:
+            log.error(f"Outer scenario error: {e}")
 
-        # Aggregate agent-level metrics
+        # Collect and enrich metrics
         collector = MetricsCollector(FOUNDER_HANDLE, FOUNDER_PASSWORD)
         if await collector.setup():
-            collector.aggregate_agent_actions(pool.agents, metrics)
-            await collector.collect(metrics)
+            await _enrich_metrics(collector, pool, metrics)
             await collector.close()
         else:
             log.warning("Metrics collector could not login — using agent-local data only")
@@ -351,18 +311,47 @@ async def main(
             return_exceptions=True,
         )
 
+        # Print results
         metrics.print_summary()
+
+        # Print PAAS-specific claims if available
+        if hasattr(metrics, "print_paas_claims"):
+            metrics.print_paas_claims()
+
         all_metrics.append(metrics)
 
         if run_all and s != scenarios_to_run[-1]:
-            print(f"\nPausing 10s before next scenario…")
+            print(f"\n  Pausing 10s before next scenario…")
             await asyncio.sleep(10)
 
+    # Write report
     if report_path:
-        report = [m.to_dict() for m in all_metrics]
+        report = {
+            "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "configuration": {
+                "num_agents": num_agents,
+                "duration_s": duration,
+                "concurrency": concurrency,
+                "llm_enabled": bool(os.environ.get("ANTHROPIC_API_KEY")),
+                "api_url": API_URL,
+                "org_slug": TEST_ORG_SLUG,
+            },
+            "scenarios": [m.to_dict() for m in all_metrics],
+            "summary": {
+                "scenarios_run": len(all_metrics),
+                "total_agents_across_scenarios": sum(m.total_agents for m in all_metrics),
+                "any_ledger_broken": any(
+                    m.ledger_chain_intact is False for m in all_metrics
+                ),
+                "any_anomaly_detected": any(m.anomaly_flags > 0 for m in all_metrics),
+                "sybil_detected_in": [m.scenario_name for m in all_metrics if m.sybil_detected],
+                "capture_detected_in": [m.scenario_name for m in all_metrics if m.capture_detected],
+                "collusion_detected_in": [m.scenario_name for m in all_metrics if m.collusion_detected],
+            },
+        }
         with open(report_path, "w") as f:
             json.dump(report, f, indent=2)
-        print(f"\nFull metrics written to {report_path}")
+        print(f"\n  Full report written to {report_path}")
 
 
 def cli() -> None:
@@ -372,24 +361,36 @@ def cli() -> None:
         epilog="""
 Scenarios:
   normal     Healthy governance — genuine agents, gradual growth
+             Tests PAAS claims: meritocracy, participation, audit integrity
   sybil      Sybil flood — coordinated agents push one agenda
-  capture    Circle capture — coordinated W_s building in one domain
+             Expected: Integrity Engine flags correlation, W_s stays low
+  capture    Circle capture — systematic W_s building + membership push
+             Expected: homogeneity warning, aSTF composition balancer
   collusion  Endorsement ring — mutual high-scoring network
+             Expected: endorser meta-reputation, rate limits, pattern detection
   mixed      Realistic mixed population with continuous spawning
+             All attack types blended with genuine agents
   stress     Concurrent load — hundreds of agents simultaneously
-  all        Run all scenarios in sequence
+             Tests API throughput and engine scaling
+  all        Run all scenarios in sequence, write combined report
         """,
     )
-    parser.add_argument("--scenario",    default="normal",    choices=list(SCENARIOS.keys()) + ["all"])
-    parser.add_argument("--agents",      type=int, default=50,  help="Total agent population")
-    parser.add_argument("--duration",    type=int, default=300, help="Duration in seconds")
-    parser.add_argument("--concurrent",  type=int, default=AGENT_CONCURRENCY, help="Max concurrent agents")
-    parser.add_argument("--spawn-rate",  type=int, default=SPAWN_BATCH_SIZE,  help="Agents spawned per batch (mixed)")
-    parser.add_argument("--report",      default=None, metavar="FILE", help="Write JSON report to file")
-    parser.add_argument("--api",         default=API_URL, help="API URL")
+    parser.add_argument("--scenario",   default="normal",
+                        choices=ALL_SCENARIOS + ["all"])
+    parser.add_argument("--agents",     type=int,   default=50,
+                        help="Total agent population per scenario")
+    parser.add_argument("--duration",   type=int,   default=300,
+                        help="Scenario duration in seconds")
+    parser.add_argument("--concurrent", type=int,   default=AGENT_CONCURRENCY,
+                        help="Max concurrent active agents")
+    parser.add_argument("--spawn-rate", type=int,   default=SPAWN_BATCH_SIZE,
+                        help="Agents per spawn batch (mixed scenario)")
+    parser.add_argument("--report",     default=None, metavar="FILE",
+                        help="Write JSON report to file")
+    parser.add_argument("--api",        default=API_URL,
+                        help="API base URL override")
     args = parser.parse_args()
 
-    # Override API_URL if provided
     if args.api != API_URL:
         os.environ["API_URL"] = args.api
 

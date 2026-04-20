@@ -144,7 +144,21 @@ async def setup(api_url: str, force: bool = False) -> None:
                 print(f"  NOTE: circle '{spec['name']}' creation returned {r.status_code} "
                       f"(circles may need to be created via governance motions)")
 
-        # ── 6. Summary ───────────────────────────────────────────────────────
+        # ── 6. Complete bootstrap ────────────────────────────────────────────
+        print(f"\nCompleting bootstrap…")
+        r = await client.post(
+            f"{api_url}/org/bootstrap-complete",
+            json={"membership_policy": "open_application"},
+            headers=headers,
+        )
+        if r.status_code == 200:
+            print(f"  ✓ Org is live — membership_policy: open_application")
+        elif r.status_code == 403 and "ALREADY_BOOTSTRAPPED" in r.text:
+            print(f"  Org already bootstrapped — continuing")
+        else:
+            print(f"  WARNING bootstrap-complete: {r.status_code} — {r.text[:80]}")
+
+        # ── 7. Summary ───────────────────────────────────────────────────────
         print(f"\n{'='*60}")
         print(f"  Test org ready")
         print(f"{'='*60}")
@@ -163,6 +177,40 @@ async def setup(api_url: str, force: bool = False) -> None:
         print(f"\n  Saved to dormain_map.json")
 
 
+async def auto_approve_applications(
+    api_url: str, headers: dict, interval: float = 5.0
+) -> None:
+    """
+    Background task that runs during scenario execution.
+    Polls pending applications and approves them so agents can join.
+    The test org uses open_application policy — Membership Circle review
+    is still required (PAAS invariant), but the founder acts as reviewer.
+    """
+    import asyncio
+    log = __import__("logging").getLogger("auto_approver")
+    async with httpx.AsyncClient(timeout=15) as client:
+        while True:
+            try:
+                r = await client.get(
+                    f"{api_url}/members/applications",
+                    params={"status": "pending", "page": 1, "page_size": 50},
+                    headers=headers,
+                )
+                if r.status_code == 200:
+                    items = r.json().get("items", [])
+                    for app in items:
+                        ra = await client.post(
+                            f"{api_url}/members/applications/{app['id']}/review",
+                            json={"approve": True, "note": "Auto-approved (simulation org)."},
+                            headers=headers,
+                        )
+                        if ra.status_code == 200:
+                            log.info(f"  Auto-approved @{app['handle']}")
+            except Exception as e:
+                log.debug(f"auto_approver: {e}")
+            await asyncio.sleep(interval)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Provision Orb Sys test org")
     parser.add_argument("--api",   default=API_URL, help="API base URL")
@@ -173,3 +221,7 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+# Exported for runner.py to background-task alongside scenarios
+__all__ = ["setup", "auto_approve_applications", "FOUNDER_HANDLE", "FOUNDER_PASSWORD"]
