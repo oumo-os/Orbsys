@@ -36,7 +36,7 @@ export default function OrgLayout({ children }: { children: React.ReactNode }) {
   const { member, isAuthenticated, logout } = useAuthStore();
 
   const [circles, setCircles] = useState<{ id: string; name: string }[]>([]);
-  const [activeStfs, setActiveStfs] = useState<{ id: string; mandate: string }[]>([]);
+  const [activeStfs, setActiveStfs] = useState<{ id: string; mandate_preview: string }[]>([]);
   const [unread, setUnread] = useState(0);
 
   const refresh = useCallback(async () => {
@@ -73,7 +73,7 @@ export default function OrgLayout({ children }: { children: React.ReactNode }) {
       group: "circles", href: `/org/circles/${c.id}`,
     })),
     ...activeStfs.map(s => ({
-      key: `stf-${s.id}`, label: s.mandate.slice(0, 20) + (s.mandate.length > 20 ? "…" : ""),
+      key: `stf-${s.id}`, label: (s.mandate_preview || "").slice(0, 20) + ((s.mandate_preview || "").length > 20 ? "…" : ""),
       icon: "⚑", group: "stfs", href: `/org/stf/${s.id}`,
     })),
   ];
