@@ -2,387 +2,208 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
-import Link from "next/link";
-import { api, stfApi } from "@/lib/api";
-import { ChevronLeft, Shield, CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { stfApi } from "@/lib/api";
+import { T, Pill, Dot, BarMini, SectionHead } from "@/components/ui";
 
-interface Circle { id: string; name: string }
-
-interface STFInstance {
+interface StfData {
   id: string;
-  org_id: string;
-  stf_type: string;
-  state: string;
+  type: string;
+  circle_name?: string;
   mandate: string;
-  commissioned_by_circle: Circle | null;
-  motion_id: string | null;
-  resolution_id: string | null;
-  subject_member_id: string | null;
-  deadline: string | null;
-  assignment_count: number;
-  verdicts_filed: number;
-  created_at: string;
-  completed_at: string | null;
-}
-
-interface Assignment {
-  id: string;
-  stf_instance_id: string;
-  stf_type: string;
-  member: { id: string; handle: string; display_name: string } | null;
-  slot_type: string;
-  assigned_at: string;
-  rotation_end: string | null;
-  verdict_filed_at: string | null;
-}
-
-interface VerdictAggregate {
-  stf_instance_id: string;
-  stf_type: string;
   state: string;
-  total_assignments: number;
-  verdicts_filed: number;
-  counts: Record<string, number>;
-  majority_verdict: string | null;
-  completed_at: string | null;
+  members?: { member_id: string; handle: string }[];
+  commissioned_at?: string;
+  deadline?: string;
+  progress?: number;
+  days_left?: number;
+  days_total?: number;
+  parent_cell_id?: string;
 }
 
-const STF_TYPE_COLOUR: Record<string, string> = {
-  xstf:      "var(--stf-xstf)",
-  astf:      "var(--stf-astf)",
-  astf_motion: "var(--stf-astf)",
-  vstf:      "var(--stf-vstf)",
-  jstf:      "var(--stf-jstf)",
-  meta_astf: "var(--stf-meta)",
-};
-
-const BLIND_TYPES = new Set(["astf", "astf_motion", "astf_periodic", "vstf", "jstf", "meta_astf"]);
-
-const VERDICT_COLOUR: Record<string, string> = {
-  approve:   "text-emerald-400",
-  clear:     "text-emerald-400",
-  reject:    "text-red-400",
-  violation: "text-red-400",
-  revision_request: "text-amber-400",
-  concerns:  "text-amber-400",
-  adequate:  "text-blue-400",
-  insufficient: "text-red-400",
-};
-
-function VerdictBar({ counts, total }: { counts: Record<string, number>; total: number }) {
-  if (total === 0) return null;
-  const colours = ["bg-emerald-500", "bg-red-500", "bg-amber-500", "bg-blue-500", "bg-zinc-500"];
-  const entries = Object.entries(counts);
-  return (
-    <div className="flex h-2 rounded-full overflow-hidden gap-0.5">
-      {entries.map(([v, count], i) => (
-        <div key={v} title={`${v}: ${count}`}
-          className={`h-full transition-all ${colours[i % colours.length]}`}
-          style={{ width: `${(count / total) * 100}%` }} />
-      ))}
-    </div>
-  );
+interface Metric {
+  label: string;
+  value: string;
+  pct?: number | null;
 }
 
-export default function STFDetailPage() {
-  const { id } = useParams<{ id: string }>();
-  const [stf, setStf] = useState<STFInstance | null>(null);
-  const [assignments, setAssignments] = useState<Assignment[]>([]);
-  const [aggregate, setAggregate] = useState<VerdictAggregate | null>(null);
+interface LogEntry {
+  entry: string;
+  date: string;
+}
+
+export default function StfDetailPage() {
+  const params = useParams();
+  const stfId = params.id as string;
+  const [stf, setStf] = useState<StfData | null>(null);
+  const [metrics, setMetrics] = useState<Metric[]>([]);
+  const [log, setLog] = useState<LogEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [err, setErr] = useState<string | null>(null);
-  const [enacting, setEnacting] = useState(false);
-  const [enactResult, setEnactResult] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
-      const [stfRes, assignRes, verdictRes] = await Promise.all([
-        stfApi.get(id),
-        stfApi.assignments(id),
-        stfApi.verdicts(id).catch(() => ({ data: null })),
-      ]);
-      setStf(stfRes.data as STFInstance);
-      setAssignments((assignRes.data ?? []) as Assignment[]);
-      setAggregate(verdictRes.data as VerdictAggregate | null);
-    } catch {
-      setErr("STF not found.");
-    } finally { setLoading(false); }
-  }, [id]);
+      const res = await stfApi.get(stfId);
+      setStf(res.data);
+    } catch { /* silent */ }
+    setLoading(false);
+  }, [stfId]);
 
   useEffect(() => { load(); }, [load]);
 
-  async function enact() {
-    if (!stf?.resolution_id) return;
-    setEnacting(true); setEnactResult(null);
-    try {
-      const res = await api.post(`/stf/${id}/resolutions`, {
-        resolution_id: stf.resolution_id,
-        confirmation: "ENACT",
-      });
-      const data = res.data as { state: string; resolution_ref: string; contested_reason?: string };
-      if (data.state === "enacted" || data.state === "enacted_locked") {
-        setEnactResult(`✓ ${data.resolution_ref} enacted`);
-      } else {
-        setEnactResult(`Contested: ${data.contested_reason ?? "engine not running"}`);
-      }
-      load();
-    } catch (ex: unknown) {
-      const msg = (ex as { response?: { data?: { detail?: string } } })
-        ?.response?.data?.detail ?? "Enactment failed";
-      setEnactResult(`Error: ${msg}`);
-    } finally { setEnacting(false); }
+  if (loading) {
+    return <p style={{ color:T.muted, fontSize:11, fontFamily:T.mono, padding:20 }}>Loading…</p>;
+  }
+  if (!stf) {
+    return <p style={{ color:T.muted, fontSize:11, fontFamily:T.mono, padding:20 }}>STF not found.</p>;
   }
 
-  if (loading) return (
-    <div className="space-y-4">
-      {[1, 2].map(i => (
-        <div key={i} className="card p-5 animate-pulse">
-          <div className="h-3 bg-[var(--surface-raised)] rounded w-1/3 mb-3" />
-          <div className="h-2 bg-[var(--surface-raised)] rounded w-full" />
-        </div>
-      ))}
-    </div>
-  );
-
-  if (err || !stf) return (
-    <div className="text-center py-16">
-      <p className="text-sm font-mono text-[var(--text-muted)]">{err ?? "Not found"}</p>
-      <Link href="/org/stf" className="text-xs text-[var(--gold)] hover:underline mt-2 block">
-        ← STFs
-      </Link>
-    </div>
-  );
-
-  const typeColour = STF_TYPE_COLOUR[stf.stf_type] ?? "var(--text-muted)";
-  const isBlind = BLIND_TYPES.has(stf.stf_type);
-  const isCompleted = stf.state === "completed";
-  const canEnact = isCompleted && stf.resolution_id &&
-    aggregate?.majority_verdict === "approve";
-  const progress = stf.assignment_count > 0
-    ? Math.round((stf.verdicts_filed / stf.assignment_count) * 100)
-    : 0;
-  const overdue = stf.deadline && !isCompleted && new Date(stf.deadline) < new Date();
+  const progress = stf.progress ?? 0;
+  const daysLeft = stf.days_left ?? 0;
+  const daysTotal = stf.days_total ?? 46;
+  const daysSpent = daysTotal - daysLeft;
+  const timePct = Math.round((daysSpent / daysTotal) * 100);
 
   return (
-    <div className="space-y-5">
-      <Link href="/org/stf"
-        className="inline-flex items-center gap-1.5 text-xs font-mono
-          text-[var(--text-muted)] hover:text-[var(--text)] transition-colors">
-        <ChevronLeft size={12} /> STFs
-      </Link>
-
-      {/* Header */}
-      <div className="card p-6">
-        <div className="flex items-start gap-4 mb-4">
-          <div className="w-10 h-10 rounded-lg border flex items-center justify-center shrink-0"
-            style={{ borderColor: typeColour + "40", background: typeColour + "15" }}>
-            <Shield size={18} style={{ color: typeColour }} />
-          </div>
-          <div className="flex-1">
-            <div className="flex flex-wrap items-center gap-2 mb-1">
-              <span className="text-xs font-mono uppercase tracking-wider"
-                style={{ color: typeColour }}>
-                {stf.stf_type.toUpperCase()}
-              </span>
-              <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded border ${
-                isCompleted
-                  ? "text-emerald-400 border-emerald-800/40 bg-emerald-900/20"
-                  : stf.state === "forming"
-                  ? "text-blue-400 border-blue-800/40 bg-blue-900/20"
-                  : "text-amber-400 border-amber-800/40 bg-amber-900/20"
-              }`}>
-                {stf.state}
-              </span>
-              {isBlind && (
-                <span className="text-[10px] font-mono text-[var(--text-dim)] px-1.5 py-0.5
-                  rounded border border-[var(--border)]">
-                  Blind review
-                </span>
-              )}
-            </div>
-            <p className="text-sm text-[var(--text)] leading-relaxed">{stf.mandate}</p>
-          </div>
-        </div>
-
-        {/* Progress */}
-        <div className="mb-4">
-          <div className="flex items-center justify-between text-[10px] font-mono
-            text-[var(--text-muted)] mb-1.5">
-            <span>{stf.verdicts_filed} of {stf.assignment_count} verdicts filed</span>
-            <span>{progress}%</span>
-          </div>
-          <div className="h-1.5 bg-[var(--border)] rounded-full overflow-hidden">
-            <div className="h-full bg-[var(--gold)] rounded-full transition-all"
-              style={{ width: `${progress}%` }} />
-          </div>
-        </div>
-
-        {/* Meta grid */}
-        <div className="grid grid-cols-2 gap-3 text-[10px] font-mono text-[var(--text-muted)]
-          pt-3 border-t border-[var(--border)]">
-          {stf.commissioned_by_circle && (
+    <div style={{ display:"flex", gap:20, flex:1 }}>
+      <div style={{ flex:1, minWidth:0 }}>
+        {/* STF Header */}
+        <div style={{
+          padding:"20px", borderRadius:8,
+          border:`1px solid ${T.border}`, background:T.surface, marginBottom:20,
+          position:"relative", overflow:"hidden",
+        }}>
+          <div style={{
+            position:"absolute", top:0, left:0, right:0, height:2,
+            background:`linear-gradient(90deg,${T.red},transparent)`,
+          }}/>
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
             <div>
-              <span className="text-[var(--text-dim)]">Commissioned by</span>
-              <p className="text-[var(--text)] mt-0.5">{stf.commissioned_by_circle.name}</p>
+              <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
+                <Pill color={T.red} bg={`${T.red}15`}>⚑ {stf.type || "STF"}</Pill>
+                <span style={{ fontSize:10, color:T.muted, fontFamily:T.mono }}>{stf.id.slice(0, 8)}</span>
+              </div>
+              <p style={{
+                margin:"0 0 8px", fontSize:15, color:T.text, fontFamily:T.serif,
+              }}>{stf.mandate}</p>
+              <div style={{ display:"flex", gap:6 }}>
+                {stf.circle_name && (
+                  <Pill color={T.gold} bg={`${T.gold}15`}>↖ {stf.circle_name}</Pill>
+                )}
+                {stf.commissioned_at && stf.deadline && (
+                  <Pill color={T.muted}>{stf.commissioned_at} → {stf.deadline}</Pill>
+                )}
+              </div>
             </div>
-          )}
-          {stf.deadline && (
-            <div>
-              <span className="text-[var(--text-dim)]">Deadline</span>
-              <p className={`mt-0.5 ${overdue ? "text-red-400" : "text-[var(--text)]"}`}>
-                {new Date(stf.deadline).toLocaleDateString("en-GB", {
-                  day: "numeric", month: "short", year: "numeric",
-                })}
-                {overdue && " (overdue)"}
-              </p>
+            <div style={{ textAlign:"right", flexShrink:0, marginLeft:16 }}>
+              <p style={{
+                margin:"0 0 4px", fontSize:28,
+                color:daysLeft < 7 ? T.red : T.gold, fontFamily:T.mono,
+              }}>{daysLeft}</p>
+              <span style={{ fontSize:9, color:T.muted, fontFamily:T.mono }}>days remaining</span>
             </div>
-          )}
-          {stf.motion_id && (
-            <div>
-              <span className="text-[var(--text-dim)]">Motion</span>
-              <Link href={`/org/motions/${stf.motion_id}`}
-                className="text-[var(--gold)] hover:underline block mt-0.5">
-                View motion →
-              </Link>
-            </div>
-          )}
-          {stf.completed_at && (
-            <div>
-              <span className="text-[var(--text-dim)]">Completed</span>
-              <p className="text-[var(--text)] mt-0.5">
-                {new Date(stf.completed_at).toLocaleDateString("en-GB", {
-                  day: "numeric", month: "short", year: "numeric",
-                })}
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Aggregate verdict */}
-      {aggregate && aggregate.verdicts_filed > 0 && (
-        <div className="card p-5">
-          <p className="section-label mb-3">Verdict aggregate</p>
-          <VerdictBar counts={aggregate.counts} total={aggregate.verdicts_filed} />
-          <div className="flex flex-wrap gap-2 mt-3">
-            {Object.entries(aggregate.counts).map(([v, count]) => (
-              <span key={v}
-                className={`text-xs font-mono px-2 py-1 rounded bg-[var(--surface-raised)]
-                  border border-[var(--border)] ${VERDICT_COLOUR[v] ?? "text-[var(--text)]"}`}>
-                {v}: {count}
-              </span>
-            ))}
           </div>
-          {aggregate.majority_verdict && (
-            <div className="mt-3 pt-3 border-t border-[var(--border)] flex items-center gap-2">
-              {aggregate.majority_verdict === "approve" || aggregate.majority_verdict === "clear"
-                ? <CheckCircle size={14} className="text-emerald-400" />
-                : <AlertCircle size={14} className="text-amber-400" />
-              }
-              <span className={`text-sm font-mono font-medium
-                ${VERDICT_COLOUR[aggregate.majority_verdict] ?? "text-[var(--text)]"}`}>
-                Majority: {aggregate.majority_verdict}
+          <div style={{ marginTop:16 }}>
+            <div style={{ display:"flex", justifyContent:"space-between", marginBottom:5 }}>
+              <span style={{ fontSize:9, color:T.muted, fontFamily:T.mono }}>Work progress vs time elapsed</span>
+              <span style={{ fontSize:9, color:T.gold, fontFamily:T.mono }}>
+                {progress}% work · {timePct}% time
               </span>
             </div>
-          )}
-        </div>
-      )}
-
-      {/* Enact button */}
-      {canEnact && (
-        <div className="card p-5 border-emerald-800/40 bg-emerald-900/10">
-          <p className="section-label mb-2 text-emerald-400">Ready to enact</p>
-          <p className="text-xs text-[var(--text-muted)] mb-3">
-            All verdicts filed with approve majority. This will trigger the Integrity Engine
-            atomic transaction.
-          </p>
-          {enactResult && (
-            <div className={`text-xs font-mono mb-3 px-3 py-2 rounded border ${
-              enactResult.startsWith("✓")
-                ? "text-emerald-400 bg-emerald-900/20 border-emerald-800/40"
-                : "text-red-400 bg-red-900/20 border-red-800/40"
-            }`}>
-              {enactResult}
+            <div style={{ height:3, background:T.border, borderRadius:2, marginBottom:3 }}>
+              <div style={{ width:`${progress}%`, height:"100%", background:T.gold, borderRadius:2 }}/>
             </div>
-          )}
-          <button onClick={enact} disabled={enacting}
-            className="btn btn-primary text-xs gap-1.5 disabled:opacity-40">
-            <CheckCircle size={12} />
-            {enacting ? "Enacting…" : "Enact resolution"}
-          </button>
-        </div>
-      )}
-
-      {/* Assignments */}
-      <div className="card p-5">
-        <p className="section-label mb-3">
-          Assignments
-          {isBlind && (
-            <span className="ml-2 text-[var(--text-dim)] normal-case font-body">
-              — reviewer identities sealed
-            </span>
-          )}
-        </p>
-        {assignments.length === 0 ? (
-          <div className="text-center py-6">
-            <Clock size={20} className="mx-auto mb-2 text-[var(--text-dim)]" />
-            <p className="text-xs font-mono text-[var(--text-muted)]">
-              No assignments yet — Inferential Engine is matching candidates
-            </p>
+            <div style={{ height:3, background:T.border, borderRadius:2 }}>
+              <div style={{ width:`${timePct}%`, height:"100%", background:`${T.blue}60`, borderRadius:2 }}/>
+            </div>
+            <div style={{ display:"flex", gap:14, marginTop:4 }}>
+              <div style={{ display:"flex", alignItems:"center", gap:4 }}>
+                <div style={{ width:10, height:1.5, background:T.gold }}/>
+                <span style={{ fontSize:8, color:T.muted, fontFamily:T.mono }}>work</span>
+              </div>
+              <div style={{ display:"flex", alignItems:"center", gap:4 }}>
+                <div style={{ width:10, height:1.5, background:`${T.blue}60` }}/>
+                <span style={{ fontSize:8, color:T.muted, fontFamily:T.mono }}>time</span>
+              </div>
+            </div>
           </div>
-        ) : (
-          <div className="space-y-2">
-            {assignments.map((a, i) => (
-              <div key={a.id}
-                className="flex items-center justify-between p-3 rounded
-                  bg-[var(--surface-raised)] border border-[var(--border)]">
-                <div className="flex items-center gap-3">
-                  <div className="w-7 h-7 rounded-full border flex items-center
-                    justify-center text-[10px] font-mono"
-                    style={{
-                      borderColor: typeColour + "40",
-                      background: typeColour + "15",
-                      color: typeColour,
-                    }}>
-                    {isBlind ? "?" : (a.member?.handle?.[0] ?? "?")}
-                  </div>
-                  <div>
-                    <p className="text-xs font-mono text-[var(--text)]">
-                      {isBlind
-                        ? `Reviewer ${i + 1} — identity sealed`
-                        : (a.member?.handle ?? "—")
-                      }
-                    </p>
-                    <p className="text-[10px] font-mono text-[var(--text-dim)]">
-                      {a.slot_type}
-                    </p>
-                  </div>
+        </div>
+
+        {/* Metrics */}
+        {metrics.length > 0 && (
+          <>
+            <SectionHead label="Metrics"/>
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:24 }}>
+              {metrics.map(m => (
+                <div key={m.label} style={{
+                  padding:"14px", borderRadius:7,
+                  border:`1px solid ${T.border}`, background:T.panel,
+                }}>
+                  <p style={{ margin:"0 0 6px", fontSize:10, color:T.muted, fontFamily:T.mono }}>{m.label}</p>
+                  <p style={{ margin:0, fontSize:16, color:T.text, fontFamily:T.mono }}>{m.value}</p>
+                  {m.pct != null && <div style={{ marginTop:8 }}><BarMini pct={m.pct} color={T.blue}/></div>}
                 </div>
-                <div className="flex items-center gap-2">
-                  {a.verdict_filed_at ? (
-                    <span className="flex items-center gap-1 text-[10px] font-mono
-                      text-emerald-400">
-                      <CheckCircle size={10} /> Filed
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-1 text-[10px] font-mono
-                      text-[var(--text-dim)]">
-                      <Clock size={10} /> Pending
-                    </span>
-                  )}
-                  {/* Review link — only for blind types with token-based access */}
-                  {isBlind && !a.verdict_filed_at && (
-                    <Link href={`/org/stf/${id}/review`}
-                      className="text-[9px] font-mono text-[var(--gold)] hover:underline
-                        px-1.5 py-0.5 border border-[var(--gold)]/30 rounded">
-                      Review →
-                    </Link>
-                  )}
-                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Audit Log */}
+        {log.length > 0 && (
+          <>
+            <SectionHead label="Audit Log" sub="Tamper-evident record"/>
+            {log.map((l, i) => (
+              <div key={i} style={{
+                padding:"14px 16px", borderRadius:7,
+                border:`1px solid ${T.border}`, background:T.surface, marginBottom:8,
+              }}>
+                <p style={{
+                  margin:"0 0 6px", fontSize:12, color:"#bbb",
+                  fontFamily:T.serif, lineHeight:1.6,
+                }}>{l.entry}</p>
+                <span style={{ fontSize:9, color:T.muted, fontFamily:T.mono }}>{l.date}</span>
               </div>
             ))}
-          </div>
+          </>
         )}
+      </div>
+
+      {/* Right rail */}
+      <div style={{ width:236, flexShrink:0 }}>
+        {/* Members */}
+        <SectionHead label="Members"/>
+        {(stf.members || []).map((m, i) => (
+          <div key={m.member_id} style={{
+            display:"flex", alignItems:"center", gap:8,
+            padding:"9px 0", borderBottom:`1px solid ${T.border}`,
+          }}>
+            <div style={{
+              width:24, height:24, borderRadius:"50%",
+              background:`${T.red}20`, border:`1px solid ${T.red}30`,
+              display:"flex", alignItems:"center", justifyContent:"center",
+              fontSize:10, color:T.red,
+            }}>{m.handle[0]}</div>
+            <span style={{ fontSize:11, color:T.textSub, fontFamily:T.serif }}>{m.handle}</span>
+          </div>
+        ))}
+
+        {/* Quorum */}
+        <div style={{ marginTop:24 }}>
+          <SectionHead label="Quorum"/>
+          <div style={{
+            padding:"12px 14px", borderRadius:7,
+            background:`${T.green}10`, border:`1px solid ${T.green}25`,
+          }}>
+            <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:4 }}>
+              <Dot color={T.green}/>
+              <span style={{ fontSize:11, color:T.green, fontFamily:T.mono }}>
+                {(stf.members || []).length} members
+              </span>
+            </div>
+            <p style={{
+              margin:0, fontSize:10, color:`${T.green}88`,
+              fontFamily:T.serif, fontStyle:"italic",
+            }}>Active and participating.</p>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,414 +1,207 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useParams } from "next/navigation";
-import Link from "next/link";
-import { api, circlesApi } from "@/lib/api";
-import { useAuthStore } from "@/stores/auth";
-import { ChevronLeft, Users, Circle, CheckCircle, AlertCircle, Clock } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { circlesApi, cellsApi } from "@/lib/api";
+import { T, Pill, Dot, BarMini, SectionHead, DomainTag, StatusPill } from "@/components/ui";
 
-interface Member { id: string; handle: string; display_name: string }
-interface DormainRef { id: string; name: string }
-
-interface CircleDormain {
-  dormain: DormainRef;
-  mandate_type: string;  // primary | secondary
-  added_at: string;
-  removed_at: string | null;
-}
-
-interface CircleMember {
-  member: Member;
-  joined_at: string;
-  current_state: string;
-  primary_dormain_ws: number | null;
-}
-
-interface CircleHealth {
-  circle_id: string;
-  circle_name: string;
-  snapshot_at: string | null;
-  overall_verdict: string | null;
-  active_member_count: number;
-  median_ws_primary_dormain: number | null;
-  participation_rate_90d: number | null;
-  open_concerns: string[];
-  stf_instance_id: string | null;
-}
-
-interface CircleDetail {
+interface CircleData {
   id: string;
   org_id: string;
   name: string;
-  description: string | null;
-  tenets: string | null;
+  description?: string;
+  tenets?: string;
   founding_circle: boolean;
-  dormains: CircleDormain[];
   member_count: number;
   created_at: string;
-  dissolved_at: string | null;
+  dissolved_at?: string | null;
+  dormains: { dormain: { id: string; name: string }; mandate_type: string }[];
 }
 
-const STATE_COLOUR: Record<string, string> = {
-  active:       "text-emerald-400",
-  probationary: "text-amber-400",
-  on_leave:     "text-blue-400",
-  inactive:     "text-zinc-500",
-  suspended:    "text-red-400",
-};
+interface Member {
+  member: { id: string; handle: string; display_name: string };
+  joined_at: string;
+  current_state: string;
+  primary_dormain_ws?: number | null;
+}
+
+interface Cell {
+  id: string;
+  title: string;
+  state: string;
+  participants?: number;
+}
 
 export default function CircleDetailPage() {
-  const { id } = useParams<{ id: string }>();
-  const currentMember = useAuthStore(s => s.member);
-
-  const [circle, setCircle]   = useState<CircleDetail | null>(null);
-  const [members, setMembers] = useState<CircleMember[]>([]);
-  const [health, setHealth]   = useState<CircleHealth | null>(null);
+  const params = useParams();
+  const router = useRouter();
+  const circleId = params.id as string;
+  const [circle, setCircle] = useState<CircleData | null>(null);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [cells, setCells] = useState<Cell[]>([]);
   const [loading, setLoading] = useState(true);
-  const [err, setErr]         = useState<string | null>(null);
-  const [tab, setTab]         = useState<"members" | "health">("members");
-  const [inviteHandle, setInviteHandle] = useState("");
-  const [inviting, setInviting] = useState(false);
-  const [inviteMsg, setInviteMsg] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
-      const [circleRes, membersRes, healthRes] = await Promise.all([
-        circlesApi.get(id),
-        circlesApi.members(id),
-        circlesApi.health(id).catch(() => ({ data: null })),
+      const [cRes, mRes] = await Promise.allSettled([
+        circlesApi.get(circleId),
+        circlesApi.members(circleId),
       ]);
-      setCircle(circleRes.data as CircleDetail);
-      setMembers((membersRes.data ?? []) as CircleMember[]);
-      setHealth(healthRes.data as CircleHealth | null);
-    } catch {
-      setErr("Circle not found.");
-    } finally { setLoading(false); }
-  }, [id]);
+      if (cRes.status === "fulfilled") setCircle(cRes.value.data);
+      if (mRes.status === "fulfilled") {
+        const d = mRes.value.data;
+        setMembers(d?.items ?? d ?? []);
+      }
+      try {
+        const cellRes = await cellsApi.list({ circle_id: circleId });
+        const cd = cellRes.data;
+        setCells(cd?.items ?? cd ?? []);
+      } catch { /* silent */ }
+    } catch { /* silent */ }
+    setLoading(false);
+  }, [circleId]);
 
   useEffect(() => { load(); }, [load]);
 
-  async function inviteMember() {
-    if (!inviteHandle.trim()) return;
-    setInviting(true); setInviteMsg(null);
-    try {
-      // Resolve handle → member_id first
-      const memberRes = await api.get(`/members/${inviteHandle.trim()}`).catch(() => null);
-      const memberId = memberRes?.data?.id;
-      if (!memberId) { setInviteMsg("Member not found."); return; }
-      await circlesApi.invite(id, { member_id: memberId });
-      setInviteMsg(`Invitation sent to @${inviteHandle.trim()}.`);
-      setInviteHandle("");
-      // Refresh members list
-      const updated = await circlesApi.members(id);
-      setMembers(updated.data ?? []);
-    } catch {
-      setInviteMsg("Could not send invitation. Are you a member of this circle?");
-    } finally {
-      setInviting(false);
-    }
+  if (loading) {
+    return <p style={{ color:T.muted, fontSize:11, fontFamily:T.mono, padding:20 }}>Loading…</p>;
+  }
+  if (!circle) {
+    return <p style={{ color:T.muted, fontSize:11, fontFamily:T.mono, padding:20 }}>Circle not found.</p>;
   }
 
-  if (loading) return (
-    <div className="space-y-4">
-      {[1, 2].map(i => (
-        <div key={i} className="card p-5 animate-pulse">
-          <div className="h-3 bg-[var(--surface-raised)] rounded w-1/3 mb-3" />
-          <div className="h-2 bg-[var(--surface-raised)] rounded w-full" />
-        </div>
-      ))}
-    </div>
-  );
-
-  if (err || !circle) return (
-    <div className="text-center py-16">
-      <p className="text-sm font-mono text-[var(--text-muted)]">{err ?? "Not found"}</p>
-      <Link href="/org/circles"
-        className="text-xs text-[var(--gold)] hover:underline mt-2 block">
-        ← Circles
-      </Link>
-    </div>
-  );
-
-  const isMember = members.some(m => m.member.id === currentMember?.id);
-  const primaryDormains  = circle.dormains.filter(d => d.mandate_type === "primary" && !d.removed_at);
-  const secondaryDormains = circle.dormains.filter(d => d.mandate_type === "secondary" && !d.removed_at);
+  const domains = circle.dormains || [];
+  const primaryDomains = domains.filter(d => d.mandate_type === "primary");
 
   return (
-    <div className="space-y-5">
-      <Link href="/org/circles"
-        className="inline-flex items-center gap-1.5 text-xs font-mono
-          text-[var(--text-muted)] hover:text-[var(--text)] transition-colors">
-        <ChevronLeft size={12} /> Circles
-      </Link>
-
-      {/* Header */}
-      <div className="card p-6">
-        <div className="flex items-start gap-4 mb-4">
-          <div className="w-10 h-10 rounded-lg bg-[var(--gold-glow)] border
-            border-[var(--gold)]/30 flex items-center justify-center shrink-0">
-            <Circle size={18} className="text-[var(--gold)]" />
+    <div style={{ display:"flex", gap:20, flex:1 }}>
+      <div style={{ flex:1, minWidth:0 }}>
+        {/* Circle profile */}
+        <div style={{
+          padding:"16px 20px", borderRadius:8,
+          border:`1px solid ${T.border}`, background:T.surface, marginBottom:20,
+        }}>
+          <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:8 }}>
+            <div style={{ width:8, height:8, borderRadius:"50%", background:T.gold }}/>
+            <h2 style={{
+              margin:0, fontSize:16, color:T.text, fontFamily:T.serif, fontWeight:400,
+            }}>{circle.name}</h2>
+            <Pill color={T.gold} bg={`${T.gold}15`}>{circle.member_count} members</Pill>
           </div>
-          <div className="flex-1">
-            <div className="flex flex-wrap items-center gap-2 mb-1">
-              <h1 className="font-display text-xl text-[var(--text)]">{circle.name}</h1>
-              {circle.founding_circle && (
-                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded
-                  border border-[var(--gold)]/30 text-[var(--gold)]">
-                  Founding
-                </span>
-              )}
-              {circle.dissolved_at && (
-                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded
-                  border border-red-800/40 text-red-400">
-                  Dissolved
-                </span>
-              )}
-              {isMember && (
-                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded
-                  border border-emerald-800/40 text-emerald-400 bg-emerald-900/20">
-                  Member
-                </span>
-              )}
-            </div>
-            {circle.description && (
-              <p className="text-sm text-[var(--text)] leading-relaxed">{circle.description}</p>
-            )}
-          </div>
-          <div className="flex items-center gap-1.5 text-sm font-mono text-[var(--text-muted)]
-            shrink-0">
-            <Users size={13} />
-            {circle.member_count}
+          {circle.description && (
+            <p style={{
+              margin:"0 0 10px", fontSize:12, color:T.textSub,
+              fontFamily:T.serif, lineHeight:1.65,
+            }}>{circle.description}</p>
+          )}
+          {circle.tenets && (
+            <p style={{
+              margin:"0 0 10px", fontSize:11, color:T.textDim,
+              fontFamily:T.serif, lineHeight:1.6, fontStyle:"italic",
+            }}>&ldquo;{circle.tenets}&rdquo;</p>
+          )}
+          <div style={{ display:"flex", gap:6 }}>
+            {domains.map(d => (
+              <DomainTag key={d.dormain.id} d={d.dormain.name} w={0.4}/>
+            ))}
           </div>
         </div>
 
-        {/* Tenets */}
-        {circle.tenets && (
-          <div className="mb-4 p-3 rounded bg-[var(--gold-glow)] border border-[var(--gold)]/20">
-            <p className="text-[9px] font-mono uppercase tracking-wider text-[var(--gold)] mb-1">
-              Tenets
-            </p>
-            <p className="text-sm text-[var(--text)] leading-relaxed">{circle.tenets}</p>
-          </div>
-        )}
-
-        {/* Dormain mandates */}
-        {(primaryDormains.length > 0 || secondaryDormains.length > 0) && (
-          <div className="pt-3 border-t border-[var(--border)]">
-            <p className="text-[9px] font-mono uppercase tracking-wider
-              text-[var(--text-dim)] mb-2">
-              Mandate Dormains
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {primaryDormains.map(d => (
-                <span key={d.dormain.id}
-                  className="text-xs font-mono px-2 py-1 rounded
-                    bg-[var(--gold-glow)] border border-[var(--gold)]/30
-                    text-[var(--gold)]">
-                  {d.dormain.name}
-                  <span className="text-[9px] ml-1 opacity-60">primary</span>
+        {/* Members */}
+        <SectionHead label="Members"/>
+        <div style={{ marginBottom:28 }}>
+          {members.map(cm => (
+            <div key={cm.member.id} style={{
+              display:"flex", alignItems:"center", gap:8,
+              padding:"9px 0", borderBottom:`1px solid ${T.border}`,
+            }}>
+              <div style={{
+                width:24, height:24, borderRadius:"50%",
+                background:`${T.blue}20`,
+                display:"flex", alignItems:"center", justifyContent:"center",
+                fontSize:10, color:T.blue,
+              }}>{cm.member.handle[0]}</div>
+              <div style={{ flex:1 }}>
+                <span style={{ fontSize:11, color:T.textSub, fontFamily:T.serif }}>
+                  {cm.member.display_name || cm.member.handle}
                 </span>
-              ))}
-              {secondaryDormains.map(d => (
-                <span key={d.dormain.id}
-                  className="text-xs font-mono px-2 py-1 rounded
-                    bg-[var(--surface-raised)] border border-[var(--border)]
-                    text-[var(--text-muted)]">
-                  {d.dormain.name}
-                  <span className="text-[9px] ml-1 opacity-60">secondary</span>
+                <span style={{ fontSize:9, color:T.muted, fontFamily:T.mono, marginLeft:6 }}>
+                  @{cm.member.handle}
                 </span>
-              ))}
+              </div>
+              <StatusPill status={cm.current_state}/>
+              {cm.primary_dormain_ws != null && (
+                <span style={{ fontSize:9, color:T.gold, fontFamily:T.mono }}>
+                  Ws {Math.round(cm.primary_dormain_ws)}
+                </span>
+              )}
             </div>
-          </div>
+          ))}
+          {members.length === 0 && (
+            <p style={{ color:T.muted, fontSize:11, fontFamily:T.mono, padding:"12px 0" }}>No members.</p>
+          )}
+        </div>
+
+        {/* Cells */}
+        {cells.length > 0 && (
+          <>
+            <SectionHead label="Circle Cells" sub="Motions and special business"/>
+            {cells.map(c => (
+              <div key={c.id}
+                style={{
+                  padding:"14px 16px", borderRadius:7,
+                  border:`1px solid ${T.border}`, background:T.panel, marginBottom:7, cursor:"pointer",
+                }}
+                onClick={() => router.push(`/org/cells/${c.id}`)}
+                onMouseEnter={e => e.currentTarget.style.borderColor = T.border2}
+                onMouseLeave={e => e.currentTarget.style.borderColor = T.border}
+              >
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                  <p style={{ margin:0, fontSize:13, color:"#bbb", fontFamily:T.serif }}>{c.title}</p>
+                  <StatusPill status={c.state}/>
+                </div>
+              </div>
+            ))}
+          </>
         )}
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-1 border-b border-[var(--border)]">
-        {[
-          { key: "members", label: `Members (${members.length})` },
-          { key: "health",  label: "Health" },
-        ].map(t => (
-          <button key={t.key} onClick={() => setTab(t.key as "members" | "health")}
-            className={`px-4 py-2.5 text-xs font-mono transition-colors border-b-2 -mb-px ${
-              tab === t.key
-                ? "text-[var(--gold)] border-[var(--gold)]"
-                : "text-[var(--text-muted)] border-transparent hover:text-[var(--text)]"
-            }`}>
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Members tab */}
-      {tab === "members" && (
-        <div className="space-y-3">
-          {/* Invite form */}
-          <div className="card p-4 flex gap-2 items-center">
-            <input
-              value={inviteHandle}
-              onChange={e => setInviteHandle(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && inviteMember()}
-              placeholder="@handle to invite"
-              className="flex-1 bg-transparent border border-[var(--border)] rounded px-3 py-1.5
-                         text-sm font-mono text-[var(--text)] placeholder:text-[var(--text-dim)]
-                         focus:outline-none focus:border-[var(--gold)]"
-            />
-            <button
-              onClick={inviteMember}
-              disabled={inviting || !inviteHandle.trim()}
-              className="px-4 py-1.5 rounded border border-[var(--gold)]/40 bg-[var(--gold-glow)]
-                         text-[var(--gold)] font-mono text-xs disabled:opacity-40
-                         hover:bg-[var(--gold)]/10 transition-colors"
-            >
-              {inviting ? "…" : "Invite"}
-            </button>
+      {/* Right rail */}
+      <div style={{ width:236, flexShrink:0 }}>
+        <SectionHead label="Circle Info"/>
+        <div style={{
+          padding:"12px 14px", borderRadius:7,
+          border:`1px solid ${T.border}`, background:T.surface, marginBottom:16,
+        }}>
+          <div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}>
+            <span style={{ fontSize:9, color:T.muted, fontFamily:T.mono }}>Founded</span>
+            <span style={{ fontSize:9, color:T.textSub, fontFamily:T.mono }}>
+              {new Date(circle.created_at).toLocaleDateString()}
+            </span>
           </div>
-          {inviteMsg && (
-            <p className={`text-xs font-mono px-1 ${
-              inviteMsg.startsWith("Invitation") ? "text-[var(--green)]" : "text-[var(--red)]"
-            }`}>{inviteMsg}</p>
-          )}
-          {members.length === 0 ? (
-            <div className="card p-8 text-center">
-              <Users size={24} className="mx-auto mb-2 text-[var(--text-dim)]" />
-              <p className="text-sm font-mono text-[var(--text-muted)]">No active members.</p>
-            </div>
-          ) : (
-            members.map(m => (
-              <div key={m.member.id}
-                className="card p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-[var(--surface-raised)]
-                    border border-[var(--border)] flex items-center justify-center">
-                    <span className="text-[11px] font-mono text-[var(--text-muted)] uppercase">
-                      {m.member.handle[0]}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-mono text-[var(--text)]">
-                      {m.member.display_name}
-                    </p>
-                    <p className="text-[10px] font-mono text-[var(--text-dim)]">
-                      @{m.member.handle}
-                      {m.member.id === currentMember?.id && (
-                        <span className="ml-2 text-[var(--gold)]">you</span>
-                      )}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  {m.primary_dormain_ws !== null && (
-                    <div className="text-right">
-                      <p className="text-sm font-mono text-[var(--gold)]">
-                        {m.primary_dormain_ws.toFixed(0)}
-                      </p>
-                      <p className="text-[9px] font-mono text-[var(--text-dim)]">W_s</p>
-                    </div>
-                  )}
-                  <span className={`text-[10px] font-mono capitalize
-                    ${STATE_COLOUR[m.current_state] ?? "text-zinc-400"}`}>
-                    {m.current_state}
-                  </span>
-                </div>
-              </div>
-            ))
-          )}
+          <div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}>
+            <span style={{ fontSize:9, color:T.muted, fontFamily:T.mono }}>Members</span>
+            <span style={{ fontSize:9, color:T.gold, fontFamily:T.mono }}>{circle.member_count}</span>
+          </div>
+          <div style={{ display:"flex", justifyContent:"space-between" }}>
+            <span style={{ fontSize:9, color:T.muted, fontFamily:T.mono }}>Domains</span>
+            <span style={{ fontSize:9, color:T.gold, fontFamily:T.mono }}>{domains.length}</span>
+          </div>
         </div>
-      )}
 
-      {/* Health tab */}
-      {tab === "health" && (
-        <div>
-          {!health || !health.snapshot_at ? (
-            <div className="card p-8 text-center">
-              <Clock size={24} className="mx-auto mb-2 text-[var(--text-dim)]" />
-              <p className="text-sm font-mono text-[var(--text-muted)]">
-                No health snapshot yet.
-              </p>
-              <p className="text-xs text-[var(--text-dim)] mt-1">
-                Health is assessed by the periodic aSTF cycle.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {/* Overall */}
-              <div className="card p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <p className="section-label">Overall</p>
-                  {health.overall_verdict && (
-                    <div className={`flex items-center gap-1.5 text-xs font-mono ${
-                      health.overall_verdict === "healthy"
-                        ? "text-emerald-400" : "text-amber-400"
-                    }`}>
-                      {health.overall_verdict === "healthy"
-                        ? <CheckCircle size={12} />
-                        : <AlertCircle size={12} />
-                      }
-                      {health.overall_verdict}
-                    </div>
-                  )}
-                </div>
-                <div className="grid grid-cols-3 gap-4 text-xs font-mono">
-                  <div>
-                    <p className="text-[var(--text-dim)]">Active members</p>
-                    <p className="text-[var(--text)] text-lg font-medium mt-0.5">
-                      {health.active_member_count}
-                    </p>
-                  </div>
-                  {health.median_ws_primary_dormain !== null && (
-                    <div>
-                      <p className="text-[var(--text-dim)]">Median W_s</p>
-                      <p className="text-[var(--gold)] text-lg font-medium mt-0.5">
-                        {health.median_ws_primary_dormain.toFixed(0)}
-                      </p>
-                    </div>
-                  )}
-                  {health.participation_rate_90d !== null && (
-                    <div>
-                      <p className="text-[var(--text-dim)]">90d participation</p>
-                      <p className="text-[var(--text)] text-lg font-medium mt-0.5">
-                        {(health.participation_rate_90d * 100).toFixed(0)}%
-                      </p>
-                    </div>
-                  )}
-                </div>
+        {primaryDomains.length > 0 && (
+          <>
+            <SectionHead label="Mandate Domains"/>
+            {primaryDomains.map(d => (
+              <div key={d.dormain.id} style={{
+                padding:"7px 0", borderBottom:`1px solid ${T.border}`,
+              }}>
+                <span style={{ fontSize:10, color:T.textSub, fontFamily:T.mono }}>{d.dormain.name}</span>
               </div>
-
-              {/* Open concerns */}
-              {health.open_concerns.length > 0 && (
-                <div className="card p-5">
-                  <p className="section-label mb-3">Open concerns</p>
-                  <ul className="space-y-2">
-                    {health.open_concerns.map((c, i) => (
-                      <li key={i} className="flex gap-2 text-sm">
-                        <AlertCircle size={13} className="text-amber-400 shrink-0 mt-0.5" />
-                        <span className="text-[var(--text)]">{c}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              <p className="text-[10px] font-mono text-[var(--text-dim)] text-center">
-                Snapshot from{" "}
-                {new Date(health.snapshot_at).toLocaleDateString("en-GB", {
-                  day: "numeric", month: "long", year: "numeric",
-                })}
-                {health.stf_instance_id && (
-                  <>
-                    {" · "}
-                    <Link href={`/org/stf/${health.stf_instance_id}`}
-                      className="text-[var(--gold)] hover:underline">
-                      View aSTF →
-                    </Link>
-                  </>
-                )}
-              </p>
-            </div>
-          )}
-        </div>
-      )}
+            ))}
+          </>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,21 +1,15 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { circlesApi } from "@/lib/api";
+import { T, BarMini, SectionHead } from "@/components/ui";
 
-const T = {
-  bg:"#050505", surface:"#080808", raised:"#0c0c0c",
-  border:"#141414", dim:"#2a2a2a", muted:"#555555",
-  text:"#cccccc", textSub:"#777777", textDim:"#3a3a3a",
-  gold:"#c8a96e", goldDim:"#c8a96e22",
-  mono:"'DM Mono',monospace", serif:"'Lora',serif",
-};
-
-interface DormainRef { id:string; name:string; }
 interface Circle {
-  id:string; name:string; description?:string;
-  dormains?:DormainRef[]; member_count?:number;
-  founding_circle?:boolean; dissolved_at?:string|null;
+  id: string;
+  name: string;
+  description?: string;
+  member_count: number;
+  dissolved_at?: string | null;
 }
 
 export default function CirclesPage() {
@@ -23,79 +17,63 @@ export default function CirclesPage() {
   const [circles, setCircles] = useState<Circle[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(()=>{
-    circlesApi.list()
-      .then(r=>setCircles(r.data?.items ?? r.data ?? []))
-      .catch(()=>{})
-      .finally(()=>setLoading(false));
-  },[]);
+  const load = useCallback(async () => {
+    try {
+      const res = await circlesApi.list();
+      const d = res.data;
+      setCircles(d?.items ?? d ?? []);
+    } catch { /* silent */ }
+    setLoading(false);
+  }, []);
 
-  const active   = circles.filter(c=>!c.dissolved_at && !c.founding_circle);
-  const founding = circles.filter(c=>!c.dissolved_at &&  c.founding_circle);
-  const dissolved= circles.filter(c=> c.dissolved_at);
+  useEffect(() => { load(); }, [load]);
 
-  function Section({ title, items }: { title:string; items:Circle[] }) {
-    if (!items.length) return null;
-    return (
-      <div style={{ marginBottom:24 }}>
-        <p style={{ margin:"0 0 8px", fontSize:8, color:T.muted,
-          letterSpacing:2, textTransform:"uppercase" }}>{title}</p>
-        <div style={{ border:`1px solid ${T.border}`, borderRadius:6,
-          background:T.surface, overflow:"hidden" }}>
-          {items.map((c,i)=>(
+  if (loading) {
+    return <p style={{ color:T.muted, fontSize:11, fontFamily:T.mono, padding:20 }}>Loading…</p>;
+  }
+
+  return (
+    <div style={{ display:"flex", gap:20, flex:1 }}>
+      <div style={{ flex:1, minWidth:0 }}>
+        <SectionHead label="Circles" sub="Organisation's governance circles"/>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
+          {circles.map(c => (
             <div key={c.id}
-              onClick={()=>router.push(`/org/circles/${c.id}`)}
               style={{
-                padding:"11px 14px",
-                borderBottom:i<items.length-1?`1px solid ${T.border}`:"none",
-                cursor:"pointer", transition:"background 0.1s",
+                padding:"14px", borderRadius:7,
+                border:`1px solid ${T.border}`, background:T.panel, cursor:"pointer",
               }}
-              onMouseEnter={e=>(e.currentTarget.style.background=T.raised)}
-              onMouseLeave={e=>(e.currentTarget.style.background="transparent")}
+              onClick={() => router.push(`/org/circles/${c.id}`)}
+              onMouseEnter={e => e.currentTarget.style.borderColor = T.border2}
+              onMouseLeave={e => e.currentTarget.style.borderColor = T.border}
             >
-              <div style={{ display:"flex", justifyContent:"space-between",
-                marginBottom:4 }}>
-                <span style={{ fontSize:12, color:T.text, fontFamily:T.serif }}>
-                  {c.name}
-                </span>
+              <div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}>
                 <span style={{ fontSize:9, color:T.muted, fontFamily:T.mono }}>
-                  {c.member_count ?? 0} members
+                  {c.member_count} members
                 </span>
               </div>
+              <p style={{
+                margin:"0 0 10px", fontSize:13, color:"#bbb",
+                fontFamily:T.serif, lineHeight:1.3,
+              }}>{c.name}</p>
               {c.description && (
-                <p style={{ margin:"0 0 5px", fontSize:10, color:T.textSub,
-                  fontFamily:T.serif, lineHeight:1.5 }}>
-                  {c.description}
-                </p>
-              )}
-              {(c.dormains?.length ?? 0) > 0 && (
-                <div style={{ display:"flex", flexWrap:"wrap", gap:4 }}>
-                  {(c.dormains??[]).map(d=>(
-                    <span key={d.id} style={{
-                      fontSize:8, padding:"1px 6px", borderRadius:10,
-                      background:T.goldDim, border:`1px solid ${T.gold}30`,
-                      color:T.gold, fontFamily:T.mono,
-                    }}>{d.name}</span>
-                  ))}
-                </div>
+                <p style={{
+                  margin:0, fontSize:10, color:T.textDim,
+                  fontFamily:T.mono, lineHeight:1.5,
+                  overflow:"hidden", textOverflow:"ellipsis",
+                  display:"-webkit-box", WebkitLineClamp:2, WebkitBoxOrient:"vertical",
+                }}>{c.description}</p>
               )}
             </div>
           ))}
         </div>
       </div>
-    );
-  }
-
-  return (
-    <div style={{ maxWidth:700 }}>
-      {loading
-        ? <p style={{ color:T.muted, fontSize:10 }}>Loading…</p>
-        : <>
-            <Section title="Circles" items={active} />
-            <Section title="Founding Circle" items={founding} />
-            <Section title="Dissolved" items={dissolved} />
-          </>
-      }
+      <div style={{ width:236, flexShrink:0 }}>
+        <SectionHead label="Organisation"/>
+        <p style={{ fontSize:10, color:T.muted, fontFamily:T.mono, lineHeight:1.6 }}>
+          Circles govern dormains. Each circle holds mandate authority over assigned domains and manages Cell composition.
+        </p>
+      </div>
     </div>
   );
 }

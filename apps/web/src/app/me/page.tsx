@@ -1,195 +1,169 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { accountApi, platformApi } from "@/lib/api";
+import { accountApi, membersApi, circlesApi } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth";
+import { T, Pill, BarMini, SectionHead, Dot } from "@/components/ui";
 
-const T = {
-  bg:"#050505", surface:"#080808", raised:"#0c0c0c",
-  border:"#141414", dim:"#2a2a2a", muted:"#555555",
-  text:"#cccccc", textSub:"#777777", textDim:"#3a3a3a",
-  gold:"#c8a96e", goldDim:"#c8a96e22",
-  mono:"'DM Mono',monospace", serif:"'Lora',serif",
-};
-
-interface OrgMembership {
-  org_id:string; org_slug:string; org_name:string;
-  member_id:string; display_name_org:string; current_state:string;
-  joined_at:string|null;
-}
-
-export default function MeDashboard() {
+export default function MePage() {
   const router = useRouter();
-  const { account, isAuthenticated, setOrgSession, logout } = useAuthStore();
-  const [orgs,    setOrgs]    = useState<OrgMembership[]>([]);
+  const { account, member, isAuthenticated, logout } = useAuthStore();
+  const [orgs, setOrgs] = useState<any[]>([]);
+  const [competences, setCompetences] = useState<any[]>([]);
+  const [curiosities, setCuriosities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [entering,setEntering]= useState<string|null>(null);
+
+  const load = useCallback(async () => {
+    try {
+      const orgsRes = await accountApi.myOrgs();
+      setOrgs(orgsRes.data?.items ?? []);
+    } catch { /* silent */ }
+    try {
+      const scoresRes = await membersApi.me();
+      const d = scoresRes.data;
+      setCompetences(d?.competence_scores ?? []);
+    } catch { /* silent */ }
+    try {
+      const curRes = await membersApi.curiosities();
+      setCuriosities(curRes.data ?? []);
+    } catch { /* silent */ }
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
     if (!isAuthenticated) { router.replace("/auth/login"); return; }
-    accountApi.myOrgs()
-      .then(r => setOrgs(r.data?.items ?? []))
-      .catch(()=>{})
-      .finally(()=>setLoading(false));
-  }, [isAuthenticated, router]);
+    load();
+  }, [isAuthenticated, load, router]);
 
-  async function enterOrg(org: OrgMembership) {
-    setEntering(org.org_id);
-    try {
-      const res = await platformApi.enterOrg(org.org_id);
-      setOrgSession({
-        id: org.member_id,
-        handle: "",
-        display_name: org.display_name_org,
-        display_name_org: org.display_name_org,
-        org_id: org.org_id,
-        org_slug: org.org_slug,
-        org_name: org.org_name,
-        current_state: org.current_state,
-      }, res.data.org_session_token);
-      router.push("/org/commons");
-    } finally { setEntering(null); }
+  if (!isAuthenticated) return null;
+  if (loading) {
+    return <p style={{ color:T.muted, fontSize:11, fontFamily:T.mono, padding:20 }}>Loading…</p>;
   }
 
-  const stateColor = (s:string) =>
-    s==="active"?"#5a8a6a":s==="probationary"?T.gold:T.muted;
-
   return (
-    <div style={{ minHeight:"100vh", background:T.bg,
-      fontFamily:T.mono, color:T.text }}>
-
-      {/* Header */}
-      <div style={{
-        borderBottom:`1px solid ${T.border}`,
-        padding:"16px 24px",
-        display:"flex", justifyContent:"space-between", alignItems:"center",
-      }}>
-        <div>
-          <p style={{ margin:"0 0 2px", fontSize:9, color:T.muted,
-            letterSpacing:3, textTransform:"uppercase" }}>PAAS · Orb Sys</p>
-          <h1 style={{ margin:0, fontSize:18, fontFamily:T.serif,
-            fontWeight:400, color:T.text }}>
-            {account?.handle ? `@${account.handle}` : "My Account"}
-          </h1>
-        </div>
-        <div style={{ display:"flex", gap:12, alignItems:"center" }}>
-          <button
-            onClick={()=>router.push("/setup")}
-            style={{ background:"transparent", border:`1px solid ${T.dim}`,
-              borderRadius:4, padding:"5px 12px", cursor:"pointer",
-              fontFamily:T.mono, fontSize:9, color:T.textSub,
-              letterSpacing:1, textTransform:"uppercase" }}>
-            + new org
-          </button>
-          <button
-            onClick={()=>{ logout(); router.replace("/auth/login"); }}
-            style={{ background:"none", border:"none", cursor:"pointer",
-              fontSize:9, color:T.muted, fontFamily:T.mono }}>
-            sign out
-          </button>
-        </div>
-      </div>
-
-      <div style={{ maxWidth:640, margin:"0 auto", padding:"32px 24px" }}>
-
-        {/* Org memberships */}
-        <div style={{ marginBottom:32 }}>
-          <p style={{ margin:"0 0 14px", fontSize:9, color:T.muted,
-            letterSpacing:2, textTransform:"uppercase" }}>
-            Organisation memberships
-          </p>
-
-          {loading ? (
-            <p style={{ color:T.muted, fontSize:10 }}>Loading…</p>
-          ) : orgs.length === 0 ? (
+    <div style={{ display:"flex", gap:20 }}>
+      <div style={{ flex:1, minWidth:0 }}>
+        {/* Profile card */}
+        <div style={{
+          padding:"20px", borderRadius:8,
+          border:`1px solid ${T.border}`, background:T.surface, marginBottom:20,
+        }}>
+          <div style={{ display:"flex", gap:16, alignItems:"flex-start" }}>
             <div style={{
-              padding:"24px", border:`1px solid ${T.border}`,
-              borderRadius:6, background:T.surface, textAlign:"center",
-            }}>
-              <p style={{ color:T.muted, fontSize:11, marginBottom:12 }}>
-                You are not a member of any organisation.
-              </p>
-              <div style={{ display:"flex", gap:8, justifyContent:"center" }}>
-                <button onClick={()=>router.push("/setup")}
-                  style={{ padding:"6px 14px",
-                    background:T.goldDim, border:`1px solid ${T.gold}50`,
-                    borderRadius:4, color:T.gold, fontFamily:T.mono,
-                    fontSize:9, cursor:"pointer", letterSpacing:1,
-                    textTransform:"uppercase" }}>
-                  Start an org →
-                </button>
-                <button onClick={()=>router.push("/discover")}
-                  style={{ padding:"6px 14px", background:"transparent",
-                    border:`1px solid ${T.dim}`, borderRadius:4,
-                    color:T.muted, fontFamily:T.mono, fontSize:9,
-                    cursor:"pointer", letterSpacing:1, textTransform:"uppercase" }}>
-                  Browse orgs
-                </button>
-              </div>
+              width:52, height:52, borderRadius:"50%",
+              background:"linear-gradient(135deg,#2a3040,#1a2030)",
+              border:`1px solid ${T.goldDim}`,
+              display:"flex", alignItems:"center", justifyContent:"center",
+              fontSize:20, color:T.gold, flexShrink:0,
+            }}>{(account?.handle || member?.handle || "?")[0].toUpperCase()}</div>
+            <div style={{ flex:1 }}>
+              <h2 style={{
+                margin:"0 0 4px", fontSize:18, color:T.text,
+                fontFamily:T.serif, fontWeight:400,
+              }}>{account?.handle || "User"}</h2>
+              <p style={{
+                margin:"0 0 8px", fontSize:10, color:T.muted, fontFamily:T.mono,
+              }}>@{account?.handle || member?.handle} · {member?.current_state || "member"}</p>
+              {member?.org_name && (
+                <p style={{
+                  margin:0, fontSize:12, color:T.textSub,
+                  fontFamily:T.serif, lineHeight:1.65,
+                }}>Member of {member.org_name}</p>
+              )}
             </div>
-          ) : (
-            <div style={{ border:`1px solid ${T.border}`, borderRadius:6,
-              background:T.surface, overflow:"hidden" }}>
-              {orgs.map((org, i) => (
-                <div key={org.org_id} style={{
-                  padding:"12px 16px",
-                  borderBottom: i<orgs.length-1 ? `1px solid ${T.border}` : "none",
-                  display:"flex", justifyContent:"space-between", alignItems:"center",
-                }}>
-                  <div>
-                    <p style={{ margin:"0 0 2px", fontSize:12,
-                      color:T.text, fontFamily:T.serif }}>
-                      {org.org_name}
-                    </p>
-                    <p style={{ margin:0, fontSize:9, color:T.textSub }}>
-                      {org.display_name_org} ·{" "}
-                      <span style={{ color:stateColor(org.current_state) }}>
-                        {org.current_state}
-                      </span>
-                    </p>
-                  </div>
-                  <button
-                    onClick={()=>enterOrg(org)}
-                    disabled={entering===org.org_id}
-                    style={{
-                      padding:"5px 12px",
-                      background: entering===org.org_id ? T.goldDim : "transparent",
-                      border:`1px solid ${entering===org.org_id?T.gold:T.dim}`,
-                      borderRadius:4, color:entering===org.org_id?T.gold:T.textSub,
-                      fontFamily:T.mono, fontSize:9, cursor:"pointer",
-                      letterSpacing:1, textTransform:"uppercase",
-                      transition:"all 0.15s",
-                    }}>
-                    {entering===org.org_id ? "entering…" : "enter →"}
-                  </button>
-                </div>
-              ))}
+          </div>
+          {member?.current_state && (
+            <div style={{
+              display:"flex", flexWrap:"wrap", gap:6, marginTop:16,
+              paddingTop:14, borderTop:`1px solid ${T.border}`,
+            }}>
+              <Pill color={T.gold} bg={`${T.gold}15`}>◎ {member.org_name || "Org"}</Pill>
+              <Pill color={T.muted}>State: {member.current_state}</Pill>
             </div>
           )}
         </div>
 
-        {/* Account info */}
-        {account && (
-          <div style={{
-            padding:"14px 16px", border:`1px solid ${T.border}`,
-            borderRadius:6, background:T.surface,
-          }}>
-            <p style={{ margin:"0 0 10px", fontSize:9, color:T.muted,
-              letterSpacing:2, textTransform:"uppercase" }}>Account</p>
-            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"8px 16px" }}>
-              {[
-                ["Handle",     `@${account.handle}`],
-                ["Legal name", account.legal_name ?? "—"],
-              ].map(([label,val]) => (
-                <div key={label}>
-                  <p style={{ margin:"0 0 1px", fontSize:8, color:T.muted,
-                    textTransform:"uppercase", letterSpacing:1 }}>{label}</p>
-                  <p style={{ margin:0, fontSize:11, color:T.text }}>{val}</p>
+        {/* Competences */}
+        {competences.length > 0 && (
+          <>
+            <SectionHead label="Competence Scores" sub="Wh (hard credentials) · Ws (contribution)"/>
+            <div style={{ marginBottom:24 }}>
+              {competences.map((c: any) => (
+                <div key={c.dormain_name || c.id} style={{
+                  display:"flex", alignItems:"center", gap:10, padding:"8px 0",
+                  borderBottom:`1px solid ${T.border}`,
+                }}>
+                  <span style={{ fontSize:10, color:T.muted, fontFamily:T.mono, minWidth:120 }}>
+                    {c.dormain_name || c.name}
+                  </span>
+                  <BarMini pct={Math.min(((c.w_s || 0) / 2000) * 100, 100)} color={T.green}/>
+                  <span style={{ fontSize:9, color:T.gold, fontFamily:T.mono, minWidth:40, textAlign:"right" }}>
+                    Ws {Math.round(c.w_s || 0)}
+                  </span>
                 </div>
               ))}
             </div>
-          </div>
+          </>
         )}
+
+        {/* Curiosities */}
+        {curiosities.length > 0 && (
+          <>
+            <SectionHead label="Curiosity Signals" sub="Self-declared · shapes matching, never vote weight"/>
+            {curiosities.map((c: any) => (
+              <div key={c.tag || c.id} style={{
+                display:"flex", alignItems:"center", gap:10, padding:"6px 0",
+              }}>
+                <span style={{ fontSize:10, color:T.muted, fontFamily:T.mono, minWidth:210 }}>
+                  #{c.tag || c.name}
+                </span>
+                <BarMini pct={(c.weight || 0) * 100} color={T.blue}/>
+                <span style={{ fontSize:9, color:T.gold, fontFamily:T.mono, minWidth:30, textAlign:"right" }}>
+                  {Math.round((c.weight || 0) * 100)}%
+                </span>
+              </div>
+            ))}
+          </>
+        )}
+      </div>
+
+      {/* Right rail */}
+      <div style={{ width:236, flexShrink:0 }}>
+        <SectionHead label="Memberships"/>
+        {orgs.map((o: any) => (
+          <div key={o.org_id} style={{
+            padding:"10px 0", borderBottom:`1px solid ${T.border}`, cursor:"pointer",
+          }} onClick={() => {
+            if (orgs.length === 1) router.push("/org/commons");
+          }}>
+            <p style={{ margin:"0 0 4px", fontSize:12, color:T.text, fontFamily:T.serif }}>{o.org_name || o.org_slug}</p>
+            <div style={{ display:"flex", justifyContent:"space-between" }}>
+              <span style={{ fontSize:9, color:T.muted, fontFamily:T.mono }}>@{o.handle}</span>
+              <span style={{ fontSize:9, color:T.gold, fontFamily:T.mono }}>{o.current_state}</span>
+            </div>
+          </div>
+        ))}
+        {orgs.length > 1 && (
+          <p style={{ fontSize:9, color:T.muted, fontFamily:T.mono, marginTop:12 }}>
+            Switch org via sidebar context.
+          </p>
+        )}
+
+        <div style={{ marginTop:24 }}>
+          <SectionHead label="Quick Actions"/>
+          {[
+            ["View Commons", "/org/commons"],
+            ["View Circles", "/org/circles"],
+            ["View Ledger", "/org/ledger"],
+          ].map(([label, href]) => (
+            <button key={href} onClick={() => router.push(href)} style={{
+              display:"block", width:"100%", textAlign:"left",
+              padding:"8px 0", borderBottom:`1px solid ${T.border}`,
+              border:"none", background:"none", cursor:"pointer",
+              fontSize:11, color:T.textSub, fontFamily:T.serif,
+            }}>{label}</button>
+          ))}
+        </div>
       </div>
     </div>
   );
