@@ -268,8 +268,9 @@ function PostCard({ post, onFormalReview }: {
     if (m < 1440) return `${Math.floor(m / 60)}h`;
     return `${Math.floor(m / 1440)}d`;
   };
-  const avgScore = post.formal_reviews.length > 0
-    ? post.formal_reviews.reduce((s, rev) => s + rev.score_s, 0) / post.formal_reviews.length
+  const reviews = post.formal_reviews ?? [];
+  const avgScore = reviews.length > 0
+    ? reviews.reduce((s, rev) => s + rev.score_s, 0) / reviews.length
     : null;
 
   return (
