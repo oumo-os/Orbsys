@@ -1,0 +1,1652 @@
+A Polycentric Autonomy-Audit System for Participatory Meritocracy 
+and Anti-Fragile Governance in Fluid Collectives
+Okitoi Samuel Oumo, 2025 
+Independent Researcher Kampala, Uganda 
+samoumo@live.com
+Abstract
+Fluid, non-territorial communities—such as decentralized autonomous organizations (DAOs), opensource projects, and global purpose-driven collectives—lack legitimate, adaptive governance 
+structures. Traditional hierarchical models are too rigid, while token-based or purely algorithmic 
+systems often degrade into plutocracy or opaque “autocracy of code.” This paper presents the 
+Polycentric Autonomy-Audit System (PAAS), a socio-technical governance framework engineered 
+for trust-sparse, amorphous environments. PAAS transforms governance into a dynamic, learning 
+process built on a continuous autonomy-audit feedback loop, instantiated through four foundational 
+vectors: Competences (dynamic expertise currency), Curiosities (interest signals), Circles (closed 
+decision bodies), and Cells (ephemeral deliberation spaces)—the 4Cs.
+By exhaustively defining and separating the dual forces of autonomy (Circles) and audit (Audit 
+Short-Term Facilitators), and by formalizing influence through a Dual Competence Metric (Hard 
+Competence 𝑊𝐻 for verified credentials, Soft Competence 𝑊𝑆for dynamic contribution), PAAS 
+addresses critical governance failures endemic in fluid collectives. The framework strictly limits 
+artificial intelligence to a non-prescriptive, human-centered role, ensuring transparency and agency. 
+Through simulated case studies, structural analysis, and comprehensive operational specifications, 
+we demonstrate PAAS’s inherent anti-fragility, participatory meritocracy, and applicability to 
+complex, real-world collectives.
+Keywords: Decentralized Governance, Collective Intelligence, Polycentricity, Human-Centered AI, 
+Competence Metrics, Anti-Fragile Systems, Participatory Meritocracy, Rotational Governance, 
+Inclusion-by-Design
+
+Page 1 of 51
+I. Introduction: The Crisis of Legitimacy in Fluid Collectives
+A. The Governance Vacuum in Amorphous Communities
+The twenty-first century has witnessed the proliferation of “headless” organizations—fluid, global, 
+and purpose-driven collectives that operate outside traditional corporate or state jurisdictional 
+boundaries. Examples include decentralized autonomous organizations (DAOs), large-scale opensource software communities, interplanetary settlement initiatives, and nascent non-territorial 
+organizations. These entities present a fundamental governance challenge: traditional hierarchical 
+models prove too rigid and centralized for trust-sparse environments, while purely algorithmic or 
+token-based systems frequently degrade into plutocracy or opaque “autocracy of code” (Torenberg, 
+2021; Hassan & De Filippi, 2021).
+Empirical evidence demonstrates the severity of this governance vacuum. Research indicates that 
+over 70% of DAO treasury proposals fail post-passage due to execution disputes rather than voting 
+failures, pointing to severe accountability and management deficits (Nabben, 2023; Aragon Network, 
+2023). Furthermore, unstructured decision-making contributes to maintainer burnout in 
+approximately 40% of large open-source projects, demonstrating systemic inability to manage 
+organizational friction (GitHub, 2024). These failures highlight a structural weakness: the focus has 
+traditionally been on achieving consensus through voting mechanisms (voting risk), while neglecting 
+the far more critical challenges of legitimate execution and conflict resolution (execution risk).
+A novel framework must embed structural safeguards directly into the execution phase, ensuring 
+accountability extends beyond the vote itself to encompass implementation, oversight, and 
+continuous learning. The governance system must transform from a static structure into a dynamic, 
+learning process that gains strength from challenges rather than fragmenting under pressure.
+B. The Polycentric Autonomy-Audit System (PAAS): A Comprehensive Solution
+The Polycentric Autonomy-Audit System (PAAS) is engineered to fill this vacuum by making 
+governance a participatory meritocracy where contribution converts into influence. It is a 
+comprehensive socio-technical system where human expertise and collective wisdom are paramount, 
+and technology serves a strictly non-prescriptive, participation-enabling function.
+The system is centered on the principle that legitimate authority in a decentralized context must be 
+both earned through demonstrated contribution (autonomy) and continuously verified through 
+rigorous oversight (audit). This dual mandate creates a trust-minimized, fluid hierarchy where no 
+single entity holds unchecked power.
+
+Page 2 of 51
+The Conceptual Foundation
+The Latin root of the framework’s conceptual basis—Orbis (circle, orbit, world)—encodes three 
+foundational principles that define the architecture:
+1. Cyclical Governance Processes: Autonomy leads to audit, which informs action, generates 
+learning, and returns to refined autonomy, creating a continuous feedback loop.
+2. Nested, Polycentric Orbits: Cells orbit Cells and Circles orbit Circles, all within a selfcorrecting system of overlapping authority that prevents both centralized control and 
+fragmented ineffectiveness.
+3. A World of Participation: Every member moves in their own orbit of Competence and 
+Curiosity, pulled into collective motion by structured opportunities. The name is not ornamental 
+but encodes the framework’s anti-fragile, participatory, and polycentric DNA.
+Architectural Overview
+PAAS is architected upon four foundational vectors—the 4Cs:
+- Competences: Dynamic expertise currency combining verified credentials (𝑊𝐻) with 
+performance-based ratings (𝑊𝑆)
+- Curiosities: Self-declared interest signals that enable AI-powered matchmaking without 
+affecting vote weight
+- Circles: Closed, competence-gated bodies with dual mandate for decision-making and 
+implementation
+- Cells: Ephemeral, open deliberation spaces that aggregate knowledge and filter ideas
+The framework formalizes governance into three continuous, distinct tracks:
+1. The Operational Track: Manages routine action, deliberation, decision-making, and audit
+2. The Judicial Track: Handles systemic appeals, integrity breaches, and disciplinary action
+3. The Competence Verification Track: Manages attribution and assessment of both Hard and 
+Soft Competence
+Through this architecture, PAAS offers a robust, implementable model that synthesizes principles 
+from polycentric governance, collective intelligence, human-centered AI, and participatory 
+meritocracy.
+
+Page 3 of 51
+II. Theoretical Foundations: Synthesis for Decentralized Legitimacy
+PAAS is grounded in a synthesis of established and emerging theories from political science, 
+organizational theory, and computer science, creating a coherent framework for decentralized 
+legitimacy.
+A. Polycentric Governance and Subsidiarity
+Elinor Ostrom’s Nobel Prize-winning work demonstrated that common-pool resources are most 
+effectively managed by polycentric systems characterized by overlapping, nested centers of decisionmaking authority (Ostrom, 1990, 2010). These systems avoid the pitfalls of both centralized control 
+and purely individualistic competition. PAAS directly operationalizes this principle through its 
+architectural design:
+Circles function as semi-autonomous decision centers, embodying the principle of subsidiarity by 
+ensuring decisions are made at the lowest level closest to the action (Føllesdal, 1998). Each Circle 
+holds both decision-making and implementation authority within its bounded domain, creating direct 
+accountability between choice and consequence.
+Cells serve as fluid deliberation spaces that foster diverse participation before decisions are 
+committed, preventing the premature closure that can occur when deliberation and decision-making 
+are conflated.
+The continuous autonomy-and-audit loop between Circles and Audit Short-Term Facilitators (aSTFs) 
+directly applies Ostrom’s observation that effective polycentric systems require robust, low-cost 
+monitoring and conflict-resolution mechanisms (Ostrom, 2010). The explicit function of Executional 
+Short-Term Facilitators (xSTFs) as coordinating bodies—especially when resolving stalemates 
+between separate Circles—formalizes the creation of collaborative forums (Ansell & Gash, 2008, 
+2018). These forums translate the necessary but often informal practices of cross-institutional 
+negotiation observed in complex polycentric networks into standardized, accountable institutional 
+processes. This structural element prevents decentralized authority from fragmenting into siloed, 
+ineffective nodes while preserving the autonomy necessary for agility.
+B. Collective Intelligence and Epistemic Democracy
+Theories of collective intelligence argue that under the right conditions, groups can make smarter 
+decisions than any individual member. Surowiecki (2004) identified key conditions necessary for 
+
+Page 4 of 51
+effective collective intelligence: diversity of opinion, independence, decentralization, and 
+aggregation. The structure of PAAS is designed to cultivate these conditions systematically:
+- Curiosities and open Cells foster diversity and independence by drawing participants from 
+varied backgrounds and interests
+- Distributed Circles enable decentralization by vesting authority in domain-specific bodies
+- Competence-weighted aggregation in voting refines the wisdom of the crowd with expert 
+judgment, creating what scholars term epistemic democracy (Landemore, 2013, 2020)
+This alignment with epistemic democracy holds that the primary value of democratic procedures is 
+their truth-tracking capability and ability to yield high-quality outcomes (Estlund, 2008). PAAS 
+directly operationalizes a form of participatory meritocracy (Weydemeyer & Atela, 2023) where 
+influence is not derived from social capital or financial stake but from verified expertise and 
+demonstrated contribution, quantified as Competence.
+This design decision is a direct structural defense against the plutocratic degradation documented in 
+many token-weighted systems, where decision-making power becomes disproportionate to capital 
+holdings (Torenberg, 2021; Hassan & De Filippi, 2021; Weyl et al., 2022). By emphasizing that 
+influence must be earned and continuously maintained, the system achieves internal meritocratic 
+legitimacy—a necessary component for sustained participation in decentralized collaborations.
+C. Human-Centered AI and Non-Directive Systems
+As artificial intelligence becomes more integrated into human systems, the principles of HumanCentered AI (HCAI) have gained prominence. HCAI advocates for systems that augment human 
+intelligence rather than replace it, emphasizing transparency, explainability, and meaningful human 
+control (Shneiderman, 2020). Research has consistently shown that algorithmic nudging and opaque 
+automated decisions can undermine human agency and perceived legitimacy (Zuboff, 2019).
+The AI layer in PAAS is meticulously designed to be non-directive, performing only supportive 
+functions—matching, summarizing, and logging—without prescribing outcomes. This design is a 
+direct implementation of HCAI best practices, ensuring technology serves as an unbiased helper 
+rather than a covert controller. The technological design clearly separates the static (𝑊𝐻) and 
+dynamic (𝑊𝑆) aspects of competence, ensuring that the non-directive AI only manages the highvolatility, performance-based metric, while the core, immutable identity is verified through a costly 
+human-led process, preserving integrity (W3C, 2022).
+
+Page 5 of 51
+D. The Autonomy-Audit Duality and Systemic Assurance
+The foundational architecture of PAAS rests on the deliberate creation of a structural tension 
+between autonomy (vested in Circles) and independent audit (vested in Audit Short-Term 
+Facilitators and Judicial Short-Term Facilitators). This separation of powers is the core mechanism 
+that provides anti-fragility (Taleb, 2012). A critical decision or systemic failure does not collapse the 
+system but instead triggers a mandatory, transparent audit process that produces learning and 
+reinforces trust.
+This oversight structure is modeled on best practices for risk governance, specifically utilizing the 
+Institute of Internal Auditors’ Three Lines Model (TLM) (The Institute of Internal Auditors, 2017):
+1. Circles function as the First Line (risk owners and managers)
+2. Audit STFs (aSTFs) function as the Second Line (monitoring, expertise support, and 
+challenge)
+3. Judicial Short-Term Facilitators (jSTFs) function as the Third Line (independent, systemic 
+assurance)
+The entire PAAS edifice is built upon a continuous feedback loop between two opposing yet 
+complementary forces:
+Autonomy is the principle of granting executional discretion to those with proven capability and 
+direct responsibility. It is the engine of action, speed, and innovation, preventing bureaucratic 
+paralysis. In PAAS, autonomy is vested in Circles, whose authority to act within their domain is a 
+necessary condition for agility.
+Audit is the principle of independent, post-hoc verification to ensure actions align with system 
+principles, ethics, and efficacy. It is the immune system that prevents corruption, groupthink, and 
+mission drift. In PAAS, audit is performed by embedded Audit Short-Term Facilitators, which 
+provide a statistically robust, competence-gated check on power.
+This duality creates a trust-minimized, fluid hierarchy where no single entity holds unchecked 
+power. Circles act, and Audit Short-Term Facilitators review. This separation of powers is the 
+primary defense against internal capture and the mechanism that makes the system anti-fragile. A 
+crisis or contentious decision does not break the system but triggers the audit mechanism. The 
+ensuing transparent deliberation and resolution process produces a public record that reinforces 
+community trust and system integrity, making the system stronger for having faced the stressor.
+
+Page 6 of 51
+The implementation of mandatory, rotating, and often anonymized oversight functions addresses the 
+known failure modes of internal-only governance models, such as those sometimes observed in selfmanaged organizational structures like Holacracy (Robertson, 2015). Systems relying purely on 
+internal mechanisms can suffer from familiarity bias, scope limitations, and the “watering down” of 
+critical issues due to lack of independent accountability. By creating distinct, competence-gated, and 
+continually rotating audit bodies, PAAS protects the oversight function itself from internal capture 
+and entrenchment, ensuring continuous legitimacy.
+III. The Economy of Influence: The Dual Competence Metric
+To establish a legitimate and robust meritocracy, PAAS employs a Dual Competence Metric that 
+combines dynamic, performance-based scores (Soft Competence 𝑊𝑆) with static, verifiable external 
+credentials (Hard Competence 𝑊𝐻). This separation provides necessary logical integrity, ensuring 
+that continuous internal performance is anchored by verifiable, foundational expertise.
+A. The Philosophical Role of Competence
+Influence in PAAS is not a function of wealth or social capital but of verified expertise. Competence
+is a quantifiable, verifiable, and dynamic measure of a member’s domain-specific knowledge and 
+capability. It operationalizes a form of meritocracy, ensuring that the weight of an individual’s voice 
+in a decision is proportional to their demonstrated understanding of the matter at hand.
+A “Domain” is a field of knowledge or responsibility (e.g., Cryptography, Community Health, 
+Treasury Management). A “Competence” is a user’s personal, quantified expertise within that 
+domain. Domains are the categories, while Competences are the user-specific ratings within those 
+categories.
+B. Soft Competence (𝑾𝑺): Dynamic Performance Currency
+Soft Competence (𝑊𝑆) is the quantifiable, domain-specific measure of a member’s demonstrated 
+capability and expertise, represented by the vector 𝑊𝑢 = {𝑤𝑢,𝑑}. It is the dynamic engine of 
+meritocratic mobility, proportional to an individual’s influence in day-to-day decisions.
+1. The Competence Vector
+Each user 𝑢 is characterized by a vector 𝑊𝑢 = {𝑤𝑢,𝑑}, where 𝑤𝑢,𝑑 ∈ [0,3000] represents their rating 
+in domain 𝑑. A score of zero indicates no expertise, while 3000 represents a recognized expert, 
+
+Page 7 of 51
+originator, or doctoral-level authority. Every change to 𝑤𝑢,𝑑 is permanently linked to the evidence, 
+endorsements, and in-system activities that caused it, creating an auditable trail. This aligns with 
+principles of transparent reputation systems (Resnick & Zeckhauser, 2002) and provides the 
+provenance-rich ledger necessary for system integrity.
+2. The Competence Engine: Change Formula
+Soft Competence is not static but evolves based on performance, credible evidence, and peer review, 
+inspired by the Elo rating system used in chess (Elo, 1978). The change from a single activity in 
+domain 𝑑 is calculated as:
+𝛥𝐶𝑢,𝑑 = 𝐺 ⋅ 𝐾𝑢,𝑑 ⋅
+∑ (𝑆𝑟 − 0.5) 𝑟∈𝑅 ⋅ 𝑤𝑟,𝑑 ⋅ 𝑀𝑟,𝑑
+∑𝑟∈𝑅 𝑤𝑟,𝑑 ⋅ 𝑀𝑟,𝑑
+An exhaustive breakdown of the parameters follows:
+Activity Gravity (𝐺): A scalar that contextualizes the impact of the activity. Different activities 
+carry different weight based on their formality and stakes: 
+- 𝐺 = 0.5: Thought exercise or informal post 
+- 𝐺 = 1.0: Formal motion or deliberation 
+- 𝐺 = 1.2: Competence audit or formal test
+Responder Score (𝑆𝑟): The judgment of responder 𝑟, where 𝑆𝑟 ∈ [0,1]. The term (𝑆𝑟 − 0.5) is a 
+critical design choice that centers a neutral response at zero, ensuring positive and negative signals 
+are symmetric and equally impactful: 
+- 𝑆𝑟 = 1.0: Strongly positive endorsement 
+- 𝑆𝑟 = 0.5: Neutral response 
+- 𝑆𝑟 = 0.0: Strongly negative response
+Endorsements may be accompanied by short provenance (reason and link) to qualify weight and 
+provide transparency.
+Competence Weight (𝑤𝑟,𝑑): The responder’s own competence in the domain. This creates a 
+recursive network of trust where the opinions of those with proven expertise carry more weight, a 
+concept supported by research on expert-led aggregation (Hong & Page, 2004). This mechanism 
+ensures that the evaluation process itself is meritocratic, preventing arbitrary assessment and 
+reinforcing the structure of merit.
+
+Page 8 of 51
+Circle Multiplier (𝑀𝑟,𝑑): Amplifies the influence of those with direct responsibility, binding 
+competence to accountability. Because Circles carry responsibility, membership in a Circle directly 
+responsible for domain 𝑑 amplifies influence: 
+- 𝑀 = 1.6: Direct Circle member (responsible for domain 𝑑 as primary) 
+- 𝑀 = 1.2: Member of a related Circle (domain 𝑑 is secondary mandate) 
+- 𝑀 = 1.0: Member unrelated to any Circle mandated to domain 𝑑
+This multiplier affects both positive and negative reactions symmetrically unless otherwise 
+configured, ensuring that those who hold power to act also hold extra influence in assessing others 
+and therefore extra accountability.
+Volatility (𝐾𝑢,𝑑): A per-user-per-domain volatility factor analogous to the Elo K-factor that 
+decreases with user maturity: 
+- 𝐾 = 60: New users with few proofs 
+- 𝐾 = 30: Established users 
+- 𝐾 = 10: Veteran or stable users
+The volatility may be computed from the number of anchored proofs, time active, and past volatility. 
+This factor allows for rapid initial learning and stable expert ratings, balancing system 
+responsiveness with stability.
+3. Post-Processing and Anti-Abuse Mechanisms
+Several safeguards prevent gaming and ensure large shifts in perceived competence are backed by 
+robust, auditable evidence:
+Capping: The absolute change per submission is capped such that |𝛥𝐶𝑢,𝑑| ≤ 𝐶𝑚𝑎𝑥 (e.g., 𝐶𝑚𝑎𝑥 =
+120) to prevent single-event volatility.
+Bounds: The final rating 𝑤𝑢,𝑑 is constrained to [0,3000] to maintain consistency across the 
+system.
+Audit Triggers: If |𝛥𝐶𝑢,𝑑| > 𝑇𝑎𝑢𝑑𝑖𝑡 (e.g., 𝑇𝑎𝑢𝑑𝑖𝑡 = 50), the change is flagged and optionally held in 
+pending state until Executional Short-Term Facilitator or specialized Short-Term 
+Facilitator review. This prevents gaming and ensures large shifts are validated through 
+human oversight.
+
+Page 9 of 51
+Endorser Meta-Reputation: The system tracks whether past endorsements aligned with later audits 
+and weighs accordingly. If an endorser’s endorsements routinely fail audits, their 
+effective 𝑤 and 𝑀 are reduced, creating accountability for the endorsement process 
+itself.
+Rate Limits: Rate limits are applied on endorsements that can trigger non-trivial 𝛥𝐶 for the same 
+target in a short window, preventing coordinated manipulation.
+Pattern Detection: The system detects coordinated endorsement networks and triggers specialized 
+or Executional Short-Term Facilitators for investigation.
+Cooldown and Smoothing: An exponential moving average is applied to large 𝛥𝐶 to prevent 
+instantaneous wild swings and maintain stability.
+4. Multi-Domain and Hierarchical Handling
+Submissions are commonly multi-domain in nature. The system handles this complexity through a 
+structured approach:
+4. The submission is tagged with domains {𝑑𝑖} and tag weights {𝑡𝑖} where ∑𝑡𝑖 = 1
+5. The change 𝛥𝐶𝑢,𝑑𝑖is computed independently for each domain using the same formula, with 
+responses partitioned by domain relevance
+6. The calculated 𝛥𝐶𝑢,𝑑𝑖is then multiplied by the tag weight 𝑡𝑖to scale its impact appropriately
+7. Hierarchical transfers are applied: if domain 𝑝 is a parent of domain 𝑐, a transfer factor 𝛼𝑝←𝑐is 
+used such that 𝛥𝐶𝑢,𝑝+= 𝛼𝑝←𝑐⋅ 𝛥𝐶𝑢,𝑐
+Example transfer coefficients: 
+- Parent from child: 𝛼 = 0.6
+- Related sibling domains: 𝛼 = 0.2 to 0.4
+This approach avoids double-counting while preserving knowledge spillover across related domains.
+5. Circle Membership Asymmetry and Double-Edged Influence
+Because Circles are responsibility-holders, Circle-endorsed signals carry greater weight in practice. 
+The design employs 𝑀 > 1 for direct Circle members so that their positive 𝑆 delivers greater gain 
+and their negative 𝑆 delivers greater penalty. This design binds competence and agency: those who 
+hold power to act also hold extra influence in assessing others and therefore extra accountability.
+
+Page 10 of 51
+Optionally, asymmetric 𝑀 may be adopted if governance decides Circle rejections should be more 
+punitive than approvals are generous. If used, asymmetric defaults should be conservative and paired 
+with stricter Executional or specialized Short-Term Facilitator auditing to maintain fairness.
+6. Provenance, Evidence, and Endorsement Confidence
+High-impact changes with large |𝛥𝐶| must be accompanied by richer evidence. The system 
+implements a confidence tier on endorsements:
+High-Confidence: Linked evidence (papers, certifications, test results) with detailed rationale. These 
+are accepted at face value if provenance checks out.
+Medium-Confidence: Short justification with attachments or references.
+Low-Confidence: Single-click endorsement without supporting text. These are treated as lower 
+effective 𝑆 or reduced 𝑤 via a confidence multiplier.
+The Integrity Engine requires provenance for endorsements that would cause large changes, 
+otherwise treating them as low-confidence to maintain system integrity.
+7. Worked Example: Digit-by-Digit Calculation
+Consider Alice who posts a thought piece (𝐺 = 0.5) tagged Philosophy. The responders in 
+Philosophy are: 
+- Bob: 𝑤𝐵 = 2500, direct Philosophy Circle member (𝑀𝐵 = 1.6), 𝑆𝐵 = 1.0
+- Carol: 𝑤𝐶 = 1800, not in Circle (𝑀𝐶 = 1.0), 𝑆𝐶 = 0.0
+- Dave: 𝑤𝐷 = 800, unrelated Circle (𝑀𝐷 = 1.0), 𝑆𝐷 = 1.0
+Alice has volatility 𝐾 = 40.
+Computing each responder term (𝑆𝑟 − 0.5) ⋅ 𝑤𝑟⋅ 𝑀𝑟: 
+- Bob: (1 − 0.5) × 2500 × 1.6 = 0.5 × 4000 = 2000
+- Carol: (0 − 0.5) × 1800 × 1.0 = −0.5 × 1800 = −900
+- Dave: (1 − 0.5) × 800 × 1.0 = 0.5 × 800 = 400
+Numerator: 2000 − 900 + 400 = 1500
+Denominator: 2500 × 1.6 + 1800 × 1 + 800 × 1 = 4000 + 1800 + 800 = 6600
+Fraction: 1500/6600 ≈ 0.22727
+With 𝐺 × 𝐾 = 0.5 × 40 = 20:
+
+Page 11 of 51
+𝛥𝐶 = 20 × 0.22727 ≈ 4.5454, rounding to + 5 points
+If Bob had not been a Circle member (𝑀𝐵 = 1.0), the gain would be approximately +3, illustrating 
+the Circle multiplier effect and demonstrating how responsibility amplifies influence.
+C. Hard Competence (𝑾𝑯): Verifiable Credentials
+Relying solely on an internal, peer-derived score (Soft Competence) can inadvertently lead to the 
+Meritocracy Paradox, where peer bias and social selection bias override objective performance, 
+potentially limiting advancement for diverse or under-represented individuals. To mitigate this risk 
+and provide an external anchor, PAAS integrates Hard Competence (𝑊𝐻).
+1. Definition and Source
+Hard Competence is the static, externally verifiable component of a member’s expertise in a 
+domain. It is intended for initial onboarding and periodic verification of foundational knowledge. 
+Hard Competence is a quantifiable score derived from externally verified professional and academic 
+credentials such as: 
+- Official licenses 
+- Specialized certifications 
+- Recognized educational degrees 
+- Patents 
+- Verified contributions to major external projects
+Verification is accomplished through tamper-proof cryptography methods and public key 
+infrastructure provided by modern Verifiable Digital Credentials (VDCs) (W3C, 2022), ensuring the 
+provenance and authenticity of the expertise.
+2. Calculation and Application
+Hard Competence is calculated outside the continuous 𝛥𝐶 formula and maintains low volatility. It is 
+updated only upon external renewal or formal verification audit.
+Process:
+a. A user submits a claim (e.g., doctoral degree in Cryptography) 
+b. An Executional Short-Term Facilitator is commissioned specifically to audit the proof, which 
+may involve: 
+
+Page 12 of 51
+- Verifying the diploma 
+- Checking the patent registry 
+- Confirming professional licensure 
+c. The audit mandate treats the xSTF report recommending the 𝑊𝐻 increase as a high-stakes 
+Motion that must be approved by an Audit Short-Term Facilitator
+This is a necessary step because the change is substantial and is based on evidence external to the 
+platform. Hard Competence is stable and only changes when new, externally verifiable credentials 
+are submitted and successfully audited.
+3. Governance Functions and Sybil Defense
+Hard Competence does not directly affect day-to-day vote weighting, which remains the domain of 
+dynamic Soft Competence. Instead, 𝑊𝐻 acts as a crucial gatekeeping mechanism and integrity check:
+Judicial Eligibility: A minimum, high 𝑊𝐻 threshold is a mandatory prerequisite for selection to the 
+Judicial Track Short-Term Facilitators where legal, ethical, and governance integrity are paramount.
+Critical Domain Circles: Specific, high-stakes Circles (e.g., Legal Compliance, Core Protocol 
+Security, Treasury Management) require members to meet minimum 𝑊𝐻 requirements to ensure they 
+possess the necessary foundational, externally validated knowledge and understanding of risk.
+Sybil Defense: Since high 𝑊𝐻 requires costly, auditable external verification—often involving a 
+specialized xSTF review—the barrier to entry for gaining significant influence via fraudulent 
+identities (Sybil attacks) is made prohibitively high. Costs are high for gaining external credentials, 
+and verification is manual and forensic in nature.
+4. Integration with the Anti-Fragile Core
+The integrity of the competence system relies on the technical and logical separation of Hard and 
+Soft Competence, mirroring best practices in system separation. Soft Competence provides the 
+dynamic responsiveness required for daily operations, while Hard Competence provides the static, 
+immutable proof of foundational expertise required for high-stakes roles and external legal 
+predictability.
+The Integrity Engine constantly flags any anomalous discrepancies between a user’s 𝑊𝐻 (static 
+anchor) and their 𝑊𝑆(dynamic performance), triggering a procedural audit if necessary to defend 
+against covert collusion or rating manipulation.
+
+Page 13 of 51
+This duality reinforces the system’s core principles across multiple dimensions:
+Legitimacy:
+- Hard Competence provides initial, foundational legitimacy for new members, countering 
+Sybil Attacks 
+- Soft Competence provides dynamic, earned legitimacy through active contribution, 
+countering stagnation and elite closure
+Audit Mandate:
+- Change in Hard Competence is subject to pre-emptive audit by a Vetting xSTF and approval 
+by an aSTF through the Judicial Track 
+- Change in Soft Competence is subject to post-hoc audit by an aSTF only if the change is 
+anomalous
+Anti-Abuse:
+- For Hard Competence: Costs are high for gaining external credentials, and verification is 
+manual and forensic 
+- For Soft Competence: Cost is high through quality work and earning expert endorsements, 
+and the process is prone to in-system audit
+This structure ensures that one cannot simply buy power (as in token-weighted systems) or gain 
+power solely through arbitrary social signals. Influence requires either verified, external cost through 
+Hard Competence or sustained, audited internal contribution through Soft Competence.
+D. The Relationship Between 𝑾𝑯 and 𝑾𝑺: Initial Boost and Decay
+The relationship between Hard and Soft Competence ensures that influence must be actively 
+maintained through contribution or it will decay, reflecting the perishable nature of skill relevance:
+Initial Status: 𝑊𝑆starts low but receives an initial, substantial boost proportional to a verified 𝑊𝐻
+credential. This is the Active Competence Value.
+Dynamic Update (Growth): 𝑊𝑆increases via the Competence Engine formula (the 𝛥𝐶 calculation) 
+when the user performs high-quality, peer-validated work in that domain.
+Decay (Sustained Relevance): If the user fails to engage in the domain, the effective influence of 
+their past credentials (the initial 𝑊𝐻 boost) decays, reflecting the half-life of knowledge. This decay 
+
+Page 14 of 51
+forces continuous contribution to sustain influence, thus preventing reliance on stagnant past 
+achievements.
+The Effective Competence (𝑊𝑢,𝑑
+𝐸𝑓𝑓𝑒𝑐𝑡𝑖𝑣𝑒) used for all voting and task matching is the Soft 
+Competence (𝑊𝑆) score, which fluctuates based on activity and decay.
+Example: A user with 𝑊𝐻 = 1786 in Material Science who remains inactive will see their 𝑊𝑆in 
+Material Science decay over time (e.g., from an initial 1786 to 1294). Conversely, a user with 𝑊𝐻 =
+400 in Cryptography who participates actively and earns positive endorsements will see their 𝑊𝑆rise 
+(e.g., from 400 to 1042), entirely independent of the static 𝑊𝐻 anchor.
+Metric Designatio
+n
+Source and 
+Verification
+Volatility/Update 
+Frequency
+Primary Governance 
+Function
+Hard 
+Compe
+tence
+𝑊𝐻 (Static 
+Anchor)
+External Credentials 
+(VDCs, Licenses). 
+Verified by 
+specialized xSTF 
+and Audited by 
+aSTF (W3C, 2022).
+Low Volatility. Updated 
+only upon successful, 
+audited external 
+submission.
+Gatekeeping:
+Eligibility for highstakes roles (e.g., jSTF). 
+Initial Boost: Provides 
+an initial, high 𝑊𝑆score 
+to legitimize the new 
+expert.
+Soft 
+Compe
+tence
+𝑊𝑆
+(Dynamic 
+Performanc
+e)
+Internal Peer Review 
+(𝛥𝐶 Formula), 
+Activity Scoring, 
+and Time Decay.
+High Volatility 
+(𝐾: 60 > 10). 
+Continuously updated.
+Effective Influence:
+The score used for all 
+voting, matching, and 
+resource allocation. 
+Meritocracy: Reflects 
+current, active 
+contribution.
+E. Curiosities (𝑩): The Engine of Inclusion and Growth
+Curiosities (𝐵𝑢) are the third vector, representing formal, self-declared signals of a user’s interests 
+and intrinsic motivations. They are the anti-stagnation mechanism, designed to foster crossdisciplinary collaboration and ensure that deliberation is infused with diverse perspectives and 
+intrinsic motivation, countering the tendency towards specialization silos.
+
+Page 15 of 51
+1. The Curiosity Vector
+The Curiosity Vector 𝐵𝑢 = {𝑏𝑢,𝑑} indicates interest in domain 𝑑. Curiosities are dynamic and selfdeclared, with users updating their curiosities based on evolving interests. The AI layer through the 
+Inferential Engine may suggest updates based on observed activity but never prescribes them, 
+preserving user autonomy and aligning with self-determination theory (Ryan & Deci, 2000).
+2. Critical Distinction from Competences
+Curiosities do not affect vote weight. Their sole purpose is for AI-powered matchmaking to 
+recommend relevant Cells, Short-Term Facilitator roles, and learning opportunities. This separation 
+is fundamental: it ensures that influence is based on proven ability (Competence) while engagement 
+is driven by passion and interest (Curiosity). This aligns with self-determination theory, which 
+highlights autonomy and relatedness as key drivers for sustained participation.
+The Inferential Engine uses Curiosity vectors to invite passionate but often under-represented 
+members to relevant Cells and Executional Short-Term Facilitators, counteracting the tendency 
+toward elite closure often observed in competence-only systems (Hong & Page, 2004; Page, 2007). 
+By fostering cross-disciplinary dialogue based on interest rather than just established role, Curiosities 
+function as the anti-stagnation mechanism, ensuring diverse input and preventing the formation of 
+rigid specialization silos.
+IV. Governance Architecture: Circles, Cells, and the Four-Component System
+The operational structure of PAAS is built upon four foundational vectors known as the Four Cs: 
+Competences, Curiosities, Circles, and Cells. Each component plays a distinct and complementary 
+role in the governance ecosystem.
+A. Circles: The Autonomous, Responsibility-Holding Organs
+1. Definition and Role
+A Circle is a closed, competence-gated body entrusted with both decision-making and 
+implementation authority for a specific, bounded domain (e.g., Network Security Circle, Treasury 
+Management Circle). Circles are the primary vessels of autonomy in PAAS, embodying the principle 
+of subsidiarity: that decisions should be made at the lowest possible level closest to the action 
+
+Page 16 of 51
+(Føllesdal, 1998). Circles function as the First Line in the Three Lines Model, serving as risk 
+owners and managers (The Institute of Internal Auditors, 2017).
+2. Exhaustive Characteristics
+Closed Membership: Membership is not open for all to join. Individuals are selected, appointed, or 
+rotated based on their Competence vector and a demonstrated willingness to accept accountability. 
+This ensures a high level of commitment and expertise, directly addressing the “tyranny of 
+structurelessness” where informal power structures emerge in the absence of formal ones (Freeman, 
+1972).
+Dual Mandate: Circles both decide on matters within their domain and are responsible for executing 
+those decisions. This binds agency to accountability: the decision-makers are also the implementers, 
+creating a direct feedback loop between choice and consequence and enabling agility through 
+executional discretion.
+Executional Discretion: Within their domain, Circles have the authority to act, allocate resources, 
+and manage projects without seeking constant permission from a higher authority, enabling agility 
+and rapid response to evolving circumstances.
+Competence-Weighted Voting: A Circle’s internal decisions are made via votes weighted by 
+members’ relevant Competences. For a Circle 𝐶 voting on a motion in domain 𝑑, let 𝑢 ∈ 𝐶 be a 
+Circle member, 𝑤𝑢,𝑑 ≥ 0 their competence, and 𝑣𝑢 ∈ {0,1} their vote (where 1 represents yes). The 
+total weighted yes votes are:
+𝑉𝑦𝑒𝑠 = ∑𝑤𝑢,𝑑
+𝑢∈𝐶
+⋅ 𝑣𝑢
+The total competence weight of the Circle is:
+𝑊𝐶 = ∑𝑤𝑢,𝑑
+𝑢∈𝐶
+A proposal passes the Circle if:
+𝑉𝑦𝑒𝑠 ≥ 𝜏 ⋅ 𝑊𝐶
+where 𝜏 ∈ (0,1] is a predefined threshold (e.g., 0.5 for majority or 0.67 for supermajority). This 
+ensures that decisions are rooted in the collective expertise of the responsible body.
+
+Page 17 of 51
+3. Circle Lifecycle and Accountability
+A Circle’s authority is not absolute but is counterbalanced by the audit of its embedded Audit ShortTerm Facilitator. If an aSTF identifies chronic underperformance, ethical breaches, or operational 
+failure, it can trigger a formal review by an overseeing Circle, potentially leading to the dismissal 
+and replacement of members. This accountability is asynchronous, triggered by performance metrics 
+and audit findings rather than fixed election cycles, making it a continuous process rather than a 
+periodic event.
+On filling vacancies, the Inferential Engine prepares candidates based on policy, and an Executional 
+Short-Term Facilitator review is triggered on each interested candidate, with the highest positive 
+endorsement taking on the role. This process ensures that new Circle members possess the necessary 
+competence and commitment before assuming responsibility.
+B. Cells: The Ephemeral Context for Deliberation
+1. Definition and Role
+A Cell is a temporary, focused deliberation space created to address a specific issue, draft a proposal, 
+or conduct research. Cells are the primary arenas where Competences are applied and Curiosities are 
+explored, operationalizing the deliberative democracy aspect of the framework. Cells serve as fluid, 
+temporary spaces for open deliberation, fostering diverse participation before decisions are 
+committed.
+2. Exhaustive Characteristics
+Ephemeral: Cells form for a specific purpose and dissolve upon completion (e.g., after submitting a 
+proposal to a Circle). This prevents bureaucratic bloat and maintains focus on the immediate issue at 
+hand.
+Open and Fluid: Unlike Circles, participation in a Cell is typically open to any user with relevant 
+Competences or Curiosities. This ensures diverse input and prevents groupthink by incorporating a 
+wide range of perspectives from across the community.
+No Authority: Cells are deliberative, not decision-making. They refine ideas and build consensus 
+but cannot issue binding decisions. That authority rests solely with Circles, maintaining a clear 
+separation between discussion and action.
+AI-Facilitated: The AI layer through the Inferential Engine and Insight Engine is crucial for Cell 
+management, using Curiosity vectors to suggest participants and summarizing discussions to reduce 
+
+Page 18 of 51
+cognitive load and information overload (Simon, 1971). This technological support enables parallel, 
+high-volume participation without leading to contributor burnout.
+Cells are not roles but a place for individuals in their respective roles to perform the desired actions. 
+They aggregate knowledge and filter rough ideas into formalized proposals, streamlining the 
+subsequent decision process while ensuring broad participation in the deliberative phase.
+C. Short-Term Facilitators: The Audit and Oversight Layer
+Short-Term Facilitators (STFs) are specialized teams explicitly distinct from Circles. They provide 
+oversight, specialized labor, and coordination but do not execute decisions, ensuring a separation of 
+powers essential to the anti-fragile architecture.
+All STFs are strictly temporary, task-specific, and dissolve upon completion. This fluid mandate 
+prevents entrenched power structures, minimizes familiarity bias between auditors and audited, and 
+maximizes system-wide participation by distributing critical governance roles across the entire active 
+membership pool.
+1. Audit Short-Term Facilitators (aSTFs): The Guardians of Integrity
+The Audit Short-Term Facilitator (aSTF) is the concrete manifestation of the audit principle and the 
+most critical innovation for anti-fragility. It functions as an internal audit committee, a concept 
+proven to enhance organizational governance, but adapted for a decentralized context. Audit ShortTerm Facilitators function as the Second Line in the Three Lines Model, providing monitoring, 
+expertise support, and challenge (The Institute of Internal Auditors, 2017).
+Role and Mandate: An aSTF is an independent, rotating audit body embedded within a specific 
+Circle. Its function is strictly post-decision. It does not propose or initiate but responds to the actions 
+of the Circle, ensuring objectivity and independence.
+Operational Mechanics: The aSTF does not participate in the Circle’s initial discussion, drafting, or 
+voting on a motion. This ensures its independence and prevents it from becoming a de facto supermember of the Circle. After a Circle vote concludes (whether it passes, fails, or is stalemated), the 
+aSTF initiates its audit. The audit criteria include: 
+- Reviewing the process for adherence to protocol 
+- Checking for conflicts of interest 
+- Assessing the quality of evidence 
+- Evaluating the decision’s ethical and long-term implications against the framework’s core 
+principles
+
+Page 19 of 51
+Binary Determination: The aSTF renders a final, binding decision with two possible outcomes: 
+- Approve: Validates the Circle’s decision and moves it to implementation 
+- Reject: Sends the motion back to the Circle for revision, further evidence, or abandonment, 
+accompanied by a formal, public report detailing the rationale
+This formalized process transforms internal conflict and potential failure points into system-wide 
+learning opportunities, reinforcing the system’s structural integrity. A rejected motion must be 
+substantially revised to address the aSTF’s stated concerns and then resubmitted as a new motion, 
+triggering a fresh audit with a new aSTF.
+Composition and Independence: aSTF membership is frequently rotated among highly competent, 
+trusted users to prevent co-option, entrenchment, and familiarity bias. Members are typically 
+anonymized to the Circle they audit to prevent undue social influence, pressure, or retaliation. The 
+selection process employs competence-sensitive selection as a key innovation: when a motion 
+involves competence domains that are critically underrepresented in the Circle’s membership, the 
+random selection algorithm for the aSTF is biased to include members with high competence in 
+those missing domains. This ensures the audit is not only procedurally sound but also substantively 
+comprehensive, mitigating collective blind spots.
+Fundamental Distinction from Circles: A Circle acts while an aSTF reviews. A Circle holds 
+operational responsibility while an aSTF holds systemic accountability. This separation is 
+fundamental to the anti-fragile property of the system, ensuring that power is checked and that 
+decisions undergo rigorous independent scrutiny before implementation.
+2. Executional Short-Term Facilitators (xSTFs): The Project-Based Workhorses
+Executional Short-Term Facilitators (xSTFs) are ad-hoc teams formed for time-bound tasks such as 
+deep research, proposal drafting, or candidate vetting (including 𝑊𝐻 verification). They are the 
+project-based workhorses of the system, reporting to a sponsoring Circle and dissolving upon task 
+completion.
+Executional Short-Term Facilitators also address issues or deliberations spanning multiple Circles, 
+such as conflicts between Circles or platform-wide policy changes. They comprise members from the 
+involved Circles and neutral experts, functioning as a mediating layer for polycentric coordination 
+(Ansell & Gash, 2018). Their role is to facilitate dialogue, draft coordinated proposals, and resolve 
+conflicts. These forums translate the necessary but often informal practices of cross-institutional 
+negotiation observed in complex polycentric networks into standardized, accountable institutional 
+processes, preventing decentralized authority from fragmenting into siloed, ineffective nodes.
+
+Page 20 of 51
+V. The Issue to Resolution to Execution Lifecycle: The Forked Path
+The Issue to Resolution to Execution lifecycle operationalizes the core Autonomy-Audit duality. 
+This process is designed to ensure every action is traceable to a legitimate, audited authority. The 
+lifecycle is not monolithic but forks into two primary tracks based on the mandate: the Executive 
+Track for Tasks and the Legislative Track for Motions.
+A. Issue Emergence and Sponsorship: The Filter
+An issue enters the system from: 
+- An organic member report 
+- An automated flag from the Inferential Engine 
+- A scheduled protocol event
+The issue is initially discussed in an ephemeral Cell, which is populated based on users’ 
+Competences and Curiosities. This deliberative phase allows for broad participation and diverse 
+input before any formal decision is made.
+To elevate the issue to a formal work stream, it requires Sponsorship from a member of the relevant 
+Responsible Circle. This step validates the issue’s priority and assigns accountability for resource 
+usage, preventing frivolous or low-priority items from consuming organizational capacity.
+B. The Fork: Task versus Motion
+The Responsible Circle commissions an Executional Short-Term Facilitator with a specific mandate, 
+defining the process path. The nature of this mandate determines whether the issue proceeds along 
+the Executive Track or the Legislative Track.
+1. Path A: The Executive Track for Operational Tasks
+Purpose: The Executive Track is designed to perform operational work, research, or drafting based 
+on an existing mandate. This track handles the routine execution of previously authorized policies 
+and procedures.
+Authority Reference: The Circle must cite an existing Resolution to justify commissioning the 
+xSTF, maintaining the chain of legitimacy and preventing unauthorized resource spending. This 
+
+Page 21 of 51
+requirement ensures that all operational work can be traced back to a democratically approved policy 
+decision.
+xSTF Role: The xSTF is composed of members highly Competent to deliver the task, acting as the 
+system’s workhorses for implementation and execution.
+Resolution: The xSTF delivers a Work Product or Report to the commissioning Circle, and the 
+process concludes. Since the mandate was pre-authorized by an audited Resolution, no further aSTF 
+audit is typically required on the deliverable itself, streamlining operational efficiency.
+2. Path B: The Legislative Track for Governance and Policy
+Purpose: The Legislative Track is designed to create a new policy, change a protocol, or approve 
+resource allocation. This track handles decisions that establish new mandates or alter existing 
+governance structures.
+xSTF Role as Deliberative Quorum: The xSTF acts as the deliberative body, drafting the formal 
+Motion. For multi-Circle issues, it includes members from all impacted Circles and neutral experts, 
+facilitating polycentric coordination and ensuring all stakeholders are represented in the drafting 
+process.
+Circle Vote: The draft Motion is submitted to the responsible Circle or Circles for a CompetenceWeighted Vote. This is the Autonomy phase where the Circle exercises its decision-making authority 
+within its domain of expertise and responsibility.
+C. The Audit and Final Determination
+Audit Trigger: A Motion passed by a Circle vote immediately triggers the aSTF. This automatic 
+trigger ensures that no significant governance decision escapes independent scrutiny.
+aSTF Role: The aSTF reviews the decision for protocol adherence, ethical impact, quality of 
+evidence, and conflicts of interest. It remains independent by not participating in the initial vote or 
+deliberation, ensuring objectivity in its assessment.
+Resolution: The aSTF renders a binding decision to either: 
+• Approve: The motion becomes an immutable Resolution 
+• Reject: The motion is returned with a public report detailing the reasons for rejection and 
+providing guidance for revision
+
+Page 22 of 51
+D. Execution and Polycentric Hand-off
+Execution: The approved Resolution grants the Target Circle or Circles the mandate to execute the 
+action. This formal authorization provides clarity and legitimacy to the implementation phase.
+Polycentricity: The system allows for a separation between the deciding body and the executing 
+body, optimizing for specialized expertise in both governance and implementation. This design 
+recognizes that the skills required for wise decision-making may differ from those required for 
+effective execution, and it enables the framework to leverage the appropriate expertise at each stage.
+VI. The Judicial Track: Integrity and Anti-Capture
+To address the risk of internal capture or corruption within a Circle, the system implements a 
+specialized judicial track, reinforcing its anti-fragile nature and providing the necessary legal gravity 
+for dispute resolution. Judicial Short-Term Facilitators function as the Third Line in the Three Lines 
+Model, offering independent, systemic assurance (The Institute of Internal Auditors, 2017).
+A. Mandate and Systemic Role
+The Judicial Track resolves complex internal system failures that extend beyond the routine mandate 
+of the aSTF. Its primary functions include:
+8. Disciplinary Action: Investigating and adjudicating serious behavioral breaches, including:
+– Attempts at Collusion or System Capture
+– Competence Misrepresentation
+– Bad-Faith 
+– Ethical or Code of Conduct Violations
+9. Systemic Policy Review: Addressing complex jurisdictional disputes between Circles or 
+fundamental ethical dilemmas not covered by routine policy.
+10. Sanction Imposition: The Judicial Track holds the exclusive mandate to impose major 
+sanctions:
+– Competence Deduction
+– Temporary Suspension
+– Circle Flush and Re-vetting
+– Expulsion
+
+Page 23 of 51
+By providing a transparent, auditable mechanism for establishing accountability and due process, the 
+Judicial Track is essential for enhancing the system’s legitimacy and enabling constructive external 
+interfaces. This capability is crucial in decentralized contexts where legal predictability and the clear 
+ascription of liability remain major challenges (Grant et al., 2024; Hassan & De Filippi, 2021).
+B. Judicial Process and Anti-Capture Mechanism
+The Judicial Process is a multi-stage, deliberately separated sequence designed to ensure due process 
+and prevent any single point of corruption.
+1. Trigger & Systemic Flag
+A case is initiated by: 
+- A formal complaint meeting a competence-gated threshold 
+- An Integrity Engine anomaly flag (e.g., Sybil-like activity, unusual voting patterns) 
+- Repeated defiant resubmission of a rejected motion
+Upon flagging, the Integrity Engine can place a temporary hold on the suspected member’s 
+Competence Multiplier (𝑀𝑟,𝑑) within the relevant domain(s), preventing them from exercising undue 
+influence during the investigation.
+2. Integrity-Commissioned Investigation (Judicial xSTF)
+Commission: The Integrity Engine or an overseeing Circle commissions a dedicated Judicial xSTF.
+Composition: This xSTF is composed of neutral members with high 𝑊𝐻 and 𝑊𝑆in investigative 
+forensics, ethics, and the relevant domain. Members are selected to have no prior involvement in the 
+case.
+Mandate: Its sole task is forensic fact-finding, evidence compilation, and witness interviews, 
+culminating in a detailed, evidence-based Investigation Report that recommends a course of action.
+3. Meta-Audit and Final Determination (Meta-aSTF)
+Review Body: The Investigation Report is submitted to a Meta-aSTF (or a designated overseeing 
+Circle functioning as one).
+Composition Requirements: This body is selected randomly from a pool of individuals with the 
+highest Hard Competence (𝑊𝐻), specifically in domains like Legal Theory, Ethics, Procedural 
+
+Page 24 of 51
+Governance, and Conflict Resolution (typically 𝑊𝐻 ≥ 2400). This ensures arbiters possess 
+verifiable, foundational expertise for judgments with serious implications.
+The Meta-Audit: This body reviews the investigation for procedural due process, evidence 
+sufficiency, and proportionality. It does not re-investigate but audits the investigation itself.
+Final Binding Ruling: The Meta-aSTF issues the final, binding verdict (e.g., “sanction imposed,” 
+“case dismissed”). This ruling, and its detailed rationale, is immutably logged by the Integrity 
+Engine.
+Executional Mandate: Crucially, only this Meta-aSTF holds the binding mandate to terminate a 
+member’s Circle membership or impose organization-level sanctions. This separation of 
+investigation and judgment is a core anti-capture feature.
+4. Systemic Repair and Vetting
+If a sanction creates a vacancy (e.g., removal from a Circle), an overseeing Circle triggers the 
+standard vetting protocol: 
+a. The Inferential Engine prepares a candidate list based on policy and qualifications 
+b. A new Vetting xSTF reviews candidates 
+c. The highest-endorsed individual fills the role
+This ensures the system self-repairs in a legitimate, meritocratic manner after a disciplinary event.
+C. Procedural Safeguards and Independence
+Anonymization: Where necessary to prevent intimidation or bias, Judicial xSTF and Meta-aSTF 
+members may be anonymized to the parties under investigation.
+Transparency & Audit Trail: Every step—from the initial flag to the final ruling—is recorded in 
+the tamper-evident ledger of the Integrity Engine, providing a complete, public audit trail.
+Procedural Independence: All judicial investigations and audits must adhere to established, 
+rigorous standards of independence and quality management, drawing upon principles found in 
+standards such as Generally Accepted Government Auditing Standards (GAGAS) (Government 
+Accountability Office, 2024).
+
+Page 25 of 51
+Feature Operational 
+Track (Circles & 
+aSTFs)
+Judicial Track 
+(Specialized STFs)
+Primary 
+Goal
+Assurance Line 
+(IIA TLM)
+Primary 
+Mandate
+Action, Execution, 
+and Routine Policy 
+Review
+Dispute Resolution, 
+Systemic Integrity, 
+Disciplinary Action, 
+Meta-Audits
+Agility and 
+Continuous 
+Improvement
+First and Second 
+Lines (Risk 
+Owners/Monitoring)
+Trigger 
+Mechanism
+Motion 
+passage/failure, 
+performance 
+anomaly, or 
+process gap
+Formal complaint, 
+Integrity Engine 
+integrity flag, or 
+Defiant Motion 
+Resubmission
+Maintain 
+system 
+legitimacy 
+and integrity
+Third Line 
+(Independent 
+Assurance)
+Review 
+Body 
+Composition
+Competence-gated 
+Circle members 
+(Autonomy) and 
+embedded aSTF 
+(Audit)
+Specialized, 
+temporary xSTFs 
+(investigation) and 
+aSTFs 
+(determination) 
+selected by high 𝑊𝐻
+Arbiters of 
+conflict and 
+systemic 
+policy 
+compliance
+Third Line 
+(Independent 
+Assurance)
+VII. Technology as a Participation Scaffold: The HCAI Layer
+The system’s technology suite (Integrity Engine, Inferential Engine, Insight Engine) is meticulously 
+designed to function strictly as a non-prescriptive, participation-enabling scaffold, adhering 
+rigorously to Human-Centered AI (HCAI) principles (Shneiderman, 2020).
+A. The Cardinal Rule: The HCAI Mandate
+The central mandate governing the technological layer is absolute and non-negotiable: the AI 
+component must retain zero prescriptive power. The AI can suggest, summarize, and schedule 
+tasks, but it must never: 
+
+Page 26 of 51
+- Recommend a vote 
+- Edit a proposal without explicit human direction 
+- Prioritize one group’s interests over another 
+- Unilaterally alter an outcome
+This design choice is fundamental to preserving human agency, ensuring transparency, and 
+maintaining perceived legitimacy, countering the risks associated with opaque algorithmic 
+governance (Zuboff, 2019). The operations of the AI suite are transparent and auditable, ideally 
+implemented through open-source code, to maximize community trust.
+The technological design clearly separates the static (𝑊𝐻) and dynamic (𝑊𝑆) aspects of competence, 
+ensuring that the non-directive AI only manages the high-volatility, performance-based metric, while 
+the core, immutable identity is verified through a costly human-led process, preserving integrity 
+(Taleb, 2012; W3C, 2022).
+B. The Integrity Engine Suite in Detail
+1. Inferential Engine: The Inclusion Engine
+The Inferential Engine acts as the “Inclusion Engine” within the system. It utilizes the Soft 
+Competence and Curiosity vectors to perform sophisticated user-to-Cell and user-to-STF matching 
+and classification of emergent issues.
+Key Functions:
+- Matching users to Cells and STFs via Competence and Curiosity vectors 
+- Tagging issues with appropriate domain classifications 
+- Tracking metrics for system performance and health
+The engine’s algorithms actively counter potential elite closure by utilizing Curiosity (𝐵𝑢) to invite 
+passionate but under-represented members to xSTFs, effectively accelerating the onboarding process 
+for novices. This structural intervention ensures that opportunities to earn Soft Competence are 
+guaranteed for interested members, promoting procedural justice and enhancing overall system 
+robustness by accessing diverse cognitive pools (Castilla, 2015).
+Participation Function: The Inferential Engine prioritizes high-Curiosity, low-Competence users 
+for xSTFs, which accelerates onboarding and provides newcomers with structured opportunities to 
+demonstrate their capabilities and earn influence within the system.
+
+Page 27 of 51
+2. Insight Engine: Reducing Cognitive Load
+The Insight Engine manages the complex logistics of a fluid community, including scheduling, 
+notification, and summarizing lengthy discussions. Its primary function is to reduce cognitive load, 
+which is essential for enabling high-volume, parallel participation across the fluid architecture 
+without leading to contributor burnout (Simon, 1971).
+Key Functions:
+- Scheduling meetings and deadlines 
+- Notifying relevant users of opportunities and obligations 
+- Fact-checking claims against the system’s knowledge base 
+- Summarizing discussions to extract key points and facilitate decision-making
+This reduces cognitive load and enables parallel, high-volume participation without burnout, 
+allowing members to engage meaningfully with multiple processes simultaneously.
+Burnout Guardrails: The Insight Engine implements structural protections: 
+- Capping notification spam to prevent overwhelming users with information 
+- Enforcing strict rotation schedules (typically 2-12 weeks) for STF roles
+This distribution of labor across Cells and xSTFs, combined with mandatory rotation, actively 
+prevents the concentration of workload that plagues many volunteer-driven decentralized projects.
+3. Integrity Engine: The Audit Trail and Anomaly Detection
+The Integrity Engine maintains a comprehensive, tamper-evident ledger of all system activity, 
+ensuring every Circle decision, aSTF finding, and competence update is fully auditable. This 
+continuous logging provides the crucial, public audit trail that grounds community trust via 
+transparency (NIST, n.d.) and creates an immutable record for future reference and learning.
+Key Functions:
+- Maintaining tamper-evident ledger of all governance actions 
+- Flagging behavioral and systemic anomalies 
+- Enforcing security and policy integrity 
+- Complementing the work of aSTFs by providing algorithmic support for human oversight
+
+Page 28 of 51
+Furthermore, the Integrity Engine proactively flags behavioral or systemic anomalies—such as 
+sudden, uncapped shifts in Soft Competence or high statistical correlation between an auditor and the 
+audited body—triggering human investigation by aSTFs or Judicial STFs.
+In this way, technology serves as a technical complement to human oversight, enforcing integrity and 
+policy compliance while public audit trails build trust through transparency and encourage 
+contribution by making all governance processes visible and accountable.
+C. Participation-by-Design Mechanics
+The AI layer implements several specific mechanisms to maximize participation and counter 
+exclusionary tendencies:
+Curiosity-First Matching: The Inferential Engine uses the Curiosity vector to invite passionate but 
+under-represented members, countering elite closure by ensuring that interest and motivation, not 
+just existing status, determines access to participation opportunities.
+STF Slot Auto-Scaling: If more than a threshold number of pending issues exist, the Inferential 
+Engine proposes parallel xSTFs to distribute work and prevent bottlenecks, ensuring that high 
+demand does not create exclusion.
+Onboarding Nudges: New users receive Curiosity-to-xSTF funnels with Activity Gravity of 1.0 
+starter tasks, providing structured pathways for newcomers to quickly gain competence and influence 
+through meaningful contribution.
+Burnout Guardrails: The Insight Engine caps notifications to prevent information overload and 
+rotates STF roles every 2-12 weeks to distribute responsibility and prevent concentration of 
+workload on a small number of highly engaged members.
+This AI layer transforms technology from a controller into a participation scaffold, aligning with 
+HCAI principles and operationalizing participatory meritocracy by ensuring that every governance 
+stress point becomes a structured opportunity for members to learn, earn Competence, and co-shape 
+the system.
+
+Page 29 of 51
+VIII. Discussion: Anti-Fragility, Comparative Analysis, and Use Cases
+A. Anti-Fragility through Stressors and Learning
+The Polycentric Autonomy-Audit System is designed to be fundamentally anti-fragile, possessing the 
+capacity to gain from disorder, chaos, and systemic stress (Taleb, 2012). This property is achieved by 
+institutionalizing structured conflict.
+Every governance stress point—such as a contentious Circle decision, an inter-Circle stalemate, or a 
+rejected audit finding—is immediately channeled into a formalized, competence-gated resolution 
+process. For instance:
+- An aSTF rejection forces the responsible Circle to revise its approach, often requiring 
+collaboration with high-competence external domains
+- A systemic blockage is mediated by a specialized xSTF
+- The transparent deliberation and resolution process generates a public record logged by the 
+Integrity Engine
+This continuous cycle of action, structured stress, transparent reflection, and institutional learning 
+ensures the system does not fracture under pressure but rather emerges from conflict stronger and 
+more resilient, with reinforced protocols and enhanced community trust.
+B. Addressing Organizational Failure Modes
+PAAS offers a definitive alternative to the core weaknesses of contemporary decentralized 
+governance models:
+1. Mitigating Plutocracy
+By making influence proportional to the Dual Competence Metric (𝑊𝑢,𝑑
+𝐸𝑓𝑓𝑒𝑐𝑡𝑖𝑣𝑒), PAAS avoids the 
+inherent plutocratic drift of token-weighted DAOs, where influence is simply a function of wealth 
+(Torenberg, 2021; Hassan & De Filippi, 2021). The system instantiates a genuine meritocracy where 
+contribution translates directly into verifiable influence (Weydemeyer & Atela, 2023).
+2. Mitigating Algorithmic Opacity
+Unlike systems relying on opaque, prescriptive algorithms that make decisions without transparent 
+reasoning, PAAS strictly limits the AI layer to a non-directive, facilitative role in accordance with 
+HCAI principles (Shneiderman, 2020). This ensures that human judgment remains paramount and all 
+
+Page 30 of 51
+technical operations are auditable through open-source implementation, maintaining transparency 
+and accountability in all governance processes.
+3. Mitigating Internal Audit Failure
+Unlike self-managed systems (such as Holacracy or Sociocracy) where internal auditing can be 
+prone to collusion, scope limitation, or a failure to enforce accountability due to personal conflict or 
+familiarity bias (Robertson, 2015), PAAS embeds a structurally independent audit layer through 
+aSTFs and Judicial STFs. The mandatory rotation, anonymity where appropriate, and Hard 
+Competence requirements protect the oversight function, ensuring that the necessary structural 
+tension between action and review is maintained continuously.
+Feature Token-Based 
+DAOs
+Algorithmic 
+Governance
+Self-Managed 
+Systems
+PAAS
+Influence 
+Basis
+TokenWeighted 
+Plutocracy
+Algorithmic 
+Prescription 
+(Opaque)
+Consent / Internal 
+Roles
+Dual Competence 
+(𝑊𝐻/𝑊𝑆) Meritocracy
+Primary 
+Accountab
+ility
+Smart Contract 
+Rigidity
+Code 
+Enforceability / 
+Developer Trust
+Internal Peer 
+Pressure / 
+Consensus
+Separation of Power: 
+Autonomy (Circles) 
+checked by Independent 
+STF Audit
+AntiCapture 
+Mechanis
+m
+High Token 
+Cost of Attack
+Proprietary Code 
+Obscurity
+Internal Conflict 
+Resolution (Prone 
+to Capture)
+Mandatory STF Rotation, 
+Anonymity, and 𝑊𝐻-
+Gated Judicial Track
+Fitness for 
+Fluidity
+Low (Rigid 
+Contracts)
+Variable (High 
+Setup Cost)
+Low (Aimed at 
+Stable 
+Organizations)
+High (Designed for 
+Amorphous, Trust-Sparse 
+Collectives)
+C. Expanded Use Cases: Applying PAAS to Complex Real-World Collectives
+The structural resilience and adaptability inherent in PAAS make it suitable for a wide range of fluid, 
+complex, and high-stakes collectives:
+1. Complex Open-Source Projects
+Primary PAAS Benefit: Formalized meritocracy and balance between speed and security in 
+development processes.
+
+Page 31 of 51
+Application: PAAS formalizes the informal meritocracy common in open-source communities. 
+Code development and feature proposals are handled by Circles and xSTFs based on high Soft 
+Competence (dynamic contribution and active participation). Core protocol changes, however, 
+require rigorous oversight from aSTFs to ensure quality and security. The Core Protocol Circle may 
+require high Hard Competence in domains like cryptography or security certification to ensure 
+external safety standards are met.
+The Competence Metric directly converts contribution into influence, countering the power of social 
+capital alone. Curiosities pull domain experts into cross-disciplinary discussion Cells, countering 
+specialization silos that can impede innovation.
+2. Decentralized Scientific Research Consortia
+Primary PAAS Benefit: Verifiable expertise and stringent ethical oversight for multi-jurisdictional 
+collaboration.
+Application: These consortia require verifiable expertise and stringent ethical oversight. 𝑊𝐻
+provides the necessary anchor by validating doctoral credentials, professional licenses, and research 
+ethics certifications (W3C, 2022). 𝑊𝑆tracks collaborative outcomes like successful publication 
+records or grant acquisition.
+Disputes over data integrity, authorship, or conflicts of interest are handled by the Judicial Track, 
+providing a structured, legally credible internal governance structure that enhances external partner 
+confidence (Grant et al., 2024; The Institute of Internal Auditors, 2017).
+3. Space and Science Societies
+Primary PAAS Benefit: Niche expert engagement and robust vetting processes for technically 
+complex decisions.
+Application: Organizations such as The Mars Society or Space Generation Advisory Council benefit 
+from Curiosities that match members to relevant Cells based on interest and passion. CompetenceWeighted Voting ensures deep technical decisions are weighted by domain experts with 
+demonstrated knowledge. The system enables specialized societies to leverage distributed expertise 
+while maintaining rigorous standards for technical decisions with high stakes.
+4. Professional Associations
+Primary PAAS Benefit: Dynamic policy development and protection against sub-group capture in 
+regulatory contexts.
+
+Page 32 of 51
+Application: Medical, legal, and other professional bodies form Circles around specific regulatory 
+domains. The Autonomy-Audit Loop ensures new standards are developed by practitioners with 
+relevant expertise but checked by an independent aSTF, preventing sub-group capture where narrow 
+interests might dominate broader professional standards. The framework enables responsive policy 
+development while maintaining integrity and protecting public interest.
+5. Global Non-Profits and NGOs
+Primary PAAS Benefit: Accountability in distributed action and transparent resource allocation.
+Application: All project execution must trace back to an audited Resolution, creating clear chains of 
+authority and accountability. xSTFs commissioned for on-the-ground work are accountable to the 
+main governing Circle, ensuring transparency for donors and stakeholders. The framework enables 
+geographically distributed organizations to coordinate effectively while maintaining donor 
+confidence through auditable governance processes.
+6. Decentralized Autonomous Organizations (DAOs)
+Primary PAAS Benefit: Legitimacy and Sybil resistance replacing plutocratic token-weighted 
+models.
+Application: PAAS replaces token-weighted voting, which creates plutocracy, with CompetenceWeighted Voting, which creates meritocracy by making influence dependent on verified contribution 
+rather than wealth. The Judicial Track addresses the failure of un-auditable treasuries by providing 
+structured oversight and conflict resolution. The framework provides DAOs with the governance 
+legitimacy and accountability mechanisms necessary for long-term sustainability and stakeholder 
+confidence.
+7. Internal Research and Development Teams and Innovation Labs
+Primary PAAS Benefit: Dynamic resource allocation driven by expert assessment rather than 
+bureaucratic process.
+Application: Circles (e.g., a Research Circle) propose funding Motions that are evaluated through 
+Competence-Weighted Votes by subject matter experts, then audited by an aSTF. This leads to rapid, 
+expert-driven resource allocation that responds to emerging opportunities while maintaining 
+oversight. The framework enables innovation-focused teams to move quickly while ensuring 
+resources are allocated based on technical merit.
+
+Page 33 of 51
+8. Holacratic and Sociocratic Organizations
+Primary PAAS Benefit: Formalized audit and conflict resolution addressing common failure points.
+Application: The independent aSTF audit and the Judicial Track solve the common failure point of 
+internal systems like Holacracy where checks on power can be internal and subject to bias or 
+familiarity effects. PAAS provides the external-facing accountability and structured conflict 
+resolution that self-managed systems often lack, enhancing their resilience and legitimacy.
+9. Global Non-Territorial Organizations
+Primary PAAS Benefit: Adaptive governance for purpose-driven collectives without fixed 
+hierarchies.
+Application: For purpose-driven collectives (e.g., decentralized supply chain alliances, disaster 
+relief coordination networks) that operate globally without fixed hierarchical structures, PAAS offers 
+an adaptive model. Competence can be rapidly assessed and applied across fluid tasks, allocating 
+resources based on demonstrated capability (𝑊𝑢,𝑑
+𝐸𝑓𝑓𝑒𝑐𝑡𝑖𝑣𝑒) rather than fixed organizational charts, 
+enabling rapid and legitimate response to evolving goals.
+The framework is optimized for fluid, non-territorial communities that seek to transform governance 
+from a static structure into a dynamic, learning process that gains strength from challenges and 
+adapts continuously to evolving needs.
+IX. Risks, Limitations, and Mitigations
+No governance framework is without risks. PAAS’s design includes explicit mitigations for 
+identified vulnerabilities, demonstrating the system’s commitment to anti-fragility through proactive 
+defense.
+A. Sybil Attacks: Creation of Fake Identities
+Risk: Malicious actors create fake identities to sway decisions through manufactured consensus or 
+coordinated voting.
+Mitigation:
+
+Page 34 of 51
+- A strong proof-of-personhood requirement for initial entry establishes a baseline identity 
+verification 
+- The competence system requires costly, verified contributions to gain meaningful influence 
+- Sybil accounts would start with minimal weight and require extensive, auditable contributions 
+over time to become effective, making the attack economically infeasible
+- The Hard Competence requirement for high-stakes roles further raises the barrier, as external 
+credentials cannot be easily fabricated at scale
+B. Competence Misrepresentation: Overstating Expertise
+Risk: Users overstate their expertise to gain illegitimate influence within the system.
+Mitigation:
+- The gradual, evidence-based accrual of competence through the transparent formula makes 
+sudden claims of expertise difficult to sustain 
+- Sudden, anomalous jumps in competence ratings trigger automatic aSTF audits that examine the 
+evidence and endorsements supporting the increase 
+- The weighting of endorsements by the endorser’s own competence creates a costly signaling 
+game for false endorsements, as only established experts can meaningfully boost another user’s 
+rating 
+- The separation of Hard Competence and Soft Competence means that even if Soft Competence 
+is artificially inflated, high-stakes roles still require externally verifiable credentials that cannot 
+be easily misrepresented
+C. aSTF and Circle Collusion: Capture of Oversight
+Risk: The audit layer becomes captured by the body it audits through familiarity, social pressure, or 
+coordinated collusion.
+Mitigation:
+- Frequent, anonymous rotation of aSTF members prevents the development of relationships that 
+could compromise independence 
+- Full transparency of audit logs, which are themselves subject to review by the wider community 
+and meta-governance bodies, creates accountability for the auditors themselves 
+
+Page 35 of 51
+- The Judicial Track provides a higher level of appeal when aSTF decisions are contested, 
+creating redundant layers of oversight 
+- The competence-sensitive selection algorithm ensures diverse perspectives are included in 
+audits, reducing the likelihood of groupthink or coordinated capture
+D. Participation Overload: Burnout Among Active Contributors
+Risk: Active contributors in Circles and STFs experience burnout from excessive demands on their 
+time and attention.
+Mitigation:
+- The AI layer provides filters based on Curiosity to manage notification spam and prevent 
+information overload 
+- Strict aSTF rotation schedules and term limits prevent any individual from bearing excessive 
+responsibility for extended periods 
+- Distribution of work across many Cells and xSTFs avoids concentration of workload on a small 
+number of highly engaged members 
+- The Insight Engine implements Burnout Guardrails by capping notifications and enforcing 
+rotation schedules typically ranging from 2-12 weeks, ensuring sustainable participation 
+patterns
+E. Groupthink in Cells: Homogeneous Perspectives Leading to Echo Chambers
+Risk: Cells populated by members with similar Curiosities and Competences develop homogeneous 
+viewpoints that fail to consider alternative perspectives or identify blind spots.
+Mitigation:
+- The Inferential Engine is designed to flag homogeneity in Cell composition and proactively 
+suggest participants with diverse Curiosity profiles or external experts to ensure cognitive 
+diversity 
+- The competence-sensitive selection for aSTFs specifically seeks to include domains 
+underrepresented in Circle deliberations, creating a structural check on blind spots 
+- The ephemeral nature of Cells prevents the calcification of group identities that can reinforce 
+echo chambers over time
+
+Page 36 of 51
+F. Participation Bottlenecks: Insufficient Access to Influence-Building Opportunities
+Risk: Too few STF slots or Cell opportunities create exclusion of engaged novices who seek to 
+contribute and build competence.
+Mitigation:
+- The Inferential Engine auto-scales xSTFs when pending issues exceed capacity thresholds, 
+creating additional participation opportunities in response to demand 
+- A minimum of 30% of slots in xSTFs are reserved for users with domain competence below 
+800, specifically targeting rising stars and ensuring newcomers have structured pathways to 
+demonstrate capability 
+- The Curiosity-first matching prioritizes passionate but under-represented members, countering 
+elite closure and ensuring that interest translates into opportunity
+G. Hard Competence Verification Fraud: Falsified External Credentials
+Risk: Malicious actors submit falsified external credentials to gain illegitimate Hard Competence 
+ratings and access to high-stakes roles.
+Mitigation:
+- All Hard Competence claims trigger a specialized xSTF review that conducts forensic 
+verification of credentials, including: 
+• Direct confirmation with issuing institutions 
+• Examination of cryptographic signatures on Verifiable Digital Credentials 
+• Cross-reference with public registries 
+- The xSTF report must be approved by an aSTF, creating dual oversight for these high-stakes 
+determinations 
+- The Integrity Engine maintains a comprehensive audit trail of all verification processes, 
+enabling retrospective review if fraud is later suspected
+
+Page 37 of 51
+X. Default Parameter Recommendations and Tuning
+The following parameters represent starting points for pilot implementation, derived from theoretical 
+modeling and intended for refinement through agent-based modeling and human-in-the-loop testing 
+in real-world deployments.
+A. Core Competence Engine Parameters
+Activity Gravity Values:
+- Thought exercises and informal posts: 𝐺 = 0.5
+- Formal motions and deliberations: 𝐺 = 1.0
+- Competence audits and formal tests: 𝐺 = 1.2
+These values reflect the relative stakes and formality of different contribution types while remaining 
+subject to governance adjustment based on observed system behavior.
+Circle Multiplier Values:
+- Direct Circle members (primary responsibility for domain): 𝑀 = 1.6
+- Members of overlapping or related Circles (secondary responsibility): 𝑀 = 1.2
+- Unrelated or non-responsible members: 𝑀 = 1.0
+These multipliers balance the need to weight responsible expertise more heavily against the risk of 
+excessive concentration of influence.
+Volatility Factors:
+- New users: 𝐾 = 60 (enables rapid initial learning and competence accrual) 
+- Established users: 𝐾 = 30 (provides moderate responsiveness) 
+- Veteran or stable users: 𝐾 = 10 (maintains rating stability for recognized experts)
+The volatility should be computed based on the number of anchored proofs, time active in the 
+system, and past volatility patterns.
+Change Caps and Audit Triggers:
+- Maximum change per submission: 𝐶𝑚𝑎𝑥 = 120 points (prevents single-event volatility from 
+distorting ratings) 
+- Audit trigger threshold: 𝑇𝑎𝑢𝑑𝑖𝑡 = 50 points (changes exceeding this value are flagged for xSTF 
+or specialized STF review before application)
+
+Page 38 of 51
+Transfer Coefficients for Hierarchical Domain Relationships:
+- Parent from child: 𝛼 = 0.6 (preserves substantial knowledge spillover while avoiding full 
+double-counting) 
+- Related sibling domains: 𝛼 = 0.2 to 0.4 (acknowledges partial relevance across related fields)
+B. Governance Process Parameters
+Competence-Weighted Voting Thresholds:
+Configurable per Circle based on decision stakes: 
+- Simple majority: 𝜏 = 0.5 (routine operational decisions) 
+- Supermajority: 𝜏 = 0.67 (significant policy changes) 
+- Strong supermajority: 𝜏 = 0.75 (constitutional or meta-governance changes)
+STF Rotation Schedules:
+Default to 2-12 weeks depending on role complexity and commitment requirements: 
+- aSTFs: 2-6 weeks (more frequent rotation to maintain independence) 
+- xSTFs: Up to 12 weeks (for complex projects requiring sustained attention)
+Hard Competence Thresholds for High-Stakes Roles:
+Established based on domain requirements: 
+- Judicial STFs: Minimum 𝑊𝐻 = 2400 in relevant legal, ethical, or governance domains 
+- Critical domain Circles (e.g., Treasury Management, Core Protocol Security): Minimum 𝑊𝐻 =
+2000 in their specific domains
+C. Tuning Through Agent-Based Modeling
+These default parameters should be refined through agent-based modeling that varies: 
+- Community size 
+- Competence distributions 
+- Voting thresholds 
+- STF audit margins
+
+Page 39 of 51
+The modeling should measure: 
+- Decision accuracy against synthetic ground truth 
+- Time-to-convergence for competence ratings 
+- Resistance to Sybil attacks and coordination attempts 
+- Fairness metrics examining whether novices are unfairly penalized or advantaged 
+- Audit workload to ensure sustainability of oversight functions
+The parameters should be iteratively adjusted based on pilot results to optimize for system 
+robustness, fairness, and operational efficiency.
+XI. Implementation Considerations and Roadmap
+A. Technical Infrastructure Requirements
+A production implementation of PAAS requires several core technical components:
+Integrity Engine Requirements:
+- A tamper-evident distributed ledger (blockchain technology for maximum immutability or 
+cryptographically secured append-only database with distributed nodes for auditability) 
+- Comprehensive logs of all governance actions (Circle votes, aSTF determinations, competence 
+changes, STF formations)
+Inferential Engine Requirements:
+- Sophisticated matching algorithms that can process Competence and Curiosity vectors at scale 
+- Domain classification systems using natural language processing to tag issues and contributions 
+appropriately 
+- Real-time analytics to monitor system health and flag anomalies
+Insight Engine Requirements:
+- Scheduling and notification systems that can manage complex, parallel workflows across 
+distributed teams 
+- Natural language summarization capabilities to reduce cognitive load 
+- Fact-checking integration with verified knowledge bases
+
+Page 40 of 51
+Identity and Verification Infrastructure:
+- Proof-of-personhood protocols to establish baseline identity verification 
+- Integration with Verifiable Digital Credentials (VDCs) for Hard Competence verification 
+(W3C, 2022) 
+- Privacy-preserving cryptographic protocols to enable anonymization where appropriate while 
+maintaining auditability
+B. Governance Bootstrapping Process
+Establishing a PAAS-based governance system in an existing community requires careful 
+sequencing to maintain legitimacy throughout the transition:
+Initial Phase:
+- Establishing founding principles through community deliberation to define core values, 
+domains, and initial governance parameters 
+- Identifying seed Circles based on existing areas of responsibility and expertise concentration 
+within the community 
+- Establishing initial competence baselines through retrospective assessment of historical 
+contributions combined with self-declared expertise subject to peer validation
+Pilot Phase:
+- Implementing governance processes for a limited scope (e.g., a single functional area or project) 
+while the broader organization maintains existing structures 
+- This enables learning and parameter tuning in a lower-stakes environment before full 
+deployment 
+- The pilot should include comprehensive monitoring of decision quality, participation patterns, 
+and system stability 
+- Followed by iterative refinement of parameters based on observed behavior and participant 
+feedback
+
+Page 41 of 51
+Scaling Phase:
+- Gradually expanding PAAS governance to additional domains and functional areas as 
+confidence and capability increase 
+- Training and onboarding to ensure all participants understand the governance processes and 
+their roles within them 
+- Development of supporting documentation and tooling to reduce friction and cognitive load 
+- Continuous refinement of the AI layer to improve matching, summarization, and anomaly 
+detection
+C. Legal and Regulatory Considerations
+Organizations implementing PAAS must carefully consider the legal implications of their 
+governance structure:
+Liability and Legal Recognition:
+- The relationship between PAAS governance decisions and legal liability must be clearly 
+established 
+- Questions include whether Circle members bear individual liability for decisions made 
+collectively, how the organization interfaces with external legal and regulatory requirements, 
+and what mechanisms exist for legal recognition of PAAS-governed entities
+Judicial Track and Due Process:
+- The Judicial Track provides a foundation for internal dispute resolution that may satisfy certain 
+legal requirements for due process 
+- However, the binding nature of Judicial STF determinations in external legal contexts requires 
+careful analysis 
+- Organizations may need to establish explicit mappings between PAAS roles and traditional 
+legal roles (e.g., officers or directors) to satisfy corporate law requirements
+Data Protection and Privacy:
+- Data protection and privacy regulations (e.g., GDPR) impose constraints on the Integrity 
+Engine’s logging and the anonymization protocols used in Audit and Judicial STFs 
+- Organizations must ensure their implementation complies with relevant regulations while 
+maintaining the transparency necessary for legitimate governance
+
+Page 42 of 51
+D. Cultural and Social Transition Challenges
+The shift from traditional governance models to PAAS represents a significant cultural change that 
+requires careful change management:
+Resistance to Distributed Authority:
+- Participants accustomed to hierarchical authority structures may initially resist the distributed, 
+meritocratic model or struggle to understand how decisions are made and legitimacy is 
+established 
+- Comprehensive education about the framework’s principles and mechanisms is essential for 
+building trust and engagement
+Established Leaders and Status Anxiety:
+- The competence-based influence model may create anxiety among established leaders whose 
+authority in traditional systems derives from position rather than demonstrated expertise 
+- The framework must be introduced with sensitivity to these concerns, emphasizing that PAAS 
+creates opportunities for leadership based on contribution rather than eliminating leadership 
+entirely 
+- The system should be framed as expanding rather than restricting pathways to influence
+Recognizing Informal Contributions:
+- Communities with existing informal power structures must navigate the transition to formalized 
+competence assessment carefully to avoid perceived unfairness or the dismissal of valuable 
+contributors whose expertise is difficult to quantify 
+- The bootstrap phase should include mechanisms for recognizing historical contributions and 
+establishing initial competence baselines that reflect actual community knowledge about 
+member capabilities
+
+Page 43 of 51
+XII. Future Research Directions
+A. Agent-Based Modeling and Simulation
+High-fidelity agent-based models should be developed to simulate PAAS dynamics under various 
+conditions, including: 
+- Different community sizes 
+- Competence distributions 
+- Attack scenarios
+These models should incorporate realistic agent behaviors such as: 
+- Varying levels of expertise 
+- Strategic voting 
+- Coalition formation 
+- Attempts at system gaming
+The simulations should explore: 
+- Long-term system stability 
+- Emergence of optimal governance patterns 
+- Sensitivity to parameter choices 
+- Resilience against coordinated attacks
+Particular attention should be paid to the interaction dynamics between Hard Competence and Soft 
+Competence under targeted collusion threats. The models should examine whether the dual metric 
+system successfully prevents capture scenarios that might succeed against either metric alone, and 
+identify parameter regimes where the system demonstrates maximum robustness.
+B. Formal Verification of Protocol Properties
+The Judicial STF protocol and other critical governance mechanisms should be subject to formal 
+verification to prove key properties such as: 
+- Termination guarantees: Ensuring that all processes eventually conclude 
+- Fairness properties: Ensuring that all participants have appropriate access to influence and 
+appeal mechanisms 
+- Consistency properties: Ensuring that the system maintains coherent state across distributed 
+operations
+
+Page 44 of 51
+Formal methods can provide mathematical guarantees about system behavior that complement 
+empirical testing and simulation, increasing confidence in the framework’s reliability for high-stakes 
+applications. The verification should focus particularly on safety-critical properties where failure 
+could result in system deadlock, illegitimate capture, or loss of auditability.
+C. Pilot Implementations in Real-World Communities
+The ultimate validation of PAAS requires pilot implementations within large-scale, real-world opensource ecosystems and other fluid collectives. These pilots should be designed as rigorous 
+experiments with clear success metrics including: 
+- Decision quality compared to counterfactual traditional governance 
+- Participant satisfaction and perceived legitimacy 
+- System resilience under stress conditions 
+- Operational efficiency measured by time-to-decision and resource utilization
+Pilot communities should be selected to represent diverse governance challenges such as: 
+- Technical versus non-technical domains 
+- Varying scales from hundreds to thousands of participants 
+- Different levels of existing governance maturity
+The comparative analysis across pilots will reveal which aspects of PAAS are universally applicable 
+and which require context-specific adaptation.
+D. Integration with Emerging Technologies
+Future research should explore how PAAS can be enhanced through integration with emerging 
+technologies while maintaining its core commitment to human-centered governance:
+Zero-Knowledge Proofs: May enable privacy-preserving competence verification that protects 
+sensitive credential information while still allowing validation.
+Decentralized Identity Systems: Can provide more robust proof-of-personhood mechanisms that 
+resist Sybil attacks without compromising user privacy or autonomy.
+Advanced Natural Language Processing: Can improve the Inferential Engine’s ability to match 
+participants to opportunities and the Insight Engine’s capacity to summarize complex deliberations 
+accurately.
+
+Page 45 of 51
+Machine Learning for Anomaly Detection: May identify subtle patterns of coordination or capture 
+that would be difficult for human auditors to detect, enhancing the Integrity Engine’s anomaly 
+detection capabilities.
+However, all such integrations must be evaluated against the cardinal rule that AI remains nonprescriptive and that human judgment retains ultimate authority over governance decisions.
+XIII. Conclusion
+The Polycentric Autonomy-Audit System (PAAS) represents a paradigm shift in decentralized 
+governance, moving beyond simplistic voting mechanisms to institute a structurally robust, antifragile model for collective action in fluid, trust-sparse environments. By exhaustively defining and 
+separating the dual forces of autonomy (vested in Circles as the locus of decision-making and 
+execution) and audit (vested in Audit Short-Term Facilitators and Judicial Short-Term Facilitators as 
+independent oversight mechanisms), the framework creates a continuous tension that prevents 
+capture while enabling agility.
+The formalization of influence through the sophisticated Dual Competence Metric—with Hard 
+Competence (𝑊𝐻) providing verifiable rigor anchored in external credentials and Soft Competence 
+(𝑊𝑆) providing dynamic meritocracy responsive to ongoing contribution—addresses the critical 
+governance failures currently endemic in fluid collectives. The system transforms every internal 
+conflict and external stressor into a structured opportunity for learning and system reinforcement, 
+thereby securing both internal legitimacy through earned influence and external accountability 
+through auditable processes.
+The framework’s strength lies not in rigid structure but in a set of interconnected, self-correcting 
+processes that are as fluid and adaptive as the communities it is designed to serve. PAAS is not 
+merely a system of governance but a framework for collective learning and anti-fragile growth that 
+converts governance stress points into participation opportunities. By making oversight itself a 
+distributed, competence-gated function performed through rotating Short-Term Facilitators, the 
+system scales participation beyond decision-making to include the audit and coordination functions 
+that traditional governance reserves for permanent administrative roles.
+The radical inclusivity of PAAS, operationalized through Curiosity-driven matching and structured 
+onboarding pathways, ensures that passion and interest translate into opportunities to build 
+competence and influence. The strict limitation of artificial intelligence to non-prescriptive, 
+participation-enabling functions preserves human agency while leveraging technology to reduce 
+
+Page 46 of 51
+cognitive load and scale coordination. This balance between human judgment and technological 
+support represents a practical implementation of Human-Centered AI principles in a governance 
+context.
+The ultimate test of PAAS will be its ability to foster legitimate, effective, and resilient selforganization in the complex, trust-diffuse environments that increasingly characterize collective 
+action in the twenty-first century. From open-source software communities to decentralized 
+autonomous organizations, from professional associations to nascent interplanetary settlements, the 
+need for governance that can adapt, learn, and strengthen under pressure has never been more urgent. 
+PAAS offers not a utopian vision but a practical, implementable framework grounded in sound 
+theory and designed for incremental adoption and continuous refinement.
+As fluid collectives become increasingly central to human collaboration and coordination, the 
+governance frameworks that guide them must evolve beyond the hierarchical models of the industrial 
+age and the plutocratic or algorithmic models of the early digital age. PAAS charts a path toward 
+participatory meritocracy where expertise is earned and verified, where autonomy is balanced by 
+accountability, and where governance itself becomes a continuous process of collective learning. The 
+framework’s anti-fragility ensures that it does not merely survive challenges but grows stronger 
+through them, making it well-suited for the turbulent, uncertain, and opportunity-rich environments 
+that define our era.
+Acknowledgment
+This paper was developed with the assistance of an AI companion, which supported the author in 
+several capacities. The AI tool was used for conceptual exploration, literature discovery (including 
+sourcing extra relevant materials on the workings of DAO’s and other roundtable, headless, and 
+distributed organizations), and initial drafting of key sections, fact checking and formatting. It also 
+served as a reflective aid during the contemplative phase, helping putting together all the fragmented 
+draft material spread over through the years. All final and original interpretations, conceptualization,
+conclusions, and editorial decisions were made by the author.
+
+Page 47 of 51
+References
+Ansell, C., & Gash, A. (2008). Collaborative governance in theory and practice. Journal of Public 
+Administration Research and Theory, 18(4), 543-571.
+Ansell, C., & Gash, A. (2018). Collaborative governance in theory and practice: A research 
+synthesis. (Contextualizing polycentric coordination).
+Aragon Network. (2023). Post-mortem: 2020-2022 governance failures. Aragon Association 
+Whitepaper.
+Castilla, E. J. (2015). Accounting for the Gatekeeper: Statistical Discrimination and the Role of 
+Accountability in Limiting Bias in the Workplace. Academy of Management Journal, 58(1), 221-
+246.
+De Waard, E., & Kramer, E. (2008). Tailored task forces: Temporary organizations and modularity. 
+International Journal of Project Management, 26(5), 537-546.
+Elo, A. E. (1978). The Rating of Chessplayers, Past and Present. Arco Publishing.
+Estlund, D. (2008). Utopophobia: On the Limits (If Any) of Political Philosophy. Princeton 
+University Press.
+Føllesdal, A. (1998). Subsidiarity. Journal of Political Philosophy, 6(2), 190-218.
+Freeman, J. (1972). The Tyranny of Structurelessness. The Second Wave, 2(1).
+GitHub. (2024). State of the Octoverse 2024. https://octoverse.github.com
+Government Accountability Office (GAO). (2024). Government Auditing Standards (GAO-24-
+106786). U.S. Government Accountability Office.
+Grant, D. M., Kirby, E. M., & Hawkins, S. (2024). Decentralized Autonomous Organizations: To 
+Statutorily Organize or Not? Wyoming Law Review, 24(1), Article 2.
+Hassan, S., & De Filippi, P. (2021). Decentralized autonomous organization. Internet Policy Review: 
+Journal on Internet Regulation, 10(2), 1-10. https://doi.org/10.14763/2021.2.1556
+Hong, L., & Page, S. E. (2004). Groups of diverse problem solvers can outperform groups of highability problem solvers. Proceedings of the National Academy of Sciences, 101(46), 16385-16389.
+Laloux, F. (2014). Reinventing Organizations: A Guide to Creating Organizations Inspired by the 
+Next Stage of Human Consciousness. Nelson Parker.
+
+Page 48 of 51
+Landemore, H. (2013). Democratic Reason: Politics, Collective Intelligence, and the Rule of the 
+Many. Princeton University Press.
+Landemore, H. (2020). Open Democracy: Reinventing Popular Rule for the 21st Century. Princeton 
+University Press.
+Lundkvist, C., et al. (2016). Uport: A Platform for Self-Sovereign Identity. White Paper.
+Malone, T. W., & Bernstein, M. S. (2015). Handbook of Collective Intelligence. MIT Press.
+Nabben, K. (2023). After DAOs: Governance lessons from 100+ failed treasury proposals. Centre 
+for Blockchain Technologies, UCL.
+National Institute of Standards and Technology (NIST). (n.d.). Digital Identities: Getting to Know 
+the Verifiable Digital Credential Ecosystem. NIST Cybersecurity Insights. Retrieved from 
+https://www.nist.gov/blogs/cybersecurity-insights/digital-identities-getting-know-verifiable-digitalcredential-ecosystem
+Ostrom, E. (1990). Governing the Commons: The Evolution of Institutions for Collective Action. 
+Cambridge University Press.
+Ostrom, E. (2010). Polycentric Systems for Coping with Collective Action and Global 
+Environmental Change. Global Environmental Change, 20(4), 550-557.
+Page, S. E. (2007). The Difference: How the Power of Diversity Creates Better Groups, Firms, 
+Schools, and Societies. Princeton University Press.
+Resnick, P., & Zeckhauser, R. (2002). Trust Among Strangers in Internet Transactions: Empirical 
+Analysis of eBay’s Reputation System. Advances in Applied Microeconomics.
+Robertson, B. J. (2015). Holacracy: The New Management System for a Rapidly Changing World. 
+Henry Holt and Company.
+Ryan, R. M., & Deci, E. L. (2000). Self-Determination Theory and the Facilitation of Intrinsic 
+Motivation, Social Development, and Well-Being. American Psychologist, 55(1), 68-78.
+Shneiderman, B. (2020). Human-Centered AI. Oxford University Press.
+Simon, H. A. (1971). Designing Organizations for an Information-Rich World. In Computers, 
+Communication, and the Public Interest.
+Surowiecki, J. (2004). The Wisdom of Crowds. Doubleday.
+
+Page 49 of 51
+Taleb, N. N. (2012). Antifragile: Things That Gain from Disorder. Random House.
+Tapscott, D., & Tapscott, A. (2016). Blockchain Revolution: How the Technology Behind Bitcoin Is 
+Changing Money, Business, and the World. Penguin.
+The Institute of Internal Auditors (IIA). (2017). International Standards for the Professional 
+Practice of Internal Auditing (Standards). IIA. Retrieved from https://www.theiia.org/en/standards/
+Torenberg, B. (2021). DAO Governance: Token-Weighted Voting and Plutocracy. Blockchain 
+Studies Journal.
+W3C Verifiable Credentials Working Group. (2022). Verifiable Credentials Data Model 2.0. W3C.
+Weber, M. (1922). Economy and Society. University of California Press.
+Weydemeyer, M., & Atela, J. (2023). Participatory meritocracy in digital commons: Evidence from 
+open-source governance. Information Systems Research, 34(4), 1120-1141. 
+https://doi.org/10.1287/isre.2023.1201
+Weyl, E. G., Ohlhaver, P., & Buterin, V. (2022). Decentralized society: Finding Web3’s soul. SSRN 
+Electronic Journal. https://doi.org/10.2139/ssrn.4105763
+Zuboff, S. (2019). The Age of Surveillance Capitalism. PublicAffairs.
+
+Page 50 of 51
+Appendix A: Glossary of Key Terms
+Audit Short-Term Facilitator (aSTF): An independent, rotating audit body embedded within a 
+specific Circle that conducts post-decision review to ensure protocol adherence, ethical alignment, 
+and decision quality. Functions as the Second Line of defense in the Three Lines Model.
+Autonomy: The principle of granting executional discretion to those with proven capability and 
+direct responsibility, vested in Circles as the engine of action and innovation.
+Cell: A temporary, focused deliberation space created to address a specific issue, draft a proposal, or 
+conduct research. Cells are ephemeral, open to participants with relevant Competences or 
+Curiosities, and serve deliberative rather than decision-making functions.
+Circle: A closed, competence-gated body entrusted with both decision-making and implementation 
+authority for a specific, bounded domain. Circles embody the principle of subsidiarity and function 
+as the First Line of defense in the Three Lines Model.
+Competence: A quantifiable, verifiable, and dynamic measure of a member’s domain-specific 
+knowledge and capability. Competence determines the weight of a member’s voice in decisions 
+proportional to their demonstrated understanding of the matter at hand.
+Competence-Weighted Voting: A voting mechanism where each vote is weighted by the voter’s 
+relevant domain competence, ensuring decisions are proportionally influenced by demonstrated 
+expertise rather than simple headcount.
+Curiosity: Formal, self-declared signals of a user’s interests and motivations used exclusively for 
+AI-powered matchmaking to relevant Cells and STF opportunities. Curiosities do not affect vote 
+weight.
+Domain: A field of knowledge or responsibility (e.g., Cryptography, Community Health, Treasury 
+Management). Domains serve as the categorical structure for organizing expertise and allocating 
+governance responsibility.
+Effective Competence (𝑊𝑢,𝑑
+𝐸𝑓𝑓𝑒𝑐𝑡𝑖𝑣𝑒): The Soft Competence (𝑊𝑆
+) score used for all voting and task 
+matching, which fluctuates based on activity and decay.
+Executional Short-Term Facilitator (xSTF): An ad-hoc team formed for time-bound tasks such as 
+deep research, proposal drafting, candidate vetting, or mediating conflicts between multiple Circles. 
+These teams dissolve upon task completion.
+
+Page 51 of 51
+Hard Competence (𝑊𝐻): The static, externally verifiable component of a member’s expertise 
+derived from auditable credentials such as academic degrees, professional certifications, or patents. 
+Used primarily for high-stakes role eligibility and Sybil defense.
+Inferential Engine: The AI component responsible for matching users to Cells and STFs based on 
+Competence and Curiosity vectors, tagging issues with domain classifications, and tracking system 
+metrics. Functions as the Inclusion Engine.
+Insight Engine: The AI component responsible for scheduling, notifications, fact-checking, and 
+summarizing discussions to reduce cognitive load and enable parallel participation without burnout.
+Integrity Engine: The AI component that maintains a tamper-evident ledger of all system activity, 
+flags behavioral and systemic anomalies, and enforces security and policy integrity. Provides the 
+audit trail foundation for system transparency.
+Judicial Short-Term Facilitator (jSTF): A specialized, independent team with high Hard 
+Competence thresholds that resolves appeals, investigates integrity breaches, and addresses systemic 
+policy disputes. Functions as the Third Line of defense in the Three Lines Model.
+Motion: A formal proposal submitted to a Circle for decision through competence-weighted voting. 
+Motions create new policies, change protocols, or approve resource allocations and must undergo 
+aSTF review after Circle approval.
+Polycentricity: An organizational structure characterized by overlapping, nested centers of decisionmaking authority that avoids both centralized control and purely individualistic competition while 
+enabling robust coordination.
+Resolution: An approved Motion that has passed both Circle vote and aSTF review, becoming an 
+immutable governance decision that grants mandate for execution.
+Short-Term Facilitator (STF): A specialized team distinct from Circles that provides oversight 
+(aSTFs), specialized labor (xSTFs), or ultimate adjudication (jSTFs). All STFs are temporary and 
+subject to rotation.
+Soft Competence (𝑊𝑆): The dynamic, performance-based component of a member’s expertise 
+calculated continuously through peer review, endorsements, and in-system activity. Used for day-today vote weighting and influence.
+Sponsorship: The validation of an issue’s priority and assignment of accountability for resource 
+usage, required from a member of the relevant Responsible Circle to elevate an issue to a formal 
+work stream.

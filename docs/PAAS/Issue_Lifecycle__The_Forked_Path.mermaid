@@ -1,0 +1,93 @@
+graph TD
+    subgraph "ISSUE EMERGENCE"
+        A[Issue Identified]
+        B[Cell Formation<br/>Open Deliberation]
+        C[Sponsorship Required<br/>by Circle Member]
+        
+        A --> B
+        B --> C
+    end
+    
+    subgraph "THE FORK"
+        D{Mandate Type?}
+        
+        C --> D
+    end
+    
+    subgraph "PATH A: EXECUTIVE TRACK - Operational Tasks"
+        E1[✓ Must Cite Existing<br/>Resolution Authority]
+        E2[xSTF Commissioned<br/>for Task Execution]
+        E3[Work Product<br/>Delivered]
+        E4[Task Complete<br/>No Further Audit]
+        
+        D -->|Operational<br/>Task| E1
+        E1 --> E2
+        E2 --> E3
+        E3 --> E4
+        
+        E5[Examples:<br/>• Deep Research<br/>• Implementation<br/>• Candidate Vetting<br/>• Report Drafting]
+        E5 -.-> E2
+    end
+    
+    subgraph "PATH B: LEGISLATIVE TRACK - Governance & Policy"
+        F1[xSTF as<br/>Deliberative Quorum]
+        F2[Draft Formal<br/>Motion]
+        F3[Circle Vote<br/>Competence-Weighted]
+        F4{Vote<br/>Result}
+        F5[Motion Failed<br/>Process Ends]
+        F6[Motion Passed<br/>Triggers aSTF]
+        
+        D -->|New Policy<br/>Protocol Change<br/>Resource Allocation| F1
+        F1 --> F2
+        F2 --> F3
+        F3 --> F4
+        F4 -->|Fail| F5
+        F4 -->|Pass| F6
+        
+        F7[Multi-Circle<br/>Coordination:<br/>• All stakeholders<br/>• Neutral experts<br/>• Mediation]
+        F7 -.-> F1
+    end
+    
+    subgraph "AUDIT PHASE"
+        G1[aSTF Review:<br/>• Protocol<br/>• Ethics<br/>• Evidence<br/>• Conflicts]
+        G2[Competence-Sensitive<br/>Selection]
+        G3{Final<br/>Determination}
+        G4[✓ APPROVE<br/>→ Resolution]
+        G5[✗ REJECT<br/>+ Public Report]
+        G6[Must Revise<br/>Substantially]
+        
+        F6 --> G1
+        G2 -.->|Ensures Missing<br/>Domain Coverage| G1
+        G1 --> G3
+        G3 -->|Approve| G4
+        G3 -->|Reject| G5
+        G5 --> G6
+        G6 -.->|Resubmit as<br/>New Motion| F2
+    end
+    
+    subgraph "EXECUTION & LEARNING"
+        H1[Target Circle<br/>Executes]
+        H2[Integrity Engine<br/>Logs All Actions]
+        H3[System Learning<br/>Protocol Updates]
+        
+        G4 --> H1
+        H1 --> H2
+        H2 --> H3
+    end
+    
+    subgraph "POLYCENTRIC COORDINATION"
+        I1[Deciding Body ≠<br/>Executing Body]
+        I2[Specialized Expertise<br/>at Each Stage]
+        
+        G4 -.-> I1
+        I1 -.-> H1
+        I1 --> I2
+    end
+    
+    style D fill:#ffd700
+    style E1 fill:#90ee90
+    style F1 fill:#ffb6c1
+    style G3 fill:#ffd700
+    style G4 fill:#90ee90
+    style G5 fill:#ffcccb
+    style H3 fill:#87ceeb

@@ -1,0 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Lora:ital,wght@0,400;0,500;1,400&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:           #050505;
+  --surface:      #080808;
+  --raised:       #0c0c0c;
+  --border:       #141414;
+  --border-sub:   #0f0f0f;
+  --dim:          #2a2a2a;
+  --muted:        #555555;
+  --text-dim:     #3a3a3a;
+  --text:         #cccccc;
+  --text-sub:     #777777;
+  --gold:         #c8a96e;
+  --gold-dim:     #c8a96e22;
+  --gold-glow:    #c8a96e0f;
+  --green:        #5a8a6a;
+  --red:          #c87a6e;
+  --font-mono:    'DM Mono', monospace;
+  --font-display: 'Lora', serif;
+  /* Legacy aliases used by older components */
+  --gold-dim:        #c8a96e30;
+  --text-muted:      #555555;
+  --surface-raised:  #0c0c0c;
+  --border-color:    #141414;
+}
+
+html, body { height: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar       { width: 3px; height: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 2px; }
+
+/* Selection */
+::selection { background: var(--gold-dim); color: var(--gold); }
+
+/* Links inherit colour by default */
+a { color: inherit; }
+
+/* Focus visible */
+:focus-visible { outline: 1px solid var(--gold); outline-offset: 2px; }
+
+/* Utility: card */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+/* Utility: pill */
+.pill {
+  display: inline-flex; align-items: center;
+  padding: 1px 7px; border-radius: 20px;
+  font-family: var(--font-mono); font-size: 9px;
+  background: var(--raised); border: 1px solid var(--border);
+  color: var(--text-sub);
+}
+
+/* Utility: section heading */
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 8px; letter-spacing: 2.5px;
+  text-transform: uppercase; color: var(--muted);
+}
+
+/* Utility: gold tag */
+.tag-gold {
+  background: var(--gold-glow);
+  border: 1px solid var(--gold-dim);
+  color: var(--gold);
+  font-size: 8px; padding: 1px 6px; border-radius: 10px;
+  font-family: var(--font-mono);
+}
