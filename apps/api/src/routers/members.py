@@ -1,6 +1,8 @@
 import uuid as _uuid
 from uuid import UUID
 from fastapi import APIRouter, HTTPException, Query, status
+from pydantic import BaseModel as _BaseModel
+
 from ..core.dependencies import ActiveMember, GovWriter, DB
 from ..services.members import MembersService
 from ..schemas import (
@@ -10,6 +12,21 @@ from ..schemas import (
 )
 
 router = APIRouter(prefix="/members", tags=["members"])
+
+
+class _ApplyRequest(_BaseModel):
+    handle: str
+    display_name: str
+    email: str
+    password: str
+    motivation: str | None = None
+    expertise_summary: str | None = None
+    proof_of_personhood_ref: str | None = None
+
+
+class _ReviewRequest(_BaseModel):
+    approve: bool
+    note: str | None = None
 
 
 @router.get("/me", response_model=MemberDetailResponse)
@@ -78,31 +95,6 @@ async def mark_all_read(member: ActiveMember, db: DB):
     )
 
 
-@router.get("/{member_id}", response_model=MemberDetailResponse)
-async def get_member(member_id: UUID, member: ActiveMember, db: DB):
-    return await MembersService(db).get_member(
-        member_id, _uuid.UUID(member.org_id)
-    )
-
-# ── Membership applications (post-bootstrap join flow) ────────────────────────
-
-from pydantic import BaseModel as _BaseModel
-
-class _ApplyRequest(_BaseModel):
-    handle: str
-    display_name: str
-    email: str
-    password: str
-    motivation: str | None = None
-    expertise_summary: str | None = None
-    proof_of_personhood_ref: str | None = None
-
-
-class _ReviewRequest(_BaseModel):
-    approve: bool
-    note: str | None = None
-
-
 @router.post("/apply", status_code=202)
 async def apply_to_join(
     body: _ApplyRequest,
@@ -115,14 +107,12 @@ async def apply_to_join(
     Returns 403 if membership_policy is invite_only or closed.
     """
     from ..models.org import Org
-    from ..core.exceptions import NotFound
     from sqlalchemy import select
     org = (await db.execute(
         select(Org).where(Org.slug == org_slug)
     )).scalar_one_or_none()
     if org is None:
         raise HTTPException(status_code=404, detail="Org not found")
-    import uuid as _uuid2
     return await MembersService(db).apply_to_join(
         org_id=org.id,
         handle=body.handle,
@@ -162,4 +152,11 @@ async def review_application(
         reviewer_id=_uuid.UUID(member.member_id),
         approve=body.approve,
         note=body.note,
+    )
+
+
+@router.get("/{member_id}", response_model=MemberDetailResponse)
+async def get_member(member_id: UUID, member: ActiveMember, db: DB):
+    return await MembersService(db).get_member(
+        member_id, _uuid.UUID(member.org_id)
     )

@@ -140,7 +140,7 @@ class CompetenceService(BaseService):
                 org_id=d.org_id,
                 name=d.name,
                 description=d.description,
-                decay_fn=d.decay_fn.value,
+                decay_fn=d.decay_fn.value if hasattr(d.decay_fn, "value") else d.decay_fn,
                 decay_half_life_months=float(d.decay_half_life_months),
                 decay_floor_pct=float(d.decay_floor_pct),
                 created_at=d.created_at,
