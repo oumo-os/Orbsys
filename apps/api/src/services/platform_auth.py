@@ -115,6 +115,7 @@ class PlatformAuthService(BaseService):
                 "org_slug": org.slug,
                 "org_name": org.name,
                 "member_id": str(member.id),
+                "handle": member.handle,
                 "display_name_org": member.display_name_org or member.display_name,
                 "current_state": member.current_state.value
                     if hasattr(member.current_state, "value") else member.current_state,

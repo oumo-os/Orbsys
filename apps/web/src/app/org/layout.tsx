@@ -56,11 +56,11 @@ export default function OrgLayout({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!isAuthenticated) { router.replace("/auth/login"); return; }
+    if (!isAuthenticated || !member) { router.replace("/auth/login"); return; }
     refresh();
     const iv = setInterval(refresh, 30000);
     return () => clearInterval(iv);
-  }, [isAuthenticated, refresh, router]);
+  }, [isAuthenticated, member, refresh, router]);
 
   if (!isAuthenticated || !member) return null;
 

@@ -1,7 +1,9 @@
 import axios from "axios";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 export const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000",
+  baseURL: API_URL,
   headers: { "Content-Type": "application/json" },
   withCredentials: false,
 });
@@ -15,8 +17,9 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// 401 → try refresh once, then redirect to login
-// 403 on /org/* → platform token used on org endpoint → redirect to enter-org
+// 401 handling:
+//   - Platform token expired → refresh and retry
+//   - Org session token expired → redirect to login (no refresh available)
 api.interceptors.response.use(
   (res) => res,
   async (err) => {
@@ -31,13 +34,35 @@ api.interceptors.response.use(
     }
 
     if (status === 401 && typeof window !== "undefined") {
+      // Already retried — don't loop
+      if (err.config?._retry) {
+        localStorage.removeItem("orbsys_access_token");
+        localStorage.removeItem("orbsys_refresh_token");
+        localStorage.removeItem("orbsys_member");
+        window.location.href = "/auth/login";
+        return Promise.reject(err);
+      }
+
+      const inOrgSession = !!localStorage.getItem("orbsys_member");
+
+      if (inOrgSession) {
+        // Org session token is invalid/expired — no platform refresh can help.
+        // Clear and send to login so the user can re-enter the org.
+        localStorage.removeItem("orbsys_access_token");
+        localStorage.removeItem("orbsys_refresh_token");
+        localStorage.removeItem("orbsys_member");
+        window.location.href = "/auth/login";
+        return Promise.reject(err);
+      }
+
+      // Platform session — try refresh
       const refreshToken = localStorage.getItem("orbsys_refresh_token");
       if (refreshToken) {
         try {
-          const res = await axios.post(
-            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/auth/refresh-platform`,
-            { refresh_token: refreshToken }
-          );
+          err.config._retry = true;
+          const res = await axios.post(`${API_URL}/auth/refresh-platform`, {
+            refresh_token: refreshToken,
+          });
           const newToken = res.data.access_token;
           localStorage.setItem("orbsys_access_token", newToken);
           api.defaults.headers.common["Authorization"] = `Bearer ${newToken}`;

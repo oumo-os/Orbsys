@@ -63,8 +63,7 @@ export default function LoginPage() {
   }
 
   async function enterOrg(org: { org_id: string; member_id: string; org_slug: string; org_name: string; display_name_org?: string; handle?: string; current_state: string }) {
-    const { platformApi: pApi, api } = await import("@/lib/api");
-    const sessionRes = await (await import("@/lib/api")).platformApi.enterOrg(org.org_id);
+    const sessionRes = await platformApi.enterOrg(org.org_id);
     const sessionToken = sessionRes.data.org_session_token;
     setOrgSession({
       id:             org.member_id,
