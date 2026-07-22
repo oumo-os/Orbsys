@@ -99,14 +99,14 @@ async def score_candidates(
     if subject_member_id:
         exclusions.append(subject_member_id)
 
-    # For blind types, exclude current STF commissioners to avoid conflict-of-interest
+        # For blind types, exclude current STF commissioners to avoid conflict-of-interest
     if commissioned_by_circle_id:
         circle_members = await db.execute(text("""
             SELECT member_id FROM circle_members
             WHERE circle_id = :cid AND exited_at IS NULL
         """), {"cid": commissioned_by_circle_id})
-        # For aSTF: exclude the filing circle's members (independence)
-        if stf_type in ("astf", "astf_motion"):
+        # For all blind types: exclude the commissioning circle's members (independence)
+        if stf_type in ("astf", "astf_motion", "jstf", "meta_astf"):
             exclusions.extend(row[0] for row in circle_members.fetchall())
 
     members_result = await db.execute(text("""
@@ -142,7 +142,7 @@ async def score_candidates(
         competence_fit = min(1.0, w_s / 3000.0)
 
         # Curiosity fit — max curiosity signal across relevant dormains
-        curiosity_fit = 0.0
+        curiosity_fit = 0.5  # neutral default when no signal declared
         if dormain_ids:
             cur_result = await db.execute(text("""
                 SELECT MAX(signal) FROM curiosities
@@ -165,7 +165,7 @@ async def score_candidates(
         is_independent = 1.0  # guaranteed by query structure
 
         # STF-type specific scoring adjustments
-        if stf_type == "meta_astf":
+        if stf_type in ("meta_astf", "jstf"):
             # jSTF requires W_h minimum — boost high-W_h members
             wh_result = await db.execute(text("""
                 SELECT MAX(w_h) FROM competence_scores
