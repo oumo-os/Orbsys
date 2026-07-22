@@ -558,6 +558,12 @@ async def handle_stf_deadline(data: dict, db: AsyncSession, nc: Any) -> None:
         SELECT sa.member_id
         FROM stf_assignments sa
         WHERE sa.stf_instance_id = :sid AND sa.verdict_filed_at IS NULL
+          AND NOT EXISTS (
+            SELECT 1 FROM notifications n
+            WHERE n.member_id = sa.member_id
+              AND n.subject_id = :sid
+              AND n.notification_type = 'stf_deadline_24h'
+          )
     """), {"sid": stf_id})
 
     for (member_id,) in members_result.fetchall():
