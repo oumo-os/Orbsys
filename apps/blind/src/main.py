@@ -443,11 +443,13 @@ async def file_verdict(
     _assert_stf_match(ctx, stf_uuid)
 
     # Check assignment exists and hasn't already had verdict filed
+    # FOR UPDATE locks the row to prevent concurrent double-submit
     assignment_result = await db.execute(
         text("""
             SELECT id, member_id, verdict_filed_at
             FROM stf_assignments
             WHERE id = :assignment_id AND stf_instance_id = :stf_id
+            FOR UPDATE
         """),
         {"assignment_id": ctx.assignment_id, "stf_id": stf_uuid},
     )
