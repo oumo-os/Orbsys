@@ -46,7 +46,7 @@ from ..models.governance import (
     Motion, MotionDirective, MotionSpecification, Resolution,
 )
 from ..models.types import (
-    CellState, CellType, ContributionType, MotionType, MotionState,
+    CellState, CellType, CellVisibility, ContributionType, MotionType, MotionState,
     ResolutionState, ImplementationType, Gate2Agent,
 )
 from ..schemas.cells import (
@@ -447,6 +447,8 @@ class CellsService(BaseService):
             ),
         )
 
+        await self._maybe_close_vote(motion, cell_id, org_id)
+
     # ── Crystallise ───────────────────────────────────────────────────────────
 
     async def crystallise(
@@ -827,13 +829,17 @@ class CellsService(BaseService):
         """
         Cell access: member must be in one of the invited Circles.
         The initiating member always has access regardless of Circle membership.
+        If cell.access == "open", all org members can read/post.
         """
         if cell.initiating_member_id == member_id:
             return
 
+        if cell.access == CellVisibility.OPEN:
+            return
+
         invited_circle_ids = [ic.circle_id for ic in cell.invited_circles]
         if not invited_circle_ids:
-            return  # open cell
+            return  # no circle restrictions set — treat as open
 
         member_circles_result = await self.db.execute(
             select(CircleMember.circle_id)
