@@ -296,6 +296,9 @@ class STFService(BaseService):
 
         inst = await self._load_stf(stf_id, org_id)
 
+        if inst.state != STFState.COMPLETED:
+            raise Forbidden("STF_NOT_COMPLETED: must be completed before enacting resolution")
+
         resolution = await self.db.execute(
             select(Resolution).where(Resolution.id == body.resolution_id)
         )
@@ -304,6 +307,8 @@ class STFService(BaseService):
             raise NotFound("Resolution", str(body.resolution_id))
         if res.org_id != org_id:
             raise Forbidden("RESOLUTION_ORG_MISMATCH")
+        if inst.resolution_id != body.resolution_id:
+            raise Forbidden("RESOLUTION_NOT_LINKED_TO_STF")
 
         # Build event payload — org_id required by Integrity Engine
         event_payload = {
