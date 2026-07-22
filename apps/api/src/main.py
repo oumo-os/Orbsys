@@ -103,7 +103,10 @@ async def internal_event(
     import os
     expected = os.environ.get("INTERNAL_TOKEN", "")
     token    = request.headers.get("X-Internal-Token", "")
-    if expected and token != expected:
+    if not expected:
+        from fastapi.responses import JSONResponse
+        return JSONResponse(status_code=503, content={"detail": "INTERNAL_TOKEN not configured"})
+    if token != expected:
         from fastapi.responses import JSONResponse
         return JSONResponse(status_code=403, content={"detail": "FORBIDDEN"})
 
@@ -149,9 +152,14 @@ async def internal_event(
 @app.get("/health")
 async def health(db: AsyncSession = Depends(get_db)):
     """Service health — includes org_count for first-run detection."""
+    from fastapi.responses import JSONResponse
     try:
         from sqlalchemy import text as _text
         org_count = (await db.execute(_text("SELECT COUNT(*) FROM orgs"))).scalar_one() or 0
-    except Exception:
-        org_count = 1
+    except Exception as e:
+        log.warning(f"[health] DB check failed: {e}")
+        return JSONResponse(
+            status_code=503,
+            content={"status": "degraded", "service": "orbsys-api", "error": "database unreachable"},
+        )
     return {"status": "ok", "service": "orbsys-api", "org_count": int(org_count)}
