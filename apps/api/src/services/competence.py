@@ -83,9 +83,12 @@ class CompetenceService(BaseService):
             raise NotFound("Dormain", str(dormain_id))
 
         total_result = await self.db.execute(
-            select(func.count(CompetenceScore.id)).where(
+            select(func.count(CompetenceScore.id))
+            .join(Member, CompetenceScore.member_id == Member.id)
+            .where(
                 CompetenceScore.dormain_id == dormain_id,
                 CompetenceScore.w_s > 0,
+                Member.org_id == org_id,
             )
         )
         total = total_result.scalar_one()
@@ -194,7 +197,7 @@ class CompetenceService(BaseService):
             credential_type=body.credential_type,
             value_wh=body.claimed_value_wh,
             vdc_reference=body.vdc_reference,
-            verified_at=now,  # preliminary — vSTF will update
+            verified_at=None,  # not yet verified — vSTF will set this
             status="wh_preliminary",
         )
         await self.save(credential)
