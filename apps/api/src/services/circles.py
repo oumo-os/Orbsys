@@ -18,6 +18,7 @@ from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
 
 from .base import BaseService
+from ..core.events import get_event_bus, GovernanceEvent, EventType
 from ..core.exceptions import NotFound, AlreadyExists, Forbidden
 from ..models.org import Circle, CircleDormain, CircleMember, Member, Dormain
 from ..models.types import MemberState
