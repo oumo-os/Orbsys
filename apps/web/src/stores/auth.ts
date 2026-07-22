@@ -83,6 +83,13 @@ export const useAuthStore = create<AuthState>()(
       clearOrgSession: () => {
         if (typeof window !== "undefined") {
           localStorage.removeItem("orbsys_member");
+          // Restore platform token as the active access token
+          const platformToken = useAuthStore.getState().platformToken;
+          if (platformToken) {
+            localStorage.setItem("orbsys_access_token", platformToken);
+          } else {
+            localStorage.removeItem("orbsys_access_token");
+          }
         }
         set({ member: null, orgSessionToken: null });
       },
@@ -92,6 +99,7 @@ export const useAuthStore = create<AuthState>()(
           localStorage.removeItem("orbsys_access_token");
           localStorage.removeItem("orbsys_refresh_token");
           localStorage.removeItem("orbsys_member");
+          localStorage.removeItem("orbsys_platform_token");
         }
         set({
           account:              null,
