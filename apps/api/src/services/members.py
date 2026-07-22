@@ -407,6 +407,9 @@ class MembersService(BaseService):
         from ..core.security import hash_password
         from ..core.exceptions import Forbidden
 
+        if len(password) < 10:
+            raise Forbidden("Password must be at least 10 characters")
+
         org = (await self.db.execute(
             select(Org).where(Org.id == org_id)
         )).scalar_one_or_none()
@@ -571,6 +574,26 @@ class MembersService(BaseService):
 
         new_member_id = None
         if approve:
+            from ..models.org import PlatformAccount
+            from ..core.security import hash_password as _hash_pw
+
+            # Find or create a PlatformAccount for the new member
+            platform_account = (await self.db.execute(
+                select(PlatformAccount).where(
+                    PlatformAccount.handle == app.handle
+                )
+            )).scalar_one_or_none()
+
+            if platform_account is None:
+                platform_account = PlatformAccount(
+                    handle=app.handle,
+                    email=app.email,
+                    password_hash=app.password_hash,
+                    created_at=now,
+                )
+                self.db.add(platform_account)
+                await self.db.flush()
+
             # Create the member account using stored credentials
             member = Member(
                 org_id=org_id,
@@ -578,6 +601,7 @@ class MembersService(BaseService):
                 display_name=app.display_name,
                 email=app.email,
                 password_hash=app.password_hash,
+                platform_account_id=platform_account.id,
                 joined_at=now,
                 current_state=MemberState.PROBATIONARY,
                 proof_of_personhood_ref=app.proof_of_personhood_ref,
