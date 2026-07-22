@@ -8,6 +8,9 @@ export const api = axios.create({
   withCredentials: false,
 });
 
+// ── Refresh mutex — prevent concurrent 401 → refresh races ───────────────────
+let refreshPromise: Promise<string> | null = null;
+
 // Attach JWT from localStorage on every request
 api.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
@@ -55,18 +58,26 @@ api.interceptors.response.use(
         return Promise.reject(err);
       }
 
-      // Platform session — try refresh
+      // Platform session — try refresh (with mutex to prevent races)
       const refreshToken = localStorage.getItem("orbsys_refresh_token");
       if (refreshToken) {
         try {
-          err.config._retry = true;
-          const res = await axios.post(`${API_URL}/auth/refresh-platform`, {
-            refresh_token: refreshToken,
-          });
-          const newToken = res.data.access_token;
+          // If a refresh is already in-flight, wait for it
+          if (!refreshPromise) {
+            refreshPromise = (async () => {
+              const res = await axios.post(`${API_URL}/auth/refresh-platform`, {
+                refresh_token: refreshToken,
+              });
+              return res.data.access_token as string;
+            })().finally(() => {
+              refreshPromise = null;
+            });
+          }
+          const newToken = await refreshPromise;
           localStorage.setItem("orbsys_access_token", newToken);
           api.defaults.headers.common["Authorization"] = `Bearer ${newToken}`;
           err.config.headers["Authorization"] = `Bearer ${newToken}`;
+          err.config._retry = true;
           return api.request(err.config);
         } catch {
           localStorage.removeItem("orbsys_access_token");
