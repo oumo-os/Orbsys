@@ -115,6 +115,7 @@ export const accountApi = {
 
 // ── Org-session endpoints (require org session token) ────────────────────────
 export const membersApi = {
+  list: (params?: object) => api.get("/members", { params }),
   me: () => api.get("/members/me"),
   feed: (params?: object) => api.get("/members/me/feed", { params }),
   curiosities: () => api.get("/members/me/curiosities"),

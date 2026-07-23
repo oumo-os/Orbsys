@@ -14,6 +14,18 @@ from ..schemas import (
 router = APIRouter(prefix="/members", tags=["members"])
 
 
+@router.get("", response_model=Paginated[MemberResponse])
+async def list_members(
+    member: ActiveMember, db: DB,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(25, ge=1, le=100),
+):
+    """List all members in the organisation."""
+    return await MembersService(db).list_members(
+        _uuid.UUID(member.org_id), page, page_size
+    )
+
+
 class _ApplyRequest(_BaseModel):
     handle: str
     display_name: str

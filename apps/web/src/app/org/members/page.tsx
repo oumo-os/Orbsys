@@ -38,7 +38,7 @@ export default function MembersPage() {
     try {
       if (tab==="members") {
         // GET /members — list all members
-        const r = await membersApi.feed({ page:1, page_size:100 });
+        const r = await membersApi.list({ page:1, page_size:100 });
         setMembers(r.data?.items ?? []);
       } else {
         const r = await membersApi.applications({ status:"pending", page_size:50 });

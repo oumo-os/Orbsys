@@ -642,6 +642,33 @@ class MembersService(BaseService):
 
     # ── Internal ──────────────────────────────────────────────────────────────
 
+    async def list_members(
+        self, org_id: uuid.UUID, page: int, page_size: int
+    ) -> Paginated[MemberResponse]:
+        """List all members in an org."""
+        from sqlalchemy import func
+
+        q = select(Member).where(Member.org_id == org_id)
+
+        total = (await self.db.execute(
+            select(func.count()).select_from(q.subquery())
+        )).scalar_one()
+
+        rows = await self.db.execute(
+            q.order_by(Member.joined_at.desc())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        )
+        members = rows.scalars().all()
+
+        return Paginated(
+            items=[MemberResponse.model_validate(m) for m in members],
+            total=total,
+            page=page,
+            page_size=page_size,
+            has_next=(page * page_size) < total,
+        )
+
     async def _load_member_full(
         self, member_id: uuid.UUID, org_id: uuid.UUID
     ) -> Member:
