@@ -63,6 +63,19 @@ class CellVisibility(str, enum.Enum):
     CLOSED = "closed"
 
 
+class CellVoteChoice(str, enum.Enum):
+    YEA = "yea"
+    NAY = "nay"
+    ABSTAIN = "abstain"
+
+
+class CommonsThreadState(str, enum.Enum):
+    OPEN = "open"
+    SPONSORED = "sponsored"
+    CLOSED = "closed"
+    ARCHIVED = "archived"
+
+
 class ContributionType(str, enum.Enum):
     DISCUSSION = "discussion"
     COMMONS_CONTEXT_IMPORT = "commons_context_import"
