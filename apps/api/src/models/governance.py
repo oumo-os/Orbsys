@@ -28,7 +28,7 @@ class CommonsThread(Base):
     freeze_reason: Mapped[Optional[FreezeReason]] = mapped_column(String(20))
     freeze_ref: Mapped[Optional[uuid.UUID]] = mapped_column(PG_UUID(as_uuid=True))
     sponsored_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
-    sponsoring_cell_id: Mapped[Optional[uuid.UUID]] = mapped_column(PG_UUID(as_uuid=True))
+    sponsoring_cell_id: Mapped[Optional[uuid.UUID]] = mapped_column(PG_UUID(as_uuid=True), ForeignKey("cells.id"))
     created_at: Mapped[datetime] = created_at_col()
 
     tags: Mapped[list["CommonsThreadDormainTag"]] = relationship(back_populates="thread")
@@ -96,7 +96,7 @@ class Cell(Base):
     parent_cell_id: Mapped[Optional[uuid.UUID]] = mapped_column(PG_UUID(as_uuid=True), ForeignKey("cells.id"))
     commons_thread_id: Mapped[Optional[uuid.UUID]] = mapped_column(PG_UUID(as_uuid=True), ForeignKey("commons_threads.id"))
     commons_snapshot_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
-    stf_instance_id: Mapped[Optional[uuid.UUID]] = mapped_column(PG_UUID(as_uuid=True))
+    stf_instance_id: Mapped[Optional[uuid.UUID]] = mapped_column(PG_UUID(as_uuid=True), ForeignKey("stf_instances.id"))
     founding_mandate: Mapped[Optional[str]] = mapped_column(Text)
     revision_directive: Mapped[Optional[str]] = mapped_column(Text)
     metadata_json: Mapped[Optional[Any]] = mapped_column(JSONB, nullable=True)
