@@ -609,7 +609,7 @@ class CellsService(BaseService):
                 s = MotionSpecification(
                     motion_id=motion.id,
                     parameter=spec.parameter,
-                    new_value={"value": spec.new_value},
+                    new_value=spec.new_value,
                     justification=spec.justification,
                 )
                 self.db.add(s)
