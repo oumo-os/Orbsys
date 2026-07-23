@@ -338,6 +338,7 @@ class STFService(BaseService):
                 )
                 engine_reply = json_mod.loads(msg.data.decode())
             except Exception as e:
+                log.error(f"[stf] enact_resolution NATS error: {e}")
                 # NATS unavailable or timeout
                 return EnactResolutionResponse(
                     resolution_id=body.resolution_id,
@@ -346,8 +347,7 @@ class STFService(BaseService):
                     gate2_diffs=[],
                     enacted_at=None,
                     contested_reason=(
-                        f"ENGINE_TIMEOUT: Integrity Engine did not respond within 30s. "
-                        f"Error: {e}"
+                        "ENGINE_TIMEOUT: Integrity Engine did not respond within 30s."
                     ),
                 )
         else:
