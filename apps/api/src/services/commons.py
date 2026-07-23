@@ -296,8 +296,8 @@ class CommonsService(BaseService):
         """
         thread = await self._load_thread(thread_id, org_id)
 
-        if thread.state not in ("open",):
-            raise Forbidden(f"Thread must be 'open' to sponsor; current state: {thread.state}")
+        if thread.state not in ("open", "sponsored"):
+            raise Forbidden(f"Thread must be 'open' or 'sponsored' to sponsor; current state: {thread.state}")
 
         # Sponsor must be a Circle member
         await self._require_circle_member(member_id, org_id)
@@ -387,7 +387,7 @@ class CommonsService(BaseService):
         """
         thread = await self._load_thread(thread_id, org_id)
 
-        if thread.state not in ("open",):
+        if thread.state not in ("open", "sponsored"):
             raise Forbidden(f"Thread state '{thread.state}' cannot be sponsored")
 
         await self._require_circle_member(member_id, org_id)
