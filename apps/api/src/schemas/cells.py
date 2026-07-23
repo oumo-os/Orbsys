@@ -122,7 +122,7 @@ class CellResponse(OrmBase):
 class ContributionResponse(OrmBase):
     id: uuid.UUID
     cell_id: uuid.UUID
-    author: MemberRef
+    author: MemberRef | None
     body: str
     contribution_type: ContributionType
     commons_post_ref: uuid.UUID | None

@@ -114,7 +114,7 @@ class CommonsThreadSummaryResponse(OrmBase):
 class CommonsPostResponse(OrmBase):
     id: uuid.UUID
     thread_id: uuid.UUID
-    author: MemberRef
+    author: MemberRef | None
     body: str
     parent_post_id: uuid.UUID | None
     formal_review_count: int
