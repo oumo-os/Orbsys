@@ -88,7 +88,7 @@ class CommonsThreadResponse(OrmBase):
     id: uuid.UUID
     title: str
     body: str
-    author: MemberRef
+    author: MemberRef | None
     tags: list[DormainTagResponse]
     state: str
     visibility: str
@@ -103,7 +103,7 @@ class CommonsThreadSummaryResponse(OrmBase):
     id: uuid.UUID
     title: str
     body_preview: str
-    author: MemberRef
+    author: MemberRef | None
     tags: list[DormainRef]
     state: str
     post_count: int
