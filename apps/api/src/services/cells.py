@@ -115,9 +115,18 @@ class CellsService(BaseService):
         )
         cells = rows.scalars().all()
 
+        # Batch-load initiating members to avoid N+1
+        initiator_ids = list({cell.initiating_member_id for cell in cells})
+        initiator_map: dict[uuid.UUID, Member] = {}
+        if initiator_ids:
+            member_result = await self.db.execute(
+                select(Member).where(Member.id.in_(initiator_ids))
+            )
+            initiator_map = {m.id: m for m in member_result.scalars().all()}
+
         items = []
         for cell in cells:
-            initiator = await self.get_by_id(Member, cell.initiating_member_id)
+            initiator = initiator_map.get(cell.initiating_member_id)
             items.append({
                 "id": str(cell.id),
                 "org_id": str(cell.org_id),
@@ -132,7 +141,6 @@ class CellsService(BaseService):
                 } if initiator else None,
                 "revision_directive": cell.revision_directive,
                 "created_at": cell.created_at.isoformat(),
-                "dissolved_at": cell.dissolved_at.isoformat() if cell.dissolved_at else None,
                 "commons_thread_id": str(cell.commons_thread_id) if cell.commons_thread_id else None,
             })
 
