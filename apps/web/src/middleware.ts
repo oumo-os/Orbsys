@@ -4,10 +4,10 @@ import { NextRequest, NextResponse } from "next/server";
  * Middleware — lightweight auth gate.
  *
  * Protected routes: /org/*
- * Public routes: /auth/*, /
+ * Public routes: /auth/*, /join, /setup, /me
  *
- * We check for the access token in cookies (set by the auth store on login).
- * If absent, redirect to /auth/login.
+ * We check for the orbsys_session cookie (set by the auth store on login).
+ * If absent on protected routes, redirect to /auth/login.
  *
  * Note: this is a presence check only — expiry is validated server-side
  * by the API. The auth store handles the 401 → clearAuth → redirect flow.
@@ -28,11 +28,14 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Protected: /org/*
+  // Protected: /org/* — check for session cookie
   if (pathname.startsWith("/org")) {
-    // Auth state lives in localStorage (client-side).
-    // The org layout enforces the guard via useAuthStore.
-    // Middleware does NOT redirect — let the client handle it.
+    const sessionCookie = request.cookies.get("orbsys_session");
+    if (!sessionCookie?.value) {
+      const loginUrl = new URL("/auth/login", request.url);
+      loginUrl.searchParams.set("redirect", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
   }
 
   return NextResponse.next();

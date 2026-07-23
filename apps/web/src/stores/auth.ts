@@ -74,6 +74,8 @@ export const useAuthStore = create<AuthState>()(
         if (typeof window !== "undefined") {
           localStorage.setItem("orbsys_access_token", token);
           localStorage.setItem("orbsys_member", JSON.stringify(member));
+          // Set session cookie for middleware auth guard
+          document.cookie = `orbsys_session=${token}; path=/; SameSite=Lax; Max-Age=86400`;
         }
         set({ member, orgSessionToken: token });
       },
@@ -83,6 +85,8 @@ export const useAuthStore = create<AuthState>()(
       clearOrgSession: () => {
         if (typeof window !== "undefined") {
           localStorage.removeItem("orbsys_member");
+          // Clear session cookie
+          document.cookie = "orbsys_session=; path=/; Max-Age=0";
           // Restore platform token as the active access token
           const platformToken = useAuthStore.getState().platformToken;
           if (platformToken) {
@@ -100,6 +104,8 @@ export const useAuthStore = create<AuthState>()(
           localStorage.removeItem("orbsys_refresh_token");
           localStorage.removeItem("orbsys_member");
           localStorage.removeItem("orbsys_platform_token");
+          // Clear session cookie
+          document.cookie = "orbsys_session=; path=/; Max-Age=0";
         }
         set({
           account:              null,
