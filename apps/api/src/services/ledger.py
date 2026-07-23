@@ -18,18 +18,20 @@ from __future__ import annotations
 import hashlib
 import json
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 
-from .base import BaseService
 from ..core.exceptions import NotFound
-from ..models.governance import LedgerEvent, STFInstance, STFVerdict, STFAssignment
-from ..schemas.ledger import (
-    LedgerEventResponse, LedgerVerifyResponse,
-    AuditReportResponse, AuditRationale,
-)
+from ..models.governance import LedgerEvent, STFAssignment, STFInstance, STFVerdict
 from ..schemas.common import Paginated
+from ..schemas.ledger import (
+    AuditRationale,
+    AuditReportResponse,
+    LedgerEventResponse,
+    LedgerVerifyResponse,
+)
+from .base import BaseService
 
 
 class LedgerService(BaseService):
@@ -118,7 +120,7 @@ class LedgerService(BaseService):
             status="ok" if first_broken is None else "broken",
             verified_events=verified,
             first_broken_event_id=first_broken,
-            verified_at=datetime.now(timezone.utc),
+            verified_at=datetime.now(UTC),
         )
 
     # ── Audit archive ─────────────────────────────────────────────────────────

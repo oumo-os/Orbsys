@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 import uuid
-import pytest
 
+import pytest
 
 # ── Schema tests ──────────────────────────────────────────────────────────────
 
@@ -17,6 +17,7 @@ class TestUpdateMemberRequest:
 
     def test_display_name_empty_string_rejected(self):
         from pydantic import ValidationError
+
         from src.schemas.members import UpdateMemberRequest
         with pytest.raises(ValidationError):
             UpdateMemberRequest(display_name="")
@@ -41,12 +42,14 @@ class TestSetCuriositiesRequest:
 
     def test_out_of_range_rejected(self):
         from pydantic import ValidationError
+
         from src.schemas.members import SetCuriositiesRequest
         with pytest.raises(ValidationError):
             SetCuriositiesRequest(curiosities={str(uuid.uuid4()): 1.5})
 
     def test_negative_rejected(self):
         from pydantic import ValidationError
+
         from src.schemas.members import SetCuriositiesRequest
         with pytest.raises(ValidationError):
             SetCuriositiesRequest(curiosities={str(uuid.uuid4()): -0.1})

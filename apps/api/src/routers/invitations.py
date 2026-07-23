@@ -7,17 +7,16 @@ POST /invitations/{token}/accept — requires platform auth, creates membership
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import select
 
 from ..core.dependencies import DB, PlatformAuth
-from ..core.events import get_event_bus, GovernanceEvent, EventType
-from ..core.exceptions import NotFound
+from ..core.events import EventType, GovernanceEvent, get_event_bus
 from ..core.security import create_org_session_token
-from ..models.org import Org, Member, OrgInvitation, CircleMember, Circle, PlatformAccount
+from ..models.org import Circle, CircleMember, Member, Org, OrgInvitation, PlatformAccount
 from ..models.types import MemberState
 
 router = APIRouter(prefix="/invitations", tags=["invitations"])
@@ -54,7 +53,7 @@ async def get_invitation(token: uuid.UUID, db: DB):
         raise HTTPException(status_code=404, detail="INVITATION_NOT_FOUND")
     if inv.status != "pending":
         raise HTTPException(status_code=410, detail=f"INVITATION_{inv.status.upper()}")
-    if inv.expires_at and inv.expires_at < datetime.now(timezone.utc):
+    if inv.expires_at and inv.expires_at < datetime.now(UTC):
         raise HTTPException(status_code=410, detail="INVITATION_EXPIRED")
 
     org = (await db.execute(
@@ -96,7 +95,7 @@ async def accept_invitation(
         raise HTTPException(status_code=404, detail="INVITATION_NOT_FOUND")
     if inv.status != "pending":
         raise HTTPException(status_code=410, detail=f"INVITATION_{inv.status.upper()}")
-    if inv.expires_at and inv.expires_at < datetime.now(timezone.utc):
+    if inv.expires_at and inv.expires_at < datetime.now(UTC):
         raise HTTPException(status_code=410, detail="INVITATION_EXPIRED")
 
     org = (await db.execute(
@@ -126,7 +125,7 @@ async def accept_invitation(
         )
         inv.status = "accepted"
         inv.platform_account_id = account_id
-        inv.responded_at = datetime.now(timezone.utc)
+        inv.responded_at = datetime.now(UTC)
         db.add(inv)
         await db.flush()
 
@@ -152,7 +151,7 @@ async def accept_invitation(
     if handle_exists is not None:
         raise HTTPException(status_code=409, detail="HANDLE_TAKEN_IN_ORG")
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     member = Member(
         org_id=inv.org_id,
         handle=handle,

@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+
 from pydantic import BaseModel, Field
 
-from .common import OrmBase, MemberRef, DormainRef, Paginated
 from ..models.types import TagSource
-
+from .common import DormainRef, MemberRef, OrmBase
 
 # ── Requests ──────────────────────────────────────────────────────────────────
 
@@ -149,10 +149,11 @@ class SponsorConfirmResponse(OrmBase):
     cell_id: uuid.UUID
     thread_id: uuid.UUID
     founding_mandate: str
-    invited_circles: list["CircleRef"]
+    invited_circles: list[CircleRef]
     created_at: datetime
 
 
 # Resolve forward ref
 from .common import CircleRef
+
 SponsorConfirmResponse.model_rebuild()

@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+
 from pydantic import BaseModel, Field, field_validator
 
-from .common import OrmBase, DormainRef
 from ..models.types import MemberState
-
+from .common import DormainRef, OrmBase
 
 # ── Requests ──────────────────────────────────────────────────────────────────
 
@@ -90,7 +90,7 @@ class FeedItemResponse(OrmBase):
     thread_id: uuid.UUID
     title: str
     body_preview: str  # first 280 chars
-    author: "MemberRef"
+    author: MemberRef
     dormain_tags: list[DormainRef]
     state: str
     post_count: int
@@ -116,6 +116,7 @@ class NotificationResponse(OrmBase):
 
 # Resolve forward refs
 from .common import MemberRef
+
 MemberDetailResponse.model_rebuild()
 FeedItemResponse.model_rebuild()
 

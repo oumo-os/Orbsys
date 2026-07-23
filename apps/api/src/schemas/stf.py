@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+
 from pydantic import BaseModel, Field
 
-from .common import OrmBase, CircleRef
-from ..models.types import STFType, STFState, VerdictType
-
+from ..models.types import STFState, STFType, VerdictType
+from .common import CircleRef, OrmBase
 
 # ── Requests ──────────────────────────────────────────────────────────────────
 
@@ -91,7 +91,7 @@ class STFAssignmentResponse(OrmBase):
     stf_instance_id: uuid.UUID
     stf_type: STFType
     # member is ABSENT (None) for all blind STF types
-    member: "MemberRef | None"
+    member: MemberRef | None
     slot_type: str
     assigned_at: datetime
     rotation_end: datetime | None
@@ -146,7 +146,7 @@ class EnactResolutionResponse(BaseModel):
     resolution_id: uuid.UUID
     resolution_ref: str
     state: str                       # enacted | contested
-    gate2_diffs: list["Gate2DiffEntry"]
+    gate2_diffs: list[Gate2DiffEntry]
     enacted_at: datetime | None
     contested_reason: str | None
 
@@ -165,5 +165,6 @@ class UnsealingEventResponse(OrmBase):
 # Resolve forward refs
 from .common import MemberRef
 from .motions import Gate2DiffEntry
+
 STFAssignmentResponse.model_rebuild()
 EnactResolutionResponse.model_rebuild()

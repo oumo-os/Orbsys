@@ -1,11 +1,14 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, Optional
+
 from sqlalchemy import Boolean, DateTime, ForeignKey, Numeric, String, Text, UniqueConstraint
-from sqlalchemy.dialects.postgresql import JSONB, UUID as PG_UUID
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from ..core.database import Base
-from .types import uuid_pk, created_at_col, updated_at_col, MemberState, ExitReason, DecayFn
+from .types import DecayFn, ExitReason, MemberState, created_at_col, updated_at_col, uuid_pk
 
 
 class Org(Base):
@@ -167,7 +170,7 @@ class PlatformAccount(Base):
     legal_name_verified_ref: Mapped[Optional[str]]  = mapped_column(String(500))
     legal_name_changed_at:   Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
     created_at:  Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
     )
     last_seen_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
 
@@ -194,7 +197,7 @@ class CredentialWallet(Base):
     vdc_reference:   Mapped[Optional[str]] = mapped_column(String(500))
     file_key:        Mapped[Optional[str]] = mapped_column(String(500))
     uploaded_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
     )
     account: Mapped["PlatformAccount"] = relationship(back_populates="wallet_items")
 
@@ -213,7 +216,7 @@ class OrgInvitation(Base):
     invited_email:       Mapped[Optional[str]]        = mapped_column(String(255))
     message:             Mapped[Optional[str]]        = mapped_column(Text)
     status:     Mapped[str]              = mapped_column(String(20), nullable=False, default="pending")
-    created_at: Mapped[datetime]         = mapped_column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+    created_at: Mapped[datetime]         = mapped_column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC))
     expires_at:   Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
     responded_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
 
@@ -253,6 +256,6 @@ class MemberApplication(Base):
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False,
-        default=lambda: datetime.now(timezone.utc)
+        default=lambda: datetime.now(UTC)
     )
     expires_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))

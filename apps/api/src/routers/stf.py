@@ -1,14 +1,21 @@
 import uuid as _uuid
 from uuid import UUID
+
 from fastapi import APIRouter, Query
-from ..core.dependencies import ActiveMember, GovWriter, DB
-from ..services.stf import STFService
+
+from ..core.dependencies import DB, ActiveMember, GovWriter
 from ..schemas import (
-    CommissionSTFRequest, STFInstanceResponse, STFInstanceSummaryResponse,
-    STFAssignmentResponse, VerdictAggregateResponse, VerdictRationaleResponse,
-    EnactResolutionRequest, EnactResolutionResponse,
+    CommissionSTFRequest,
+    EnactResolutionRequest,
+    EnactResolutionResponse,
     Paginated,
+    STFAssignmentResponse,
+    STFInstanceResponse,
+    STFInstanceSummaryResponse,
+    VerdictAggregateResponse,
+    VerdictRationaleResponse,
 )
+from ..services.stf import STFService
 
 router = APIRouter(prefix="/stf", tags=["stf"])
 

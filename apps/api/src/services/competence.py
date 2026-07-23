@@ -11,23 +11,25 @@ vSTF verdict upgrades it to wh_verified.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from sqlalchemy import select, func
-from sqlalchemy.orm import selectinload
+from sqlalchemy import func, select
 
-from .base import BaseService
-from ..core.exceptions import NotFound, AlreadyExists
-from ..core.events import get_event_bus, GovernanceEvent, EventType
-from ..models.org import Member, Dormain
-from ..models.competence import CompetenceScore, WhCredential, DeltaCEvent
+from ..core.events import EventType, GovernanceEvent, get_event_bus
+from ..core.exceptions import AlreadyExists, NotFound
+from ..models.competence import CompetenceScore, WhCredential
+from ..models.org import Dormain, Member
+from ..schemas.common import DormainRef, MemberRef
 from ..schemas.competence import (
-    CompetenceScoreResponse, CompetenceScoresResponse,
-    DormainLeaderboardResponse, LeaderboardEntryResponse,
-    SubmitWhClaimRequest, WhClaimResponse,
-    DormainListResponse, DeltaCEventResponse,
+    CompetenceScoreResponse,
+    CompetenceScoresResponse,
+    DormainLeaderboardResponse,
+    DormainListResponse,
+    LeaderboardEntryResponse,
+    SubmitWhClaimRequest,
+    WhClaimResponse,
 )
-from ..schemas.common import MemberRef, DormainRef
+from .base import BaseService
 
 
 class CompetenceService(BaseService):
@@ -190,7 +192,6 @@ class CompetenceService(BaseService):
                 f"{member_id}+{body.dormain_id}+{body.credential_type.value}",
             )
 
-        now = datetime.now(timezone.utc)
         credential = WhCredential(
             member_id=member_id,
             dormain_id=body.dormain_id,

@@ -20,9 +20,8 @@ from __future__ import annotations
 import json
 import logging
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
-from functools import lru_cache
 from typing import Any
 
 log = logging.getLogger(__name__)
@@ -108,7 +107,7 @@ class GovernanceEvent:
         self.payload = payload or {}
         self.triggered_by_member = triggered_by_member
         self.triggered_by_resolution = triggered_by_resolution
-        self.emitted_at = datetime.now(timezone.utc)
+        self.emitted_at = datetime.now(UTC)
         self.ledger_event_id: uuid.UUID | None = None  # set by Integrity Engine
 
     def to_dict(self) -> dict:

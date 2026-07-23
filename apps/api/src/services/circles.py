@@ -12,22 +12,26 @@ Invitation flow:
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
 
-from .base import BaseService
-from ..core.events import get_event_bus, GovernanceEvent, EventType
-from ..core.exceptions import NotFound, AlreadyExists, Forbidden
-from ..models.org import Circle, CircleDormain, CircleMember, Member, Dormain
+from ..core.events import EventType, GovernanceEvent, get_event_bus
+from ..core.exceptions import AlreadyExists, Forbidden, NotFound
+from ..models.org import Circle, CircleDormain, CircleMember, Dormain, Member
 from ..models.types import MemberState
 from ..schemas.circles import (
-    CircleResponse, CircleSummaryResponse, CircleDormainResponse,
-    CircleMemberResponse, CircleHealthSnapshotResponse, InvitationResponse,
+    CircleDormainResponse,
+    CircleHealthSnapshotResponse,
+    CircleMemberResponse,
+    CircleResponse,
+    CircleSummaryResponse,
+    InvitationResponse,
     InviteMemberRequest,
 )
-from ..schemas.common import MemberRef, DormainRef
+from ..schemas.common import DormainRef, MemberRef
+from .base import BaseService
 
 
 class CirclesService(BaseService):
@@ -129,7 +133,7 @@ class CirclesService(BaseService):
     async def list_circle_members(
         self, circle_id: uuid.UUID, org_id: uuid.UUID
     ) -> list[CircleMemberResponse]:
-        circle = await self._load_circle(circle_id, org_id)
+        await self._load_circle(circle_id, org_id)
 
         result = await self.db.execute(
             select(CircleMember, Member)
@@ -229,12 +233,11 @@ class CirclesService(BaseService):
         if existing_membership.scalar_one_or_none() is not None:
             raise AlreadyExists("Circle membership", "member_id", str(body.member_id))
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         # Bootstrap auto-confirm (org.bootstrapped_at is null)
         from ..models.org import Org
         org = await self.get_by_id(Org, org_id)
-        auto_confirm = org is not None and org.bootstrapped_at is None
 
         invitation_id = uuid.uuid4()
 

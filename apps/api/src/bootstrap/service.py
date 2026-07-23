@@ -15,35 +15,43 @@ It uses the same underlying service methods as normal governance — no special 
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
-from sqlalchemy import select, func, update
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
-from ..core.events import EventType, GovernanceEvent, get_event_bus
-from ..core.exceptions import Forbidden, NotFound
-from ..models.org import (
-    Circle, CircleDormain, CircleMember,
-    Dormain, Member, Org, OrgParameter,
-)
-from ..models.governance import (
-    Cell, CellInvitedCircle,
-    CommonsPost, CommonsThread, CommonsThreadDormainTag,
-    Motion, MotionDirective,
-)
-from ..models.types import (
-    CellState, CellType, MandateType, MemberState, MotionType, TagSource,
-)
-from ..services.base import BaseService
 from ..bootstrap.templates import (
-    OrgTemplate, FoundingProposal,
     UNIVERSAL_DORMAINS,
     all_proposals_for_template,
     founding_circle_quorum,
     get_template,
 )
-
+from ..core.events import EventType, GovernanceEvent, get_event_bus
+from ..core.exceptions import Forbidden, NotFound
+from ..models.governance import (
+    Cell,
+    CellInvitedCircle,
+    CommonsPost,
+    CommonsThread,
+    CommonsThreadDormainTag,
+    Motion,
+)
+from ..models.org import (
+    Circle,
+    CircleDormain,
+    CircleMember,
+    Dormain,
+    Member,
+    Org,
+    OrgParameter,
+)
+from ..models.types import (
+    CellState,
+    CellType,
+    MandateType,
+    MemberState,
+)
+from ..services.base import BaseService
 
 SYSTEM_HANDLE = "_system"
 
@@ -76,7 +84,7 @@ class BootstrapService(BaseService):
 
         from ..core.security import hash_password
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         # Org
         org = Org(
@@ -139,8 +147,9 @@ class BootstrapService(BaseService):
         # First member — also creates the linked PlatformAccount, since
         # /setup/create is now the platform's primary signup surface for
         # someone starting a brand new org from scratch.
-        from ..models.org import PlatformAccount
         from sqlalchemy import or_ as _or
+
+        from ..models.org import PlatformAccount
 
         platform_account = (await self.db.execute(
             select(PlatformAccount).where(
@@ -159,8 +168,8 @@ class BootstrapService(BaseService):
             self.db.add(platform_account)
             await self.db.flush()
         else:
-            from ..core.security import verify_password
             from ..core.exceptions import Forbidden as _Forbidden
+            from ..core.security import verify_password
             if not verify_password(first_member_password, platform_account.password_hash):
                 raise _Forbidden(
                     "A platform account with this handle/email already exists. "
@@ -215,7 +224,7 @@ class BootstrapService(BaseService):
         Seeds one Cell per founding proposal, authored and pre-sponsored by the system.
         Returns list of cell_ids created.
         """
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         # Find the founding circle
         fc_row = (await self.db.execute(
@@ -358,7 +367,7 @@ class BootstrapService(BaseService):
         If the founding circle has reached quorum, form it and seed proposals.
         Returns True if the founding circle was just formed.
         """
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         # Store the recommendation in a dedicated parameter
         key = f"fc_candidate_{member_id}"
@@ -544,7 +553,7 @@ class BootstrapService(BaseService):
         if not proposal:
             return
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         first_member = (await self.db.execute(
             select(Member).where(
                 Member.org_id == org_id,

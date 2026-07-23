@@ -13,9 +13,10 @@ now ALSO creates a linked PlatformAccount under the hood so founding
 members immediately have a portable identity.
 """
 from fastapi import APIRouter, Query
+
 from ..core.dependencies import DB
+from ..schemas import MemberSessionResponse, RegisterMemberRequest
 from ..services.auth import AuthService
-from ..schemas import RegisterMemberRequest, MemberSessionResponse
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 

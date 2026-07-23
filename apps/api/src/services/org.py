@@ -8,22 +8,25 @@ constructs even though their members are managed separately.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from .base import BaseService
-from ..core.exceptions import (
-    NotFound, AlreadyExists, BootstrapOnly, PostBootstrapOnly
-)
-from ..core.events import get_event_bus, GovernanceEvent, EventType
-from ..models.org import Org, Dormain, OrgParameter, Circle, CircleDormain
-from ..models.types import DecayFn, MandateType
+from ..core.events import EventType, GovernanceEvent, get_event_bus
+from ..core.exceptions import AlreadyExists, NotFound
+from ..models.org import Circle, Dormain, Org, OrgParameter
+
+if TYPE_CHECKING:
+    from ..schemas.circles import CircleResponse
 from ..schemas.org import (
-    CreateOrgRequest, OrgResponse, DormainResponse,
-    CreateDormainRequest, OrgParameterResponse, CreateCircleRequest,
+    CreateDormainRequest,
+    CreateOrgRequest,
+    DormainResponse,
+    OrgParameterResponse,
+    OrgResponse,
 )
+from .base import BaseService
 
 
 class OrgService(BaseService):
@@ -92,7 +95,7 @@ class OrgService(BaseService):
         if membership_policy not in ("open_application", "invite_only", "closed"):
             raise Forbidden(f"INVALID_POLICY: {membership_policy}")
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         # 1. Mark org live
         org.bootstrapped_at = now
@@ -220,15 +223,15 @@ class OrgService(BaseService):
         org_id: uuid.UUID,
         member_id: uuid.UUID,
         body: object,  # BootstrapCircleRequest — avoid circular import
-    ) -> "CircleResponse":
+    ) -> CircleResponse:
         """
         Direct circle creation during bootstrap (org.bootstrapped_at is null).
         In live operation circles are created via governance motions.
         """
-        from ..core.exceptions import Forbidden, AlreadyExists, BootstrapOnly
-        from ..models.org import Org, Circle, CircleDormain, CircleMember, Dormain
+        from ..core.exceptions import AlreadyExists, BootstrapOnly, Forbidden
+        from ..models.org import Circle, CircleDormain, CircleMember, Dormain, Org
         from ..models.types import MandateType, MemberState
-        from ..schemas.circles import CircleResponse, CircleDormainResponse
+        from ..schemas.circles import CircleDormainResponse, CircleResponse
         from ..schemas.common import DormainRef
 
         org = await self.get_by_id(Org, org_id)
@@ -244,7 +247,7 @@ class OrgService(BaseService):
         if existing:
             raise AlreadyExists("Circle", "name", body.name)
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         circle = Circle(
             org_id=org_id,
             name=body.name,

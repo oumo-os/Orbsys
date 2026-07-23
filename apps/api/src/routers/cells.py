@@ -1,18 +1,26 @@
 import uuid as _uuid
 from uuid import UUID
-from fastapi import APIRouter, Query, status
+
+from fastapi import APIRouter, Query
 from fastapi.responses import Response
-from ..core.dependencies import ActiveMember, GovWriter, DB
-from ..services.cells import CellsService
+
+from ..core.dependencies import DB, ActiveMember, GovWriter
 from ..schemas import (
-    CellResponse, ContributionResponse, AddContributionRequest,
-    ImportCommonsContextRequest, CellMinutesResponse,
-    CastVoteRequest, CellVoteSummariesResponse,
+    AddContributionRequest,
+    CastVoteRequest,
+    CellMinutesResponse,
+    CellResponse,
+    CellVoteSummariesResponse,
+    CompositionProfileResponse,
+    ContributionResponse,
     CrystalliseDraftResponse,
-    FileCrystallisedMotionRequest, FiledMotionResponse,
-    CompositionProfileResponse, DissolveCellRequest,
+    DissolveCellRequest,
+    FileCrystallisedMotionRequest,
+    FiledMotionResponse,
+    ImportCommonsContextRequest,
     Paginated,
 )
+from ..services.cells import CellsService
 
 router = APIRouter(prefix="/cells", tags=["cells"])
 
@@ -116,8 +124,10 @@ async def dissolve_cell(cell_id: UUID, body: DissolveCellRequest, member: GovWri
     )
     return Response(status_code=204)
 
-from pydantic import BaseModel as _BM
 import uuid as _u
+
+from pydantic import BaseModel as _BM
+
 
 class CreateCellRequest(_BM):
     mandate: str

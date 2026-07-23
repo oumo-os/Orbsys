@@ -1,17 +1,33 @@
 import uuid
 from datetime import datetime
-from typing import Optional, Any
+from typing import Any, Optional
+
 from sqlalchemy import Boolean, DateTime, ForeignKey, Numeric, String, Text, UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID as PG_UUID, ARRAY, JSONB
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from ..core.database import Base
 from .types import (
-    uuid_pk, created_at_col,
-    CellType, CellState, CellVisibility, ContributionType, TagSource, FreezeReason,
-    MotionType, MotionState, ResolutionState, ImplementationType, Gate2Agent,
-    STFType, STFState, VerdictType, UnsealingCondition, PreValidationStatus,
+    CellState,
+    CellType,
+    CellVisibility,
+    ContributionType,
+    FreezeReason,
+    Gate2Agent,
+    ImplementationType,
+    MotionState,
+    MotionType,
+    PreValidationStatus,
+    ResolutionState,
+    STFState,
+    STFType,
+    TagSource,
+    UnsealingCondition,
+    VerdictType,
+    created_at_col,
+    uuid_pk,
 )
-
 
 # ── Commons ───────────────────────────────────────────────────────────────────
 

@@ -12,19 +12,20 @@ and is now also called internally by enter_org() to mint org session tokens.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from sqlalchemy import select, or_
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import or_, select
 
-from .base import BaseService
 from ..core.exceptions import AlreadyExists, Forbidden, NotFound
 from ..core.security import (
-    hash_password, verify_password,
-    create_platform_token, create_platform_refresh_token,
     create_org_session_token,
+    create_platform_refresh_token,
+    create_platform_token,
+    hash_password,
+    verify_password,
 )
 from ..models.org import Member, Org, PlatformAccount
+from .base import BaseService
 
 
 class PlatformAuthService(BaseService):
@@ -49,7 +50,7 @@ class PlatformAuthService(BaseService):
         if existing:
             raise AlreadyExists("PlatformAccount", "handle/email", handle)
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         account = PlatformAccount(
             handle=handle,
             email=email,
@@ -84,7 +85,7 @@ class PlatformAuthService(BaseService):
         if account is None or not verify_password(password, account.password_hash):
             raise Forbidden("INVALID_CREDENTIALS")
 
-        account.last_seen_at = datetime.now(timezone.utc)
+        account.last_seen_at = datetime.now(UTC)
         self.db.add(account)
         await self.db.flush()
 

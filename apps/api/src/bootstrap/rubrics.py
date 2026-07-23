@@ -9,6 +9,7 @@ and flag thresholds. Consumed by:
   - Ledger (labelling score fields in event payloads)
 """
 from __future__ import annotations
+
 from dataclasses import dataclass
 
 

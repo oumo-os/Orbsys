@@ -1,17 +1,31 @@
-from contextlib import asynccontextmanager
 import logging
 import uuid
+from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request, Depends
+from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from .core.config import get_settings
 from .core.database import get_db
-from sqlalchemy.ext.asyncio import AsyncSession
 from .core.events import get_event_bus
 from .core.exceptions import OrbSysError
-from .routers import auth, platform_auth, members, competence, commons, cells, motions, stf, circles, org, ledger, setup, invitations
+from .routers import (
+    auth,
+    cells,
+    circles,
+    commons,
+    competence,
+    invitations,
+    ledger,
+    members,
+    motions,
+    org,
+    platform_auth,
+    setup,
+    stf,
+)
 
 log = logging.getLogger(__name__)
 settings = get_settings()
@@ -114,8 +128,9 @@ async def internal_event(
     event_type = data.get("event_type", "")
 
     # Map back to EventType enum string and publish via event bus
-    from .core.events import get_event_bus, GovernanceEvent, EventType
     import uuid as _u
+
+    from .core.events import EventType, GovernanceEvent, get_event_bus
 
     org_id_str = data.get("org_id")
     if not org_id_str:

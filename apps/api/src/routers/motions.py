@@ -1,13 +1,16 @@
 import uuid as _uuid
 from uuid import UUID
+
 from fastapi import APIRouter, Query
-from ..core.dependencies import ActiveMember, GovWriter, DB
-from ..services.motions import MotionsService
+
+from ..core.dependencies import DB, ActiveMember, GovWriter
 from ..schemas import (
     MotionResponse,
-    ValidateSpecificationRequest, ValidateSpecificationResponse,
     Paginated,
+    ValidateSpecificationRequest,
+    ValidateSpecificationResponse,
 )
+from ..services.motions import MotionsService
 
 router = APIRouter(prefix="/motions", tags=["motions"])
 

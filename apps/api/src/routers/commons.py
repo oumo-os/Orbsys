@@ -1,16 +1,24 @@
 import uuid as _uuid
 from uuid import UUID
+
 from fastapi import APIRouter, Query
-from ..core.dependencies import ActiveMember, GovWriter, DB
-from ..services.commons import CommonsService
+
+from ..core.dependencies import DB, ActiveMember, GovWriter
 from ..schemas import (
-    CreateThreadRequest, CommonsThreadResponse, CommonsThreadSummaryResponse,
-    CreatePostRequest, CommonsPostResponse,
-    FormalReviewRequest, FormalReviewResponse,
+    CommonsPostResponse,
+    CommonsThreadResponse,
+    CommonsThreadSummaryResponse,
+    ConfirmSponsorshipRequest,
     CorrectDormainTagRequest,
-    SponsorDraftResponse, ConfirmSponsorshipRequest, SponsorConfirmResponse,
+    CreatePostRequest,
+    CreateThreadRequest,
+    FormalReviewRequest,
+    FormalReviewResponse,
     Paginated,
+    SponsorConfirmResponse,
+    SponsorDraftResponse,
 )
+from ..services.commons import CommonsService
 
 router = APIRouter(prefix="/commons", tags=["commons"])
 

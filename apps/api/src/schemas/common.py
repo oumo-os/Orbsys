@@ -5,8 +5,8 @@ Import from here, not from individual domain schemas.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
 from typing import Generic, TypeVar
+
 from pydantic import BaseModel, ConfigDict
 
 T = TypeVar("T")

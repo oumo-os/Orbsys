@@ -1,10 +1,12 @@
 from typing import Annotated
+
 from fastapi import Depends, Header, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from .database import get_db
-from .security import decode_token, decode_isolated_view_token
+from .security import decode_isolated_view_token, decode_token
 
 bearer = HTTPBearer()
 

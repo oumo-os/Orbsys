@@ -2,14 +2,18 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+
 from pydantic import BaseModel, Field, model_validator
 
-from .common import OrmBase, MemberRef, CircleRef, DormainRef
 from ..models.types import (
-    CellType, CellState, CellVisibility, ContributionType,
-    MotionType, PreValidationStatus,
+    CellState,
+    CellType,
+    CellVisibility,
+    ContributionType,
+    MotionType,
+    PreValidationStatus,
 )
-
+from .common import CircleRef, DormainRef, MemberRef, OrmBase
 
 # ── Requests ──────────────────────────────────────────────────────────────────
 

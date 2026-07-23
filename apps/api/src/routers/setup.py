@@ -12,18 +12,20 @@ POST /setup/check-proposals    Check if bootstrap_complete Cell should surface
 from __future__ import annotations
 
 import uuid as _uuid
-from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from ..core.database import get_db
-from ..core.dependencies import DB, ActiveMember, GovWriter, PlatformAuth, CurrentAccount
-from ..bootstrap.templates import (
-    TEMPLATES, primary_templates, extended_templates, get_template,
-    all_proposals_for_template, founding_circle_quorum,
-)
 from ..bootstrap.service import BootstrapService
+from ..bootstrap.templates import (
+    TEMPLATES,
+    all_proposals_for_template,
+    extended_templates,
+    founding_circle_quorum,
+    get_template,
+    primary_templates,
+)
+from ..core.dependencies import DB, PlatformAuth
 
 router = APIRouter(prefix="/setup", tags=["setup"])
 
@@ -47,7 +49,6 @@ async def list_templates(extended: bool = False):
     List available org templates for the first-run selector.
     Returns primary (5) by default; set extended=true for all 10.
     """
-    source = TEMPLATES if extended else primary_templates()
     return {
         "primary": [
             {
@@ -153,7 +154,7 @@ async def create_org_from_template(body: CreateOrgRequest, db: DB):
     # separate POST /auth/enter-org/{org_id} call (same path every member
     # uses to switch into any org). This keeps exactly one issuance pattern
     # for "I am now inside an org" across the whole platform.
-    from ..core.security import create_platform_token, create_platform_refresh_token
+    from ..core.security import create_platform_refresh_token, create_platform_token
     access  = create_platform_token(result["platform_account_id"])
     refresh = create_platform_refresh_token(result["platform_account_id"])
 
@@ -179,11 +180,14 @@ async def bootstrap_status(org_id: _uuid.UUID, account: PlatformAuth, db: DB):
     Bootstrap progress for the onboarding UI.
     Returns: verified member count, founding circle status, proposal progress.
     """
-    from sqlalchemy import select, func, text
-    from ..models.org import (
-        Member, Circle, CircleMember, OrgParameter,
-    )
+    from sqlalchemy import func, select, text
+
     from ..models.governance import Cell, Motion
+    from ..models.org import (
+        Circle,
+        CircleMember,
+        OrgParameter,
+    )
 
     # Verified member count (have at least one enacted W_h credential)
     verified_count = (await db.execute(

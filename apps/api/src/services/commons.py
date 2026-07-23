@@ -21,35 +21,39 @@ Formal review:
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
-from typing import Any
+from datetime import UTC, datetime
 
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from .base import BaseService
-from ..core.exceptions import (
-    NotFound, Forbidden, NotCircleMember, AlreadyExists
-)
-from ..core.events import get_event_bus, GovernanceEvent, EventType
-from ..models.org import Member, Circle, CircleMember, Dormain
+from ..core.events import EventType, GovernanceEvent, get_event_bus
+from ..core.exceptions import AlreadyExists, Forbidden, NotCircleMember, NotFound
 from ..models.governance import (
-    CommonsThread, CommonsThreadDormainTag, CommonsPost,
-    CommonsFormalReview, Cell, CellInvitedCircle,
+    Cell,
+    CellInvitedCircle,
+    CommonsFormalReview,
+    CommonsPost,
+    CommonsThread,
+    CommonsThreadDormainTag,
 )
-from ..models.types import (
-    CellType, CellState, CellVisibility, TagSource, ContributionType
-)
+from ..models.org import Circle, CircleMember, Dormain, Member
+from ..models.types import CellState, CellType, CellVisibility, TagSource
+from ..schemas.common import CircleRef, DormainRef, MemberRef, Paginated
 from ..schemas.commons import (
-    CreateThreadRequest, CommonsThreadResponse, CommonsThreadSummaryResponse,
-    CreatePostRequest, CommonsPostResponse,
-    FormalReviewRequest, FormalReviewResponse,
+    CommonsPostResponse,
+    CommonsThreadResponse,
+    CommonsThreadSummaryResponse,
+    ConfirmSponsorshipRequest,
     CorrectDormainTagRequest,
-    ConfirmSponsorshipRequest, SponsorConfirmResponse, SponsorDraftResponse,
+    CreatePostRequest,
+    CreateThreadRequest,
     DormainTagResponse,
+    FormalReviewRequest,
+    FormalReviewResponse,
+    SponsorConfirmResponse,
+    SponsorDraftResponse,
 )
-from ..schemas.common import Paginated, MemberRef, DormainRef, CircleRef
+from .base import BaseService
 
 
 class CommonsService(BaseService):
@@ -134,7 +138,7 @@ class CommonsService(BaseService):
         await self.save(thread)
 
         # Apply author dormain signals
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         for dormain_id in body.dormain_ids:
             tag = CommonsThreadDormainTag(
                 thread_id=thread.id,
@@ -311,7 +315,7 @@ class CommonsService(BaseService):
         import json as _json
 
         draft_id = str(uuid.uuid4())
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         # Try NATS request/reply to Insight Engine (10s timeout)
         bus = get_event_bus()
@@ -395,7 +399,7 @@ class CommonsService(BaseService):
         # Validate all invited_circle_ids exist within org
         circles = await self._validate_circles(body.invited_circle_ids, org_id)
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         # Create the Deliberation Cell
         cell = Cell(
@@ -515,7 +519,7 @@ class CommonsService(BaseService):
             reviewer_id=member_id,
             dormain_id=body.dormain_id,
             score_s=body.score_s,
-            reviewed_at=datetime.now(timezone.utc),
+            reviewed_at=datetime.now(UTC),
         )
         await self.save(review)
 
@@ -558,7 +562,7 @@ class CommonsService(BaseService):
         body: CorrectDormainTagRequest,
     ) -> CommonsThreadResponse:
         thread = await self._load_thread(thread_id, org_id)
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         # Find the tag to remove
         old_tag_result = await self.db.execute(

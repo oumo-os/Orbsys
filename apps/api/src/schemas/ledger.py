@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+
 from pydantic import BaseModel
 
-from .common import OrmBase, Paginated
-
+from .common import OrmBase
 
 # ── Responses ─────────────────────────────────────────────────────────────────
 

@@ -20,29 +20,36 @@ Enact resolution:
 """
 from __future__ import annotations
 
-import asyncio
+import logging
 import uuid
-from datetime import datetime, timezone
 
-from sqlalchemy import select, func
+log = logging.getLogger(__name__)
 
-from .base import BaseService
-from ..core.exceptions import (
-    NotFound, Forbidden, EngineTimeout
-)
-from ..core.events import get_event_bus, GovernanceEvent, EventType
-from ..models.org import Circle, Member
+from sqlalchemy import func, select
+
+from ..core.events import EventType, GovernanceEvent, get_event_bus
+from ..core.exceptions import Forbidden, NotFound
 from ..models.governance import (
-    STFInstance, STFAssignment, STFVerdict, Resolution, ResolutionGate2Diff
+    Resolution,
+    STFAssignment,
+    STFInstance,
+    STFVerdict,
 )
-from ..models.types import STFType, STFState, ResolutionState
+from ..models.org import Circle, Member
+from ..models.types import STFState, STFType
+from ..schemas.common import CircleRef, MemberRef, Paginated
 from ..schemas.stf import (
-    CommissionSTFRequest, STFInstanceResponse, STFInstanceSummaryResponse,
-    STFAssignmentResponse, VerdictAggregateResponse, VerdictRationaleResponse,
-    EnactResolutionRequest, EnactResolutionResponse,
     BLIND_STF_TYPES,
+    CommissionSTFRequest,
+    EnactResolutionRequest,
+    EnactResolutionResponse,
+    STFAssignmentResponse,
+    STFInstanceResponse,
+    STFInstanceSummaryResponse,
+    VerdictAggregateResponse,
+    VerdictRationaleResponse,
 )
-from ..schemas.common import MemberRef, CircleRef, Paginated
+from .base import BaseService
 
 
 class STFService(BaseService):
@@ -291,8 +298,6 @@ class STFService(BaseService):
         If NATS is unavailable or engine does not respond, returns CONTESTED
         with a clear reason — the resolution is NOT marked as enacted.
         """
-        import json as _json
-        from ..core.exceptions import EngineTimeout
 
         inst = await self._load_stf(stf_id, org_id)
 
@@ -383,7 +388,7 @@ class STFService(BaseService):
                 resolution_ref=engine_reply.get("resolution_ref", res.resolution_ref),
                 state=engine_reply.get("enacted_state", "enacted"),
                 gate2_diffs=engine_reply.get("gate2_diffs", []),
-                enacted_at=_dt.datetime.now(_dt.timezone.utc),
+                enacted_at=_dt.datetime.now(_dt.UTC),
                 contested_reason=None,
             )
         else:

@@ -24,18 +24,18 @@ import json
 import random
 import sys
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import select, text
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 
 def _ago(days: int, hours: int = 0) -> datetime:
-    return datetime.now(timezone.utc) - timedelta(days=days, hours=hours)
+    return datetime.now(UTC) - timedelta(days=days, hours=hours)
 
 
 def _future(days: int) -> datetime:
-    return datetime.now(timezone.utc) + timedelta(days=days)
+    return datetime.now(UTC) + timedelta(days=days)
 
 
 def _uuid() -> uuid.UUID:
@@ -55,25 +55,49 @@ async def seed_demo(database_url: str, org_slug: str, quiet: bool = False) -> No
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
     from src.core.security import hash_password
-    from src.models.org import (
-        Org, Member, Dormain, Circle, CircleDormain, CircleMember,
-        OrgParameter, PlatformAccount, MemberExitRecord,
+    from src.models.competence import (
+        CompetenceScore,
+        Curiosity,
+        WhCredential,
     )
     from src.models.governance import (
-        CommonsThread, CommonsThreadDormainTag, CommonsPost,
-        Cell, CellContribution, CellVote, CellInvitedCircle,
-        Motion, MotionDirective, MotionSpecification,
-        Resolution, STFInstance, STFAssignment, STFVerdict,
-        LedgerEvent, Notification,
+        Cell,
+        CellContribution,
+        CommonsPost,
+        CommonsThread,
+        CommonsThreadDormainTag,
+        LedgerEvent,
+        Motion,
+        MotionDirective,
+        MotionSpecification,
+        Notification,
+        Resolution,
+        STFAssignment,
+        STFInstance,
+        STFVerdict,
     )
-    from src.models.competence import (
-        CompetenceScore, Curiosity, DeltaCEvent, WhCredential,
+    from src.models.org import (
+        Circle,
+        CircleMember,
+        Dormain,
+        Member,
+        MemberExitRecord,
+        Org,
+        OrgParameter,
+        PlatformAccount,
     )
     from src.models.types import (
-        MemberState, CellType, CellState, CellVisibility,
-        MotionType, MotionState, STFType, STFState, VerdictType,
-        MandateType, DecayFn, ActivityType, ContributionType,
-        CredentialType, ResolutionState,
+        CellState,
+        CellType,
+        CellVisibility,
+        ContributionType,
+        MemberState,
+        MotionState,
+        MotionType,
+        ResolutionState,
+        STFState,
+        STFType,
+        VerdictType,
     )
 
     engine = create_async_engine(database_url, echo=False)
@@ -783,7 +807,6 @@ async def seed_demo(database_url: str, org_slug: str, quiet: bool = False) -> No
                     # Verdicts
                     for vhandle, vtype, rationale in verdicts:
                         if vhandle == ahandle:
-                            vm = member_map[vhandle]
                             db.add(STFVerdict(
                                 stf_instance_id=stf.id,
                                 assignment_id=assigned.id,

@@ -1,12 +1,18 @@
 import uuid as _uuid
 from uuid import UUID
+
 from fastapi import APIRouter
-from ..core.dependencies import ActiveMember, GovWriter, DB
-from ..services.circles import CirclesService
+
+from ..core.dependencies import DB, ActiveMember, GovWriter
 from ..schemas import (
-    CircleResponse, CircleSummaryResponse, CircleMemberResponse,
-    CircleHealthSnapshotResponse, InviteMemberRequest, InvitationResponse,
+    CircleHealthSnapshotResponse,
+    CircleMemberResponse,
+    CircleResponse,
+    CircleSummaryResponse,
+    InvitationResponse,
+    InviteMemberRequest,
 )
+from ..services.circles import CirclesService
 
 router = APIRouter(prefix="/circles", tags=["circles"])
 

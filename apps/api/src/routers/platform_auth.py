@@ -24,14 +24,13 @@ additionally create a linked platform account under the hood.
 from __future__ import annotations
 
 import uuid as _uuid
-from typing import Annotated
+from datetime import UTC
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from ..core.dependencies import DB
-from ..core.dependencies import PlatformAuth
-from ..core.security import decode_token, create_platform_token
+from ..core.dependencies import DB, PlatformAuth
+from ..core.security import create_platform_token, decode_token
 from ..services.platform_auth import PlatformAuthService
 
 router = APIRouter(tags=["platform"])
@@ -112,6 +111,7 @@ async def enter_org(org_id: _uuid.UUID, account: PlatformAuth, db: DB):
 @router.get("/accounts/me")
 async def get_my_account(account: PlatformAuth, db: DB):
     from sqlalchemy import select
+
     from ..models.org import PlatformAccount
     acct = (await db.execute(
         select(PlatformAccount).where(PlatformAccount.id == _uuid.UUID(account.account_id))
@@ -144,8 +144,10 @@ async def set_legal_name(body: LegalNameRequest, account: PlatformAuth, db: DB):
     on request. Frequent changes are a signal worth an org's Judicial Track
     noticing if it correlates with other anomalies.
     """
+    from datetime import datetime
+
     from sqlalchemy import select
-    from datetime import datetime, timezone
+
     from ..models.org import PlatformAccount
 
     acct = (await db.execute(
@@ -157,7 +159,7 @@ async def set_legal_name(body: LegalNameRequest, account: PlatformAuth, db: DB):
     acct.legal_name = body.legal_name
     acct.legal_name_verified = False  # any change resets verification
     acct.legal_name_verified_ref = body.verified_ref
-    acct.legal_name_changed_at = datetime.now(timezone.utc)
+    acct.legal_name_changed_at = datetime.now(UTC)
     db.add(acct)
     await db.flush()
     return {"legal_name": acct.legal_name, "legal_name_verified": acct.legal_name_verified}
@@ -168,6 +170,7 @@ async def set_legal_name(body: LegalNameRequest, account: PlatformAuth, db: DB):
 @router.get("/accounts/me/wallet")
 async def list_wallet(account: PlatformAuth, db: DB):
     from sqlalchemy import select
+
     from ..models.org import CredentialWallet
     rows = (await db.execute(
         select(CredentialWallet).where(
@@ -217,7 +220,8 @@ async def upload_wallet_item(body: WalletUploadRequest, account: PlatformAuth, d
 
 @router.delete("/accounts/me/wallet/{item_id}", status_code=204)
 async def delete_wallet_item(item_id: _uuid.UUID, account: PlatformAuth, db: DB):
-    from sqlalchemy import select, delete
+    from sqlalchemy import delete, select
+
     from ..models.org import CredentialWallet
     item = (await db.execute(
         select(CredentialWallet).where(

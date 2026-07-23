@@ -3,8 +3,6 @@ from __future__ import annotations
 
 import re
 import uuid
-import pytest
-
 
 # ── Unit tests (no DB) ────────────────────────────────────────────────────────
 
@@ -12,7 +10,6 @@ class TestPasswordValidation:
     """Password rules enforced before hashing."""
 
     def test_too_short_raises(self):
-        from src.core.security import hash_password
         pw = "short"
         assert len(pw) < 10, "Passwords under 10 chars must be rejected upstream"
 

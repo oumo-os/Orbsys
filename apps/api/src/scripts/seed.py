@@ -13,14 +13,13 @@ Prints everything needed to start using the app.
 """
 from __future__ import annotations
 
-import json
 import argparse
 import asyncio
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 DEFAULT_ORG_NAME    = "Meridian Collective"
 DEFAULT_ORG_SLUG    = "meridian"
@@ -125,9 +124,18 @@ async def seed(
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
     from src.core.security import hash_password
-    from src.models.org import Org, Dormain, Circle, CircleDormain, CircleMember, Member, OrgParameter, PlatformAccount
-    from src.models.governance import CommonsThread, CommonsPost
-    from src.models.types import MemberState, DecayFn, MandateType
+    from src.models.governance import CommonsPost, CommonsThread
+    from src.models.org import (
+        Circle,
+        CircleDormain,
+        CircleMember,
+        Dormain,
+        Member,
+        Org,
+        OrgParameter,
+        PlatformAccount,
+    )
+    from src.models.types import DecayFn, MandateType, MemberState
 
     engine = create_async_engine(database_url, echo=False)
     SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
@@ -175,7 +183,7 @@ async def seed(
                         if dname in dormain_map:
                             db.add(CircleDormain(
                                 circle_id=c.id, dormain_id=dormain_map[dname].id,
-                                mandate_type=MandateType.PRIMARY, added_at=datetime.now(timezone.utc),
+                                mandate_type=MandateType.PRIMARY, added_at=datetime.now(UTC),
                             ))
                     await db.flush()
                     log(f"  ✓ Circle: {spec['name']}")
@@ -196,7 +204,7 @@ async def seed(
                     pa = PlatformAccount(
                         handle=handle, email=email,
                         password_hash=hash_password(password),
-                        created_at=datetime.now(timezone.utc),
+                        created_at=datetime.now(UTC),
                     )
                     db.add(pa)
                     await db.flush()
@@ -205,7 +213,7 @@ async def seed(
                     org_id=org.id, handle=handle, display_name=display_name,
                     email=email, password_hash=hash_password(password),
                     platform_account_id=pa.id,
-                    joined_at=datetime.now(timezone.utc), current_state=MemberState.ACTIVE,
+                    joined_at=datetime.now(UTC), current_state=MemberState.ACTIVE,
                 )
                 db.add(member); await db.flush()
                 log(f"  ✓ Member: @{handle}")
@@ -222,7 +230,7 @@ async def seed(
                 if not existing:
                     db.add(CircleMember(
                         circle_id=circle.id, member_id=member.id,
-                        joined_at=datetime.now(timezone.utc), current_state=MemberState.ACTIVE,
+                        joined_at=datetime.now(UTC), current_state=MemberState.ACTIVE,
                     ))
             await db.flush()
 
@@ -271,7 +279,7 @@ async def seed(
                             display_name=agent_spec["display_name"],
                             email=agent_spec["email"],
                             password_hash=hash_password(agent_spec["password"]),
-                            joined_at=datetime.now(timezone.utc),
+                            joined_at=datetime.now(UTC),
                             current_state=MemberState.ACTIVE,
                         )
                         db.add(bot); await db.flush()
@@ -281,7 +289,7 @@ async def seed(
                                 db.add(CircleMember(
                                     circle_id=circle_map[circle_name].id,
                                     member_id=bot.id,
-                                    joined_at=datetime.now(timezone.utc),
+                                    joined_at=datetime.now(UTC),
                                     current_state=MemberState.ACTIVE,
                                 ))
                         await db.flush()
@@ -293,8 +301,8 @@ async def seed(
 
             # ── Complete bootstrap ───────────────────────────────────────────
             if org.bootstrapped_at is None:
-                from datetime import datetime as _dt2, timezone as _tz2
-                org.bootstrapped_at = _dt2.now(_tz2.utc)
+                from datetime import datetime as _dt2
+                org.bootstrapped_at = _dt2.now(UTC)
                 db.add(org)
                 # Seed membership_policy if missing
                 existing_mp = (await db.execute(
@@ -308,7 +316,7 @@ async def seed(
                         org_id=org.id,
                         parameter="membership_policy",
                         value={"value": "open_application"},
-                        applied_at=_dt2.now(_tz2.utc),
+                        applied_at=_dt2.now(UTC),
                     ))
                 await db.commit()
                 log("  ✓ Bootstrap complete — org is live")

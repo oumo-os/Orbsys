@@ -24,40 +24,58 @@ from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime, timezone
-from typing import Any
+from datetime import UTC, datetime
 
 log = logging.getLogger(__name__)
 
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from .base import BaseService
+from ..core.events import EventType, GovernanceEvent, get_event_bus
 from ..core.exceptions import (
-    NotFound, Forbidden, CellAccessDenied, VoteAlreadyCast,
-    MotionAlreadyFiled, ValidationFailed, MissingExecutingCircles,
+    CellAccessDenied,
+    Forbidden,
+    MissingExecutingCircles,
+    MotionAlreadyFiled,
+    NotFound,
+    VoteAlreadyCast,
 )
-from ..core.events import get_event_bus, GovernanceEvent, EventType
-from ..models.org import Member, Circle, CircleMember, Dormain
 from ..models.competence import CompetenceScore
 from ..models.governance import (
-    Cell, CellInvitedCircle, CellContribution, CellVote, CellCompositionProfile,
-    Motion, MotionDirective, MotionSpecification, Resolution,
+    Cell,
+    CellCompositionProfile,
+    CellContribution,
+    CellInvitedCircle,
+    CellVote,
+    Motion,
+    MotionDirective,
+    MotionSpecification,
 )
+from ..models.org import Circle, CircleMember, Dormain, Member
 from ..models.types import (
-    CellState, CellType, CellVisibility, ContributionType, MotionType, MotionState,
-    ResolutionState, ImplementationType, Gate2Agent,
+    CellState,
+    CellVisibility,
+    ContributionType,
+    MotionState,
+    MotionType,
 )
 from ..schemas.cells import (
-    CellResponse, ContributionResponse, AddContributionRequest,
-    ImportCommonsContextRequest, CellMinutesResponse,
-    CastVoteRequest, CellVoteSummariesResponse, VoteSummaryResponse,
-    CrystalliseDraftResponse, DirectiveDraft, SpecificationDraft,
-    FileCrystallisedMotionRequest, FiledMotionResponse,
-    CompositionProfileResponse, DissolveCellRequest,
+    AddContributionRequest,
+    CastVoteRequest,
+    CellResponse,
+    CellVoteSummariesResponse,
+    CompositionProfileResponse,
+    ContributionResponse,
+    CrystalliseDraftResponse,
+    DirectiveDraft,
+    DissolveCellRequest,
+    FileCrystallisedMotionRequest,
+    FiledMotionResponse,
+    ImportCommonsContextRequest,
+    VoteSummaryResponse,
 )
-from ..schemas.common import MemberRef, CircleRef, DormainRef, Paginated
+from ..schemas.common import CircleRef, MemberRef, Paginated
+from .base import BaseService
 
 
 class CellsService(BaseService):
@@ -435,7 +453,7 @@ class CellsService(BaseService):
             vote=body.vote,
             w_s_at_vote=w_s,
             weight=w_s,
-            voted_at=datetime.now(timezone.utc),
+            voted_at=datetime.now(UTC),
         )
         await self.save(vote)
 
@@ -525,7 +543,7 @@ class CellsService(BaseService):
                 ),
                 specification_drafts=None,
                 accountability_circles_suggested=None,
-                generated_at=datetime.now(timezone.utc),
+                generated_at=datetime.now(UTC),
             )
 
         # Fallback stub if Insight Engine unavailable
@@ -547,7 +565,7 @@ class CellsService(BaseService):
             ),
             specification_drafts=None,
             accountability_circles_suggested=None,
-            generated_at=datetime.now(timezone.utc),
+            generated_at=datetime.now(UTC),
         )
 
     # ── File motion ───────────────────────────────────────────────────────────
@@ -580,7 +598,7 @@ class CellsService(BaseService):
         if existing is not None:
             raise MotionAlreadyFiled(str(cell_id))
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         motion = Motion(
             org_id=org_id,
@@ -657,6 +675,7 @@ class CellsService(BaseService):
         The Inferential Engine commissioned aSTF listens for this transition.
         """
         from sqlalchemy import func as sqlfunc
+
         from ..models.org import OrgParameter
 
         # Load pass_threshold from org parameters (default 0.5)
@@ -698,7 +717,7 @@ class CellsService(BaseService):
             return  # still undecided
 
         motion.state = MotionState.VOTED
-        motion.state_changed_at = datetime.now(timezone.utc)
+        motion.state_changed_at = datetime.now(UTC)
         self.db.add(motion)
         await self.db.flush()
 
@@ -724,7 +743,7 @@ class CellsService(BaseService):
         self, cell_id: uuid.UUID, org_id: uuid.UUID, member_id: uuid.UUID
     ) -> dict:
         """Rolling Insight Engine minutes for this Cell."""
-        cell = await self.get_cell(cell_id, org_id, member_id)
+        await self.get_cell(cell_id, org_id, member_id)
         # Minutes written by Insight Engine into cell_composition_profiles
         # Return the latest snapshot
         from sqlalchemy import text
@@ -769,7 +788,7 @@ class CellsService(BaseService):
         if profile is None:
             return CompositionProfileResponse(
                 cell_id=cell_id,
-                computed_at=datetime.now(timezone.utc),
+                computed_at=datetime.now(UTC),
                 dormain_weights={},
                 gap_dormains=[],
             )
@@ -804,7 +823,7 @@ class CellsService(BaseService):
             raise Forbidden("DISSOLVE_BLOCKED: motion is in gate review — dissolve blocked")
 
         cell.state = CellState.DISSOLVED
-        cell.state_changed_at = datetime.now(timezone.utc)
+        cell.state_changed_at = datetime.now(UTC)
         await self.db.flush()
 
         await get_event_bus().emit(

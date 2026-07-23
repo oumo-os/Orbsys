@@ -1,7 +1,9 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
+
 from jose import JWTError, jwt
 from passlib.context import CryptContext
+
 from .config import get_settings
 
 settings = get_settings()
@@ -23,7 +25,7 @@ def create_access_token(member_id: str, org_id: str, member_state: str) -> str:
             "org": org_id,
             "state": member_state,
             "type": "access",
-            "exp": datetime.now(timezone.utc)
+            "exp": datetime.now(UTC)
             + timedelta(minutes=settings.jwt_access_token_expire_minutes),
         },
         settings.jwt_secret_key,
@@ -37,7 +39,7 @@ def create_refresh_token(member_id: str, org_id: str) -> str:
             "sub": member_id,
             "org": org_id,
             "type": "refresh",
-            "exp": datetime.now(timezone.utc)
+            "exp": datetime.now(UTC)
             + timedelta(days=settings.jwt_refresh_token_expire_days),
         },
         settings.jwt_secret_key,
@@ -56,7 +58,7 @@ def create_isolated_view_token(stf_instance_id: str, assignment_id: str) -> str:
             "stf_instance_id": stf_instance_id,
             "assignment_id": assignment_id,
             "type": "isolated_view",
-            "exp": datetime.now(timezone.utc) + timedelta(days=14),
+            "exp": datetime.now(UTC) + timedelta(days=14),
         },
         settings.jwt_secret_key,
         algorithm=settings.jwt_algorithm,
@@ -86,7 +88,7 @@ def create_platform_token(account_id: str) -> str:
         {
             "sub": account_id,
             "type": "platform",
-            "exp": datetime.now(timezone.utc)
+            "exp": datetime.now(UTC)
             + timedelta(minutes=settings.jwt_access_token_expire_minutes),
         },
         settings.jwt_secret_key,
@@ -99,7 +101,7 @@ def create_platform_refresh_token(account_id: str) -> str:
         {
             "sub": account_id,
             "type": "platform_refresh",
-            "exp": datetime.now(timezone.utc)
+            "exp": datetime.now(UTC)
             + timedelta(days=settings.jwt_refresh_token_expire_days),
         },
         settings.jwt_secret_key,
@@ -124,7 +126,7 @@ def create_org_session_token(
             "org": org_id,
             "state": member_state,
             "type": "access",   # unchanged — existing org endpoints check for this
-            "exp": datetime.now(timezone.utc)
+            "exp": datetime.now(UTC)
             + timedelta(minutes=settings.jwt_access_token_expire_minutes),
         },
         settings.jwt_secret_key,

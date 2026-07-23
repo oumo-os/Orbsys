@@ -13,24 +13,26 @@ SYSTEM_PARAMETERS below. This list grows as org parameters are formalised.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
 
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
 
-from .base import BaseService
 from ..core.exceptions import NotFound
-from ..models.org import Member, Circle, Dormain
-from ..models.governance import Motion, MotionDirective, MotionSpecification, Resolution
-from ..models.types import MotionType, PreValidationStatus
+from ..models.governance import Motion, Resolution
+from ..models.org import Circle, Member
+from ..models.types import PreValidationStatus
+from ..schemas.common import CircleRef, MemberRef, Paginated
 from ..schemas.motions import (
-    MotionResponse, MotionDirectiveResponse, MotionSpecificationResponse,
-    ResolutionResponse, Gate2DiffEntry,
-    ValidateSpecificationRequest, ValidateSpecificationResponse,
+    Gate2DiffEntry,
+    MotionDirectiveResponse,
+    MotionResponse,
+    MotionSpecificationResponse,
+    ResolutionResponse,
     SpecificationValidationResult,
+    ValidateSpecificationRequest,
+    ValidateSpecificationResponse,
 )
-from ..schemas.common import MemberRef, CircleRef
-
+from .base import BaseService
 
 # ── Known sys-bound parameters ────────────────────────────────────────────────
 # parameter → (type, min, max) — extend as org parameters are formalised.
@@ -66,9 +68,9 @@ class MotionsService(BaseService):
         page_size: int,
         state: str | None = None,
         cell_id: uuid.UUID | None = None,
-    ) -> "Paginated[MotionResponse]":
-        from ..schemas.common import Paginated as PaginatedT
+    ) -> Paginated[MotionResponse]:
         from ..models.types import MotionState
+        from ..schemas.common import Paginated as PaginatedT
 
         q = select(Motion).where(Motion.org_id == org_id)
         if state:

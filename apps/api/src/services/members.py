@@ -17,25 +17,29 @@ Notifications:
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from sqlalchemy import select, update, and_, delete
+from sqlalchemy import and_, delete, select
 from sqlalchemy.orm import selectinload
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from .base import BaseService
-from ..core.exceptions import NotFound, AlreadyExists, Forbidden
-from ..core.events import get_event_bus, GovernanceEvent, EventType
-from ..models.org import Member, Dormain
-from ..models.competence import Curiosity, CompetenceScore
-from ..models.governance import CommonsThread, FeedScore, Notification
-from ..models.org import MemberApplication
-from ..schemas.members import (
-    MemberResponse, MemberDetailResponse, UpdateMemberRequest,
-    SetCuriositiesRequest, CuriosityResponse, CompetenceScoreSummary,
-    CircleMembershipSummary, FeedItemResponse, NotificationResponse,
-)
+from ..core.events import EventType, GovernanceEvent, get_event_bus
+from ..core.exceptions import AlreadyExists, Forbidden, NotFound
+from ..models.competence import CompetenceScore, Curiosity
+from ..models.governance import FeedScore, Notification
+from ..models.org import Dormain, Member
 from ..schemas.common import Paginated
+from ..schemas.members import (
+    CircleMembershipSummary,
+    CompetenceScoreSummary,
+    CuriosityResponse,
+    FeedItemResponse,
+    MemberDetailResponse,
+    MemberResponse,
+    NotificationResponse,
+    SetCuriositiesRequest,
+    UpdateMemberRequest,
+)
+from .base import BaseService
 
 
 class MembersService(BaseService):
@@ -101,8 +105,9 @@ class MembersService(BaseService):
         Joins feed_scores (written by Inferential Engine) when available.
         Falls back to chronological order when no scores exist for this member.
         """
-        from sqlalchemy import func, outerjoin, literal
-        from ..models.governance import CommonsThread, CommonsPost
+        from sqlalchemy import func
+
+        from ..models.governance import CommonsPost, CommonsThread
 
         # Outer-join threads with feed_scores for this member
         # threads without a score get score=0 and basis="chrono"
@@ -263,7 +268,7 @@ class MembersService(BaseService):
         )
         existing = {c.dormain_id: c for c in existing_result.scalars().all()}
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         to_keep_ids = set(dormain_ids)
 
         # Upsert
@@ -289,7 +294,7 @@ class MembersService(BaseService):
         await self.db.flush()
 
         # Emit event for Inferential Engine to rebuild feed relevance
-        member = await self.get_by_id(Member, member_id)
+        await self.get_by_id(Member, member_id)
         await get_event_bus().emit(
             org_id,
             GovernanceEvent(
@@ -367,7 +372,7 @@ class MembersService(BaseService):
         if notif is None:
             raise NotFound("Notification", str(notification_id))
         notif.read = True
-        notif.read_at = datetime.now(timezone.utc)
+        notif.read_at = datetime.now(UTC)
         await self.db.flush()
 
     async def mark_all_notifications_read(
@@ -381,7 +386,7 @@ class MembersService(BaseService):
                 Notification.org_id == org_id,
                 Notification.read == False,  # noqa: E712
             )
-            .values(read=True, read_at=datetime.now(timezone.utc))
+            .values(read=True, read_at=datetime.now(UTC))
         )
         return result.rowcount
 
@@ -403,9 +408,9 @@ class MembersService(BaseService):
         Checks membership_policy parameter — raises 403 if not 'open_application'.
         Notifies Membership Circle members (P2 notification).
         """
-        from ..models.org import Org, OrgParameter, MemberApplication
-        from ..core.security import hash_password
         from ..core.exceptions import Forbidden
+        from ..core.security import hash_password
+        from ..models.org import MemberApplication, Org, OrgParameter
 
         if len(password) < 10:
             raise Forbidden("Password must be at least 10 characters")
@@ -494,8 +499,9 @@ class MembersService(BaseService):
         page_size: int,
     ) -> dict:
         """List membership applications. Membership Circle visibility only."""
-        from ..models.org import MemberApplication
         from sqlalchemy import func
+
+        from ..models.org import MemberApplication
 
         q = select(MemberApplication).where(MemberApplication.org_id == org_id)
         if status_filter:
@@ -547,9 +553,9 @@ class MembersService(BaseService):
         On approval: creates the Member account and sends credentials.
         Reviewer must be a member of the Membership Circle (enforced here).
         """
-        from ..models.org import MemberApplication, Circle, CircleDormain, CircleMember
+        from ..core.exceptions import NotFound
+        from ..models.org import MemberApplication
         from ..models.types import MemberState
-        from ..core.exceptions import NotFound, Forbidden
 
         app = (await self.db.execute(
             select(MemberApplication).where(
@@ -566,7 +572,7 @@ class MembersService(BaseService):
         # For now: any GovWriter (circle member) can review — enforced at route level
         # In v1.1: require specific Membership Circle membership
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         app.reviewed_by = reviewer_id
         app.reviewed_at = now
         app.review_note = note
@@ -575,7 +581,6 @@ class MembersService(BaseService):
         new_member_id = None
         if approve:
             from ..models.org import PlatformAccount
-            from ..core.security import hash_password as _hash_pw
 
             # Find or create a PlatformAccount for the new member
             platform_account = (await self.db.execute(
@@ -703,7 +708,7 @@ class MembersService(BaseService):
     async def _load_circle_memberships(
         self, member_id: uuid.UUID
     ) -> list[CircleMembershipSummary]:
-        from ..models.org import CircleMember, Circle
+        from ..models.org import Circle, CircleMember
         result = await self.db.execute(
             select(CircleMember, Circle.name)
             .join(Circle, CircleMember.circle_id == Circle.id)

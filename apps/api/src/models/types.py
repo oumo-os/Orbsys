@@ -1,8 +1,9 @@
 import enum
 import uuid
+
 from sqlalchemy import DateTime, func
-from sqlalchemy.orm import mapped_column, MappedColumn
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+from sqlalchemy.orm import MappedColumn, mapped_column
 
 
 class MemberState(str, enum.Enum):

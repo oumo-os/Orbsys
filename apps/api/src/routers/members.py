@@ -1,15 +1,22 @@
 import uuid as _uuid
 from uuid import UUID
-from fastapi import APIRouter, HTTPException, Query, status
-from pydantic import BaseModel as _BaseModel, Field
 
-from ..core.dependencies import ActiveMember, GovWriter, DB
-from ..services.members import MembersService
+from fastapi import APIRouter, HTTPException, Query
+from pydantic import BaseModel as _BaseModel
+from pydantic import Field
+
+from ..core.dependencies import DB, ActiveMember, GovWriter
 from ..schemas import (
-    MemberResponse, MemberDetailResponse, UpdateMemberRequest,
-    FeedItemResponse, Paginated, CuriosityResponse, SetCuriositiesRequest,
+    CuriosityResponse,
+    FeedItemResponse,
+    MemberDetailResponse,
+    MemberResponse,
     NotificationResponse,
+    Paginated,
+    SetCuriositiesRequest,
+    UpdateMemberRequest,
 )
+from ..services.members import MembersService
 
 router = APIRouter(prefix="/members", tags=["members"])
 
@@ -118,8 +125,9 @@ async def apply_to_join(
     Only works post-bootstrap (bootstrapped_at is set).
     Returns 403 if membership_policy is invite_only or closed.
     """
-    from ..models.org import Org
     from sqlalchemy import select
+
+    from ..models.org import Org
     org = (await db.execute(
         select(Org).where(Org.slug == org_slug)
     )).scalar_one_or_none()

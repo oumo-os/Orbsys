@@ -1,13 +1,17 @@
 import uuid as _uuid
 from uuid import UUID
+
 from fastapi import APIRouter, Query
-from ..core.dependencies import ActiveMember, GovWriter, DB
-from ..services.competence import CompetenceService
+
+from ..core.dependencies import DB, ActiveMember, GovWriter
 from ..schemas import (
-    DormainListResponse, DormainLeaderboardResponse,
-    CompetenceScoresResponse, SubmitWhClaimRequest,
+    CompetenceScoresResponse,
+    DormainLeaderboardResponse,
+    DormainListResponse,
+    SubmitWhClaimRequest,
     WhClaimResponse,
 )
+from ..services.competence import CompetenceService
 
 router = APIRouter(prefix="/competence", tags=["competence"])
 

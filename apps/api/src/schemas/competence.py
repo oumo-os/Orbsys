@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+
 from pydantic import BaseModel, Field
 
-from .common import OrmBase, MemberRef, DormainRef
-from ..models.types import CredentialType, McmpStatus, PreValidationStatus
-
+from ..models.types import CredentialType, McmpStatus
+from .common import DormainRef, MemberRef, OrmBase
 
 # ── Requests ──────────────────────────────────────────────────────────────────
 

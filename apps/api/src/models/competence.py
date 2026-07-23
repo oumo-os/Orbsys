@@ -1,11 +1,22 @@
 import uuid
 from datetime import datetime
 from typing import Optional
-from sqlalchemy import DateTime, ForeignKey, Integer, Numeric, SmallInteger, String, Text, UniqueConstraint
+
+from sqlalchemy import (
+    DateTime,
+    ForeignKey,
+    Integer,
+    Numeric,
+    SmallInteger,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from ..core.database import Base
-from .types import uuid_pk, created_at_col, updated_at_col, ActivityType, McmpStatus, CredentialType
+from .types import ActivityType, CredentialType, McmpStatus, updated_at_col, uuid_pk
 
 
 class CompetenceScore(Base):

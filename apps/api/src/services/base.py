@@ -8,7 +8,7 @@ services decide whether to raise NotFound based on context.
 from __future__ import annotations
 
 import uuid
-from typing import TypeVar, Type
+from typing import Type, TypeVar
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession

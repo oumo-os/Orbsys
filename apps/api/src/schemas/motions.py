@@ -2,14 +2,18 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+
 from pydantic import BaseModel, Field
 
-from .common import OrmBase, MemberRef, CircleRef
 from ..models.types import (
-    MotionType, MotionState, ResolutionState, ImplementationType,
-    Gate2Agent, PreValidationStatus,
+    Gate2Agent,
+    ImplementationType,
+    MotionState,
+    MotionType,
+    PreValidationStatus,
+    ResolutionState,
 )
-
+from .common import CircleRef, MemberRef, OrmBase
 
 # ── Responses ─────────────────────────────────────────────────────────────────
 

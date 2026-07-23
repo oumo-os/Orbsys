@@ -9,28 +9,31 @@ Responsibilities:
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
+from jose import JWTError
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from .base import BaseService
-from ..core.exceptions import (
-    InvalidCredentials, NotFound, AlreadyExists, BootstrapOnly
-)
+from ..core.events import EventType, GovernanceEvent, get_event_bus
+from ..core.exceptions import AlreadyExists, BootstrapOnly, InvalidCredentials, NotFound
 from ..core.security import (
-    verify_password, hash_password,
-    create_access_token, create_refresh_token,
+    create_access_token,
+    create_refresh_token,
     decode_token,
+    hash_password,
+    verify_password,
 )
-from ..core.events import get_event_bus, GovernanceEvent, EventType
-from ..models.org import Org, Member
+from ..models.org import Member, Org
 from ..models.types import MemberState
 from ..schemas.auth import (
-    LoginRequest, LoginResponse, RefreshRequest, TokenResponse,
-    RegisterMemberRequest, MemberSessionResponse,
+    LoginRequest,
+    LoginResponse,
+    MemberSessionResponse,
+    RefreshRequest,
+    RegisterMemberRequest,
+    TokenResponse,
 )
-from jose import JWTError
+from .base import BaseService
 
 
 class AuthService(BaseService):
@@ -106,8 +109,9 @@ class AuthService(BaseService):
         # requested handle is already a platform handle owned by someone
         # else, the registration fails with a clearer error than a generic
         # AlreadyExists on the org-local check above.
-        from ..models.org import PlatformAccount
         from sqlalchemy import or_ as _or
+
+        from ..models.org import PlatformAccount
 
         platform_account = (await self.db.execute(
             select(PlatformAccount).where(
@@ -116,7 +120,7 @@ class AuthService(BaseService):
             )
         )).scalar_one_or_none()
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         if platform_account is None:
             platform_account = PlatformAccount(
                 handle=body.handle,
