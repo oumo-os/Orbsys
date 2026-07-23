@@ -1,7 +1,7 @@
 import uuid as _uuid
 from uuid import UUID
 from fastapi import APIRouter, HTTPException, Query, status
-from pydantic import BaseModel as _BaseModel
+from pydantic import BaseModel as _BaseModel, Field
 
 from ..core.dependencies import ActiveMember, GovWriter, DB
 from ..services.members import MembersService
@@ -27,7 +27,7 @@ async def list_members(
 
 
 class _ApplyRequest(_BaseModel):
-    handle: str
+    handle: str = Field(..., min_length=2, max_length=100, pattern=r"^[a-z0-9_-]+$")
     display_name: str
     email: str
     password: str
