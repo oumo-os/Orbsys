@@ -237,7 +237,7 @@ class CirclesService(BaseService):
 
         # Bootstrap auto-confirm (org.bootstrapped_at is null)
         from ..models.org import Org
-        org = await self.get_by_id(Org, org_id)
+        await self.get_by_id(Org, org_id)
 
         invitation_id = uuid.uuid4()
 

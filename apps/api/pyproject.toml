@@ -33,6 +33,21 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP"]
+ignore = [
+    "E402",   # module-import-not-at-top-of-file — deliberate lazy imports after logging
+    "E501",   # line-too-long — seed data and dict literals
+    "E702",   # multiple-statements-on-one-line — seed scripts use `db.add(x); await db.flush()`
+    "E712",   # true-false-comparison — SQLAlchemy filter patterns
+    "E721",   # type-comparison — dict-based parameter validation
+    "UP006",  # non-pep585-annotation — Type[M] in BaseService
+    "UP035",  # deprecated-import — typing.Type
+    "UP042",  # replace-str-enum — pre-existing (str, enum.Enum) pattern
+    "UP045",  # optional-annotation — Mapped[Optional[X]] in SQLAlchemy models
+    "UP046",  # non-pep695-generic-class — Paginated(Generic[T])
+]
+
+[tool.ruff.lint.per-file-ignores]
+"src/models/*.py" = ["F821"]  # SQLAlchemy relationship forward references
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
