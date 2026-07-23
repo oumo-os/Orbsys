@@ -439,7 +439,11 @@ class STFService(BaseService):
             commissioned_by_circle=commissioned_by_circle,
             motion_id=inst.motion_id,
             resolution_id=inst.resolution_id,
-            subject_member_id=inst.subject_member_id,
+            subject_member_id=(
+                inst.subject_member_id
+                if STFType(inst.stf_type) not in BLIND_STF_TYPES
+                else None
+            ),
             deadline=inst.deadline,
             assignment_count=assignment_count,
             verdicts_filed=verdict_count,
